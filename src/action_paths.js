@@ -2,13 +2,13 @@ const { Octokit } = require("@octokit/rest");
 const { createTokenAuth } = require("@octokit/auth-token");
 const { exec } = require("@actions/exec");
 const  core  = require("@actions/core");
-const assert = require('@assert');
+const assert = require('assert');
 const { execSync } = require('child_process');
 const { spawn, spawnSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const process = require('process');
-const io = require('@actions/io');
+const {mkdirP} = require('./utils');
 
 function handle_error(err) {
   core.error(err);
@@ -16,47 +16,41 @@ function handle_error(err) {
 }
 
 function getActionPathsForConfigUnchecked(config_name, root_path) {
+  console.log('root_path = ' + root_path);
+  console.log('config_name = ' + config_name);
+  const output_path = path.join(root_path, 'output', config_name);
   return {
-    source: path.join(root_path);
-    install: path.join(root_path, 'install', config_name);
-    build: path.join(root_path, 'build', config_name);
-    artifacts: path.join(root_path, 'artifacts', config_name);
+    source: path.join(root_path, 'llvm-project'),
+    install: path.join(output_path, 'install'),
+    build: path.join(output_path, 'build'),
+    artifacts: path.join(output_path, 'artifacts')
   };
 }
 
 
-function checkAllActionPathsUnused(action_paths) {
-  action_paths.values().forEach(val => {
-    if (path.existsSync(val)) {
-      var basename = path.basename(val);
-      var path_for = path.basename(path.dirname(val));
-      core.setFailed(`${path_for} path for config ${basename} already exists!`);
-      process.exit(process.exitCode);
-    }
-  });
-}
-
-function createActionPathsForConfig(config_name, root_path) {
+async function createActionPathsForConfig(config_name, root_path) {
   core.startGroup('create-action-paths');
   const action_paths = getActionPathsForConfigUnchecked(config_name, root_path);
-  action_paths.values().forEach(val => {
-    if (path.existsSync(val)) {
+  await Object.entries(action_paths).forEach(async (entry) => {
+    let key = entry[0];
+    let val = entry[1];
+    if (fs.existsSync(val) && key != 'source') {
       var basename = path.basename(val);
       var path_for = path.basename(path.dirname(val));
       core.setFailed(`${path_for} path for config ${basename} already exist!`);
       process.exit(process.exitCode);
+    } else if (!fs.existsSync(val)) {
+      core.info(`Creating directory ${val}`);
+      await mkdirP(val);
     }
-    core.info(`Creating directory ${val}`);
-    io.mkdirP(val);
   });
   core.endGroup();
   return action_paths;
 }
-
-function getActionPathsForConfig(config_name, root_path) {
+async  function getActionPathsForConfig(config_name, root_path) {
   const action_paths = getActionPathsForConfigUnchecked(config_name, root_path);
-  action_paths.values().forEach(val => {
-    if (!path.existsSync(val)) {
+  await action_paths.values().forEach(val => {
+    if (!fs.existsSync(val)) {
       var basename = path.basename(val);
       var path_for = path.basename(path.dirname(val));
       core.setFailed(`${path_for} path for config ${basename} does not already exist!`);
@@ -66,12 +60,17 @@ function getActionPathsForConfig(config_name, root_path) {
   return action_paths;
 }
 
-export function getActionPaths(config_name) {
-  return getActionPathsForConfig(config_name, core.getInput('GITHUB_WORKSPACE'));
+function getActionPaths(config_name, root_path = '') {
+  if (!root_path)
+    root_path = process.env['GITHUB_WORKSPACE'];
+  return getActionPathsForConfig(config_name, root_path);
 }
 
-export function createActionPaths(config_name) {
-  return createActionPathsForConfig(config_name, core.getInput('GITHUB_WORKSPACE'));
+function createActionPaths(config_name, root_path = '') {
+  if (!root_path)
+    root_path = process.env['GITHUB_WORKSPACE'];
+  return createActionPathsForConfig(config_name, root_path);
 }
 
+module.exports = {getActionPaths, createActionPaths};
 
