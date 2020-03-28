@@ -1,7 +1,7 @@
 {
-  "name": "javascript-action",
+  "name": "setup-runtimes",
   "version": "1.0.0",
-  "description": "JavaScript Action Template",
+  "description": "Setup the build env for LLVM runtimes",
   "main": "index.js",
   "scripts": {
     "lint": "eslint index.js",
@@ -30,6 +30,7 @@
     "@actions/github": "^2.1.1",
     "@octokit/rest": "^17.1.4",
     "assert": "^2.0.0",
+    "checkout": "github:actions/checkout",
     "xmldom": "^0.3.0",
     "xunit-viewer": "^6.2.1"
   },

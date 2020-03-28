@@ -1,10 +1,10 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
-const create_annotations_for_results = require('./xml_annotate');
+const {create_annotations_from_xunit_results} = require('../src/lit_utils');
 const xunitViewer = require('xunit-viewer');
 const artifact = require('@actions/artifact');
 const artifactClient = artifact.create();
-const checkout = require('checkout');
+const {checkout} = require('checkout/dist/index');
 const rootDirectory = '.'; // Also possible to use __dirname
 const artifactOptions = {
   continueOnError: false

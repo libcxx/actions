@@ -2,7 +2,7 @@ const { Octokit } = require("@octokit/rest");
 const { createTokenAuth } = require("@octokit/auth-token");
 const { exec } = require("@actions/exec");
 const  core  = require("@actions/core");
-const assert = require('@assert');
+const assert = require('assert');
 var DOMParser = require('xmldom').DOMParser;
 
 const { execSync } = require('child_process');
@@ -73,17 +73,19 @@ function collect_failure_messages(xml_doc) {
     return failure_messages;
 }
 
-export function create_annotations_from_xunit_results(xml_file_path) {
+function create_annotations_from_xunit_results(xml_file_path) {
   const xml_dom = read_xml_from_file(xml_file_path);
   const failures = collect_failure_messages(xml_dom);
   failures.forEach(failure => { core.error(failure); });
 }
 
-export function create_html_from_xunit_results(title, xml_file_path, html_output_path) {
-  buxunitViewer({
+function create_html_from_xunit_results(title, xml_file_path, html_output_path) {
+  return xunitViewer({
       server: false,
       results: xml_file_path,
       title: title,
       output: html_output_path,
     });
 }
+
+module.exports = {create_annotations_from_xunit_results, create_html_from_xunit_results}
