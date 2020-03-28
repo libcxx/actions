@@ -8,14 +8,12 @@ jobs:
     steps:
     - name: "Checkout locally"
       uses: actions/checkout@v2
-      with:
-        path: '../actions'
     - name: 'Print Context'
       run: |
         echo $(ls)
         echo $(pwd)
     - name: "Test setup breathing"
-      uses: ./../actions/setup
+      uses: ./actions/setup
       with:
         name: 'breathing'
     - name: 'Print New Context'
