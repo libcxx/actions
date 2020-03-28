@@ -1,0 +1,32 @@
+{
+  "name": "libcxx-actions",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/libcxx/actions.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": " Apache-2.0 WITH LLVM-exception",
+  "bugs": {
+    "url": "https://github.com/libcxx/actions/issues"
+  },
+  "homepage": "https://github.com/libcxx/actions#readme",
+  "dependencies": {
+    "@actions/artifact": "^0.2.0",
+    "@actions/core": "^1.2.3",
+    "@actions/exec": "^1.0.3",
+    "@actions/github": "^2.1.1",
+    "@octokit/rest": "^17.1.4",
+    "checkout": "github:actions/checkout#v2",
+    "xunit-viewer": "^6.2.1"
+  }
+}

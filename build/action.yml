@@ -1,0 +1,51 @@
+name: 'Build LLVM Runtimes'
+description: 'Configure and build the LLVM runtime libraries from source.'
+author: 'eric@efcs.ca'
+inputs:
+  name:
+    description: 'The name of the build configuration'
+    required: true
+  runtimes:
+    description: 'The runtimes to configure and build'
+    required: false
+    default: 'libcxx libcxxabi libunwind'
+  cc:
+    description: 'The C compiler'
+    required: false
+    default: 'clang'
+  cxx:
+    description: 'The C++ compiler'
+    required: false
+    default: 'clang++'
+  cxxabi:
+    description: 'The ABI library to target'
+    required: false
+    default: 'default'
+  sanitizer:
+    description: 'The sanitizer to compile with'
+    required: false
+    default: ""
+  cmake_args:
+    description: 'Additional arguments to pass to CMake when configuring'
+    required: false
+  repo:
+    description: 'The repository to pull from in the form ":owner/:repo"'
+    required: false
+    default: llvm/llvm-project
+  ref:
+    description: 'The branch or sha to checkout'
+    required: false
+    default: 'master'
+outputs:
+  commit_sha:
+    description: 'The git SHA of the specified ref'
+  artifacts_path:
+    description: 'The artifacts path for this configuration'
+  install_path:
+    description: 'The runtimes installation path'
+  build_path:
+    description: 'The build directory used by this configuration'
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
+

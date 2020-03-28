@@ -1,0 +1,39 @@
+name: 'Build LLVM Runtimes'
+description: 'Configure and build the LLVM runtime libraries from source.'
+author: 'eric@efcs.ca'
+inputs:
+  build:
+    description: 'The build directory to target'
+    required: false
+    default: 'build'
+  runtimes:
+    description: 'The runtimes to configure and build'
+    required: false
+    default: 'libcxx libcxxabi libunwind'
+  cc:
+    description: 'The C compiler'
+    required: false
+    default: 'clang'
+  cxx:
+    description: 'The C++ compiler'
+    required: false
+    default: 'clang++'
+  cxxabi:
+    description: 'The ABI library to target'
+    required: false
+    default: 'default'
+  sanitizer:
+    description: 'The sanitizer to compile with'
+    required: false
+    default: ""
+  cmake_args:
+    description: 'Additional arguments to pass to CMake when configuring'
+    required: false
+  xunit_path:
+    description: 'The path to the xunit output'
+    required: false
+    default: 'test/Inputs/libcxx_results.xml'
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
+

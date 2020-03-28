@@ -1,0 +1,309 @@
+-- Testing: 9 tests, 9 workers --
+PASS: libc++ :: std/depr/depr.lib.binders/nothing_to_do.pass.cpp (1 of 9)
+PASS: libc++ :: std/depr/depr.lib.binders/depr.lib.binder.2nd/binder2nd.depr_in_cxx11.fail.cpp (2 of 9)
+FAIL: libc++ :: std/depr/depr.lib.binders/depr.lib.bind.1st/bind1st.pass.cpp (3 of 9)
+******************** TEST 'libc++ :: std/depr/depr.lib.binders/depr.lib.bind.1st/bind1st.pass.cpp' FAILED ********************
+Command: ['/usr/local/bin/clang++', '-o', '/usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/test/std/depr/depr.lib.binders/depr.lib.bind.1st/Output/bind1st.pass.cpp.o', '-x', 'c++', '/usr/local/google/home/ericwf/libcxx/libcxx/test/std/depr/depr.lib.binders/depr.lib.bind.1st/bind1st.pass.cpp', '-c', '-v', '-D_LIBCPP_HAS_MERGED_TYPEINFO_NAMES_DEFAULT=0', '-D_LIBCPP_ABI_UNSTABLE', '-fmodules', '-Xclang', '-fmodules-local-submodule-visibility', '-fmodules-cache-path=/usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/test/modules.cache', '-Werror=thread-safety', '-std=c++14', '-Wno-macro-redefined', '-include', '/usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/__config_site', '-include', '/usr/local/google/home/ericwf/libcxx/libcxx/test/support/nasty_macros.h', '-nostdinc++', '-I/usr/local/google/home/ericwf/libcxx/libcxx/include', '-I/usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/include/c++build', '-D__STDC_FORMAT_MACROS', '-D__STDC_LIMIT_MACROS', '-D__STDC_CONSTANT_MACROS', '-I/usr/local/google/home/ericwf/libcxx/libcxx/test/support', '-ftemplate-depth=270', '-DLIBCXX_FILESYSTEM_STATIC_TEST_ROOT="/usr/local/google/home/ericwf/libcxx/libcxx/test/std/input.output/filesystems/Inputs/static_test_env"', '-DLIBCXX_FILESYSTEM_DYNAMIC_TEST_ROOT="/usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/test/filesystem/Output/dynamic_env"', '-DLIBCXX_FILESYSTEM_DYNAMIC_TEST_HELPER="/usr/bin/python /usr/local/google/home/ericwf/libcxx/libcxx/test/support/filesystem_dynamic_test_helper.py"', '-D_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER', '-Wall', '-Wextra', '-Werror', '-Wuser-defined-warnings', '-Wshadow', '-Wno-unused-command-line-argument', '-Wno-attributes', '-Wno-pessimizing-move', '-Wno-c++11-extensions', '-Wno-user-defined-literals', '-Wno-noexcept-type', '-Wsign-compare', '-Wunused-variable', '-Wunused-parameter', '-Wunreachable-code', '-Wno-macro-redefined', '-c']
+Exit Code: 1
+Standard Error:
+--
+clang version 11.0.0 (https://github.com/llvm/llvm-project.git a9f15832287e72a172faa8faa0c3235de5cba838)
+Target: x86_64-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /usr/local/bin
+Found candidate GCC installation: /usr/lib/gcc/i686-linux-gnu/8
+Found candidate GCC installation: /usr/lib/gcc/i686-linux-gnu/9
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/6
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/6.5.0
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/7
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/7.5.0
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/8
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/9
+Selected GCC installation: /usr/lib/gcc/x86_64-linux-gnu/9
+Candidate multilib: .;@m64
+Selected multilib: .;@m64
+ (in-process)
+ "/usr/local/bin/clang-10" -cc1 -triple x86_64-unknown-linux-gnu -emit-obj -mrelax-all -disable-free -main-file-name bind1st.pass.cpp -mrelocation-model static -mthread-model posix -mframe-pointer=all -fmath-errno -fno-rounding-math -masm-verbose -mconstructor-aliases -munwind-tables -target-cpu x86-64 -dwarf-column-info -fno-split-dwarf-inlining -debugger-tuning=gdb -v -nostdinc++ -resource-dir /usr/local/lib/clang/11.0.0 -include /usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/__config_site -include /usr/local/google/home/ericwf/libcxx/libcxx/test/support/nasty_macros.h -D _LIBCPP_HAS_MERGED_TYPEINFO_NAMES_DEFAULT=0 -D _LIBCPP_ABI_UNSTABLE -I /usr/local/google/home/ericwf/libcxx/libcxx/include -I /usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/include/c++build -D __STDC_FORMAT_MACROS -D __STDC_LIMIT_MACROS -D __STDC_CONSTANT_MACROS -I /usr/local/google/home/ericwf/libcxx/libcxx/test/support -D "LIBCXX_FILESYSTEM_STATIC_TEST_ROOT=\"/usr/local/google/home/ericwf/libcxx/libcxx/test/std/input.output/filesystems/Inputs/static_test_env\"" -D "LIBCXX_FILESYSTEM_DYNAMIC_TEST_ROOT=\"/usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/test/filesystem/Output/dynamic_env\"" -D "LIBCXX_FILESYSTEM_DYNAMIC_TEST_HELPER=\"/usr/bin/python /usr/local/google/home/ericwf/libcxx/libcxx/test/support/filesystem_dynamic_test_helper.py\"" -D _LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER -internal-isystem /usr/local/include -internal-isystem /usr/local/lib/clang/11.0.0/include -internal-externc-isystem /usr/include/x86_64-linux-gnu -internal-externc-isystem /include -internal-externc-isystem /usr/include -Werror=thread-safety -Wno-macro-redefined -Wall -Wextra -Werror -Wuser-defined-warnings -Wshadow -Wno-unused-command-line-argument -Wno-attributes -Wno-pessimizing-move -Wno-c++11-extensions -Wno-user-defined-literals -Wno-noexcept-type -Wsign-compare -Wunused-variable -Wunused-parameter -Wunreachable-code -Wno-macro-redefined -std=c++14 -fdeprecated-macro -fdebug-compilation-dir /usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/test/std/depr/depr.lib.binders/depr.lib.bind.1st -ftemplate-depth 270 -ferror-limit 19 -fmessage-length 0 -fgnuc-version=4.2.1 -fmodules -fimplicit-module-maps -fmodules-cache-path=/usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/test/modules.cache -fmodules-validate-system-headers -fobjc-runtime=gcc -fcxx-exceptions -fexceptions -fdiagnostics-show-option -fmodules-local-submodule-visibility -faddrsig -o /usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/test/std/depr/depr.lib.binders/depr.lib.bind.1st/Output/bind1st.pass.cpp.o -x c++ /usr/local/google/home/ericwf/libcxx/libcxx/test/std/depr/depr.lib.binders/depr.lib.bind.1st/bind1st.pass.cpp
+clang -cc1 version 11.0.0 based upon LLVM 11.0.0git default target x86_64-unknown-linux-gnu
+ignoring nonexistent directory "/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /usr/local/google/home/ericwf/libcxx/libcxx/include
+ /usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/include/c++build
+ /usr/local/google/home/ericwf/libcxx/libcxx/test/support
+ /usr/local/include
+ /usr/local/lib/clang/11.0.0/include
+ /usr/include/x86_64-linux-gnu
+ /usr/include
+End of search list.
+clang -cc1 version 11.0.0 based upon LLVM 11.0.0git default target x86_64-unknown-linux-gnu
+ignoring nonexistent directory "/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /usr/local/google/home/ericwf/libcxx/libcxx/include
+ /usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/include/c++build
+ /usr/local/google/home/ericwf/libcxx/libcxx/test/support
+ /usr/local/include
+ /usr/local/lib/clang/11.0.0/include
+ /usr/include/x86_64-linux-gnu
+ /usr/include
+End of search list.
+clang -cc1 version 11.0.0 based upon LLVM 11.0.0git default target x86_64-unknown-linux-gnu
+ignoring nonexistent directory "/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /usr/local/google/home/ericwf/libcxx/libcxx/include
+ /usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/include/c++build
+ /usr/local/google/home/ericwf/libcxx/libcxx/test/support
+ /usr/local/include
+ /usr/local/lib/clang/11.0.0/include
+ /usr/include/x86_64-linux-gnu
+ /usr/include
+End of search list.
+clang -cc1 version 11.0.0 based upon LLVM 11.0.0git default target x86_64-unknown-linux-gnu
+ignoring nonexistent directory "/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /usr/local/google/home/ericwf/libcxx/libcxx/include
+ /usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/include/c++build
+ /usr/local/google/home/ericwf/libcxx/libcxx/test/support
+ /usr/local/include
+ /usr/local/lib/clang/11.0.0/include
+ /usr/include/x86_64-linux-gnu
+ /usr/include
+End of search list.
+/usr/local/google/home/ericwf/libcxx/libcxx/test/std/depr/depr.lib.binders/depr.lib.bind.1st/bind1st.pass.cpp:26:17: error: 'bind1st<test_func, int>' is deprecated [-Werror,-Wdeprecated-declarations]
+    assert(std::bind1st(test_func(1), 5)(10.) == -5.);
+                ^
+/usr/local/google/home/ericwf/libcxx/libcxx/include/functional:1063:1: note: 'bind1st<test_func, int>' has been explicitly marked deprecated here
+_LIBCPP_DEPRECATED_IN_CXX11 inline _LIBCPP_INLINE_VISIBILITY
+^
+/usr/local/google/home/ericwf/libcxx/libcxx/include/__config:985:39: note: expanded from macro '_LIBCPP_DEPRECATED_IN_CXX11'
+#  define _LIBCPP_DEPRECATED_IN_CXX11 _LIBCPP_DEPRECATED
+                                      ^
+/usr/local/google/home/ericwf/libcxx/libcxx/include/__config:974:48: note: expanded from macro '_LIBCPP_DEPRECATED'
+#    define _LIBCPP_DEPRECATED __attribute__ ((deprecated))
+                                               ^
+1 error generated.
+--
+
+Compilation failed unexpectedly!
+********************
+PASS: libc++ :: std/depr/depr.lib.binders/depr.lib.bind.1st/bind1st.depr_in_cxx11.fail.cpp (4 of 9)
+PASS: libc++ :: std/depr/depr.lib.binders/depr.lib.bind.2nd/bind2nd.depr_in_cxx11.fail.cpp (5 of 9)
+FAIL: libc++ :: std/depr/depr.lib.binders/depr.lib.bind.2nd/bind2nd.pass.cpp (6 of 9)
+******************** TEST 'libc++ :: std/depr/depr.lib.binders/depr.lib.bind.2nd/bind2nd.pass.cpp' FAILED ********************
+Command: ['/usr/local/bin/clang++', '-o', '/usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/test/std/depr/depr.lib.binders/depr.lib.bind.2nd/Output/bind2nd.pass.cpp.o', '-x', 'c++', '/usr/local/google/home/ericwf/libcxx/libcxx/test/std/depr/depr.lib.binders/depr.lib.bind.2nd/bind2nd.pass.cpp', '-c', '-v', '-D_LIBCPP_HAS_MERGED_TYPEINFO_NAMES_DEFAULT=0', '-D_LIBCPP_ABI_UNSTABLE', '-fmodules', '-Xclang', '-fmodules-local-submodule-visibility', '-fmodules-cache-path=/usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/test/modules.cache', '-Werror=thread-safety', '-std=c++14', '-Wno-macro-redefined', '-include', '/usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/__config_site', '-include', '/usr/local/google/home/ericwf/libcxx/libcxx/test/support/nasty_macros.h', '-nostdinc++', '-I/usr/local/google/home/ericwf/libcxx/libcxx/include', '-I/usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/include/c++build', '-D__STDC_FORMAT_MACROS', '-D__STDC_LIMIT_MACROS', '-D__STDC_CONSTANT_MACROS', '-I/usr/local/google/home/ericwf/libcxx/libcxx/test/support', '-ftemplate-depth=270', '-DLIBCXX_FILESYSTEM_STATIC_TEST_ROOT="/usr/local/google/home/ericwf/libcxx/libcxx/test/std/input.output/filesystems/Inputs/static_test_env"', '-DLIBCXX_FILESYSTEM_DYNAMIC_TEST_ROOT="/usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/test/filesystem/Output/dynamic_env"', '-DLIBCXX_FILESYSTEM_DYNAMIC_TEST_HELPER="/usr/bin/python /usr/local/google/home/ericwf/libcxx/libcxx/test/support/filesystem_dynamic_test_helper.py"', '-D_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER', '-Wall', '-Wextra', '-Werror', '-Wuser-defined-warnings', '-Wshadow', '-Wno-unused-command-line-argument', '-Wno-attributes', '-Wno-pessimizing-move', '-Wno-c++11-extensions', '-Wno-user-defined-literals', '-Wno-noexcept-type', '-Wsign-compare', '-Wunused-variable', '-Wunused-parameter', '-Wunreachable-code', '-Wno-macro-redefined', '-c']
+Exit Code: 1
+Standard Error:
+--
+clang version 11.0.0 (https://github.com/llvm/llvm-project.git a9f15832287e72a172faa8faa0c3235de5cba838)
+Target: x86_64-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /usr/local/bin
+Found candidate GCC installation: /usr/lib/gcc/i686-linux-gnu/8
+Found candidate GCC installation: /usr/lib/gcc/i686-linux-gnu/9
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/6
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/6.5.0
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/7
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/7.5.0
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/8
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/9
+Selected GCC installation: /usr/lib/gcc/x86_64-linux-gnu/9
+Candidate multilib: .;@m64
+Selected multilib: .;@m64
+ (in-process)
+ "/usr/local/bin/clang-10" -cc1 -triple x86_64-unknown-linux-gnu -emit-obj -mrelax-all -disable-free -main-file-name bind2nd.pass.cpp -mrelocation-model static -mthread-model posix -mframe-pointer=all -fmath-errno -fno-rounding-math -masm-verbose -mconstructor-aliases -munwind-tables -target-cpu x86-64 -dwarf-column-info -fno-split-dwarf-inlining -debugger-tuning=gdb -v -nostdinc++ -resource-dir /usr/local/lib/clang/11.0.0 -include /usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/__config_site -include /usr/local/google/home/ericwf/libcxx/libcxx/test/support/nasty_macros.h -D _LIBCPP_HAS_MERGED_TYPEINFO_NAMES_DEFAULT=0 -D _LIBCPP_ABI_UNSTABLE -I /usr/local/google/home/ericwf/libcxx/libcxx/include -I /usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/include/c++build -D __STDC_FORMAT_MACROS -D __STDC_LIMIT_MACROS -D __STDC_CONSTANT_MACROS -I /usr/local/google/home/ericwf/libcxx/libcxx/test/support -D "LIBCXX_FILESYSTEM_STATIC_TEST_ROOT=\"/usr/local/google/home/ericwf/libcxx/libcxx/test/std/input.output/filesystems/Inputs/static_test_env\"" -D "LIBCXX_FILESYSTEM_DYNAMIC_TEST_ROOT=\"/usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/test/filesystem/Output/dynamic_env\"" -D "LIBCXX_FILESYSTEM_DYNAMIC_TEST_HELPER=\"/usr/bin/python /usr/local/google/home/ericwf/libcxx/libcxx/test/support/filesystem_dynamic_test_helper.py\"" -D _LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER -internal-isystem /usr/local/include -internal-isystem /usr/local/lib/clang/11.0.0/include -internal-externc-isystem /usr/include/x86_64-linux-gnu -internal-externc-isystem /include -internal-externc-isystem /usr/include -Werror=thread-safety -Wno-macro-redefined -Wall -Wextra -Werror -Wuser-defined-warnings -Wshadow -Wno-unused-command-line-argument -Wno-attributes -Wno-pessimizing-move -Wno-c++11-extensions -Wno-user-defined-literals -Wno-noexcept-type -Wsign-compare -Wunused-variable -Wunused-parameter -Wunreachable-code -Wno-macro-redefined -std=c++14 -fdeprecated-macro -fdebug-compilation-dir /usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/test/std/depr/depr.lib.binders/depr.lib.bind.2nd -ftemplate-depth 270 -ferror-limit 19 -fmessage-length 0 -fgnuc-version=4.2.1 -fmodules -fimplicit-module-maps -fmodules-cache-path=/usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/test/modules.cache -fmodules-validate-system-headers -fobjc-runtime=gcc -fcxx-exceptions -fexceptions -fdiagnostics-show-option -fmodules-local-submodule-visibility -faddrsig -o /usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/test/std/depr/depr.lib.binders/depr.lib.bind.2nd/Output/bind2nd.pass.cpp.o -x c++ /usr/local/google/home/ericwf/libcxx/libcxx/test/std/depr/depr.lib.binders/depr.lib.bind.2nd/bind2nd.pass.cpp
+clang -cc1 version 11.0.0 based upon LLVM 11.0.0git default target x86_64-unknown-linux-gnu
+ignoring nonexistent directory "/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /usr/local/google/home/ericwf/libcxx/libcxx/include
+ /usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/include/c++build
+ /usr/local/google/home/ericwf/libcxx/libcxx/test/support
+ /usr/local/include
+ /usr/local/lib/clang/11.0.0/include
+ /usr/include/x86_64-linux-gnu
+ /usr/include
+End of search list.
+/usr/local/google/home/ericwf/libcxx/libcxx/test/std/depr/depr.lib.binders/depr.lib.bind.2nd/bind2nd.pass.cpp:26:17: error: 'bind2nd<test_func, int>' is deprecated [-Werror,-Wdeprecated-declarations]
+    assert(std::bind2nd(test_func(1), 5)(10) == 5.);
+                ^
+/usr/local/google/home/ericwf/libcxx/libcxx/include/functional:1089:1: note: 'bind2nd<test_func, int>' has been explicitly marked deprecated here
+_LIBCPP_DEPRECATED_IN_CXX11 inline _LIBCPP_INLINE_VISIBILITY
+^
+/usr/local/google/home/ericwf/libcxx/libcxx/include/__config:985:39: note: expanded from macro '_LIBCPP_DEPRECATED_IN_CXX11'
+#  define _LIBCPP_DEPRECATED_IN_CXX11 _LIBCPP_DEPRECATED
+                                      ^
+/usr/local/google/home/ericwf/libcxx/libcxx/include/__config:974:48: note: expanded from macro '_LIBCPP_DEPRECATED'
+#    define _LIBCPP_DEPRECATED __attribute__ ((deprecated))
+                                               ^
+1 error generated.
+--
+
+Compilation failed unexpectedly!
+********************
+FAIL: libc++ :: std/depr/depr.lib.binders/depr.lib.binder.1st/binder1st.pass.cpp (7 of 9)
+******************** TEST 'libc++ :: std/depr/depr.lib.binders/depr.lib.binder.1st/binder1st.pass.cpp' FAILED ********************
+Command: ['/usr/local/bin/clang++', '-o', '/usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/test/std/depr/depr.lib.binders/depr.lib.binder.1st/Output/binder1st.pass.cpp.o', '-x', 'c++', '/usr/local/google/home/ericwf/libcxx/libcxx/test/std/depr/depr.lib.binders/depr.lib.binder.1st/binder1st.pass.cpp', '-c', '-v', '-D_LIBCPP_HAS_MERGED_TYPEINFO_NAMES_DEFAULT=0', '-D_LIBCPP_ABI_UNSTABLE', '-fmodules', '-Xclang', '-fmodules-local-submodule-visibility', '-fmodules-cache-path=/usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/test/modules.cache', '-Werror=thread-safety', '-std=c++14', '-Wno-macro-redefined', '-include', '/usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/__config_site', '-include', '/usr/local/google/home/ericwf/libcxx/libcxx/test/support/nasty_macros.h', '-nostdinc++', '-I/usr/local/google/home/ericwf/libcxx/libcxx/include', '-I/usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/include/c++build', '-D__STDC_FORMAT_MACROS', '-D__STDC_LIMIT_MACROS', '-D__STDC_CONSTANT_MACROS', '-I/usr/local/google/home/ericwf/libcxx/libcxx/test/support', '-ftemplate-depth=270', '-DLIBCXX_FILESYSTEM_STATIC_TEST_ROOT="/usr/local/google/home/ericwf/libcxx/libcxx/test/std/input.output/filesystems/Inputs/static_test_env"', '-DLIBCXX_FILESYSTEM_DYNAMIC_TEST_ROOT="/usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/test/filesystem/Output/dynamic_env"', '-DLIBCXX_FILESYSTEM_DYNAMIC_TEST_HELPER="/usr/bin/python /usr/local/google/home/ericwf/libcxx/libcxx/test/support/filesystem_dynamic_test_helper.py"', '-D_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER', '-Wall', '-Wextra', '-Werror', '-Wuser-defined-warnings', '-Wshadow', '-Wno-unused-command-line-argument', '-Wno-attributes', '-Wno-pessimizing-move', '-Wno-c++11-extensions', '-Wno-user-defined-literals', '-Wno-noexcept-type', '-Wsign-compare', '-Wunused-variable', '-Wunused-parameter', '-Wunreachable-code', '-Wno-macro-redefined', '-c']
+Exit Code: 1
+Standard Error:
+--
+clang version 11.0.0 (https://github.com/llvm/llvm-project.git a9f15832287e72a172faa8faa0c3235de5cba838)
+Target: x86_64-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /usr/local/bin
+Found candidate GCC installation: /usr/lib/gcc/i686-linux-gnu/8
+Found candidate GCC installation: /usr/lib/gcc/i686-linux-gnu/9
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/6
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/6.5.0
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/7
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/7.5.0
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/8
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/9
+Selected GCC installation: /usr/lib/gcc/x86_64-linux-gnu/9
+Candidate multilib: .;@m64
+Selected multilib: .;@m64
+ (in-process)
+ "/usr/local/bin/clang-10" -cc1 -triple x86_64-unknown-linux-gnu -emit-obj -mrelax-all -disable-free -main-file-name binder1st.pass.cpp -mrelocation-model static -mthread-model posix -mframe-pointer=all -fmath-errno -fno-rounding-math -masm-verbose -mconstructor-aliases -munwind-tables -target-cpu x86-64 -dwarf-column-info -fno-split-dwarf-inlining -debugger-tuning=gdb -v -nostdinc++ -resource-dir /usr/local/lib/clang/11.0.0 -include /usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/__config_site -include /usr/local/google/home/ericwf/libcxx/libcxx/test/support/nasty_macros.h -D _LIBCPP_HAS_MERGED_TYPEINFO_NAMES_DEFAULT=0 -D _LIBCPP_ABI_UNSTABLE -I /usr/local/google/home/ericwf/libcxx/libcxx/include -I /usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/include/c++build -D __STDC_FORMAT_MACROS -D __STDC_LIMIT_MACROS -D __STDC_CONSTANT_MACROS -I /usr/local/google/home/ericwf/libcxx/libcxx/test/support -D "LIBCXX_FILESYSTEM_STATIC_TEST_ROOT=\"/usr/local/google/home/ericwf/libcxx/libcxx/test/std/input.output/filesystems/Inputs/static_test_env\"" -D "LIBCXX_FILESYSTEM_DYNAMIC_TEST_ROOT=\"/usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/test/filesystem/Output/dynamic_env\"" -D "LIBCXX_FILESYSTEM_DYNAMIC_TEST_HELPER=\"/usr/bin/python /usr/local/google/home/ericwf/libcxx/libcxx/test/support/filesystem_dynamic_test_helper.py\"" -D _LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER -internal-isystem /usr/local/include -internal-isystem /usr/local/lib/clang/11.0.0/include -internal-externc-isystem /usr/include/x86_64-linux-gnu -internal-externc-isystem /include -internal-externc-isystem /usr/include -Werror=thread-safety -Wno-macro-redefined -Wall -Wextra -Werror -Wuser-defined-warnings -Wshadow -Wno-unused-command-line-argument -Wno-attributes -Wno-pessimizing-move -Wno-c++11-extensions -Wno-user-defined-literals -Wno-noexcept-type -Wsign-compare -Wunused-variable -Wunused-parameter -Wunreachable-code -Wno-macro-redefined -std=c++14 -fdeprecated-macro -fdebug-compilation-dir /usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/test/std/depr/depr.lib.binders/depr.lib.binder.1st -ftemplate-depth 270 -ferror-limit 19 -fmessage-length 0 -fgnuc-version=4.2.1 -fmodules -fimplicit-module-maps -fmodules-cache-path=/usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/test/modules.cache -fmodules-validate-system-headers -fobjc-runtime=gcc -fcxx-exceptions -fexceptions -fdiagnostics-show-option -fmodules-local-submodule-visibility -faddrsig -o /usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/test/std/depr/depr.lib.binders/depr.lib.binder.1st/Output/binder1st.pass.cpp.o -x c++ /usr/local/google/home/ericwf/libcxx/libcxx/test/std/depr/depr.lib.binders/depr.lib.binder.1st/binder1st.pass.cpp
+clang -cc1 version 11.0.0 based upon LLVM 11.0.0git default target x86_64-unknown-linux-gnu
+ignoring nonexistent directory "/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /usr/local/google/home/ericwf/libcxx/libcxx/include
+ /usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/include/c++build
+ /usr/local/google/home/ericwf/libcxx/libcxx/test/support
+ /usr/local/include
+ /usr/local/lib/clang/11.0.0/include
+ /usr/include/x86_64-linux-gnu
+ /usr/include
+End of search list.
+/usr/local/google/home/ericwf/libcxx/libcxx/test/std/depr/depr.lib.binders/depr.lib.binder.1st/binder1st.pass.cpp:36:19: error: 'binder1st<test_func>' is deprecated [-Werror,-Wdeprecated-declarations]
+    : public std::binder1st<test_func>
+                  ^
+/usr/local/google/home/ericwf/libcxx/libcxx/include/functional:1043:28: note: 'binder1st<test_func>' has been explicitly marked deprecated here
+class _LIBCPP_TEMPLATE_VIS _LIBCPP_DEPRECATED_IN_CXX11 binder1st
+                           ^
+/usr/local/google/home/ericwf/libcxx/libcxx/include/__config:985:39: note: expanded from macro '_LIBCPP_DEPRECATED_IN_CXX11'
+#  define _LIBCPP_DEPRECATED_IN_CXX11 _LIBCPP_DEPRECATED
+                                      ^
+/usr/local/google/home/ericwf/libcxx/libcxx/include/__config:974:48: note: expanded from macro '_LIBCPP_DEPRECATED'
+#    define _LIBCPP_DEPRECATED __attribute__ ((deprecated))
+                                               ^
+/usr/local/google/home/ericwf/libcxx/libcxx/test/std/depr/depr.lib.binders/depr.lib.binder.1st/binder1st.pass.cpp:38:18: error: 'binder1st<test_func>' is deprecated [-Werror,-Wdeprecated-declarations]
+    typedef std::binder1st<test_func> base;
+                 ^
+/usr/local/google/home/ericwf/libcxx/libcxx/include/functional:1043:28: note: 'binder1st<test_func>' has been explicitly marked deprecated here
+class _LIBCPP_TEMPLATE_VIS _LIBCPP_DEPRECATED_IN_CXX11 binder1st
+                           ^
+/usr/local/google/home/ericwf/libcxx/libcxx/include/__config:985:39: note: expanded from macro '_LIBCPP_DEPRECATED_IN_CXX11'
+#  define _LIBCPP_DEPRECATED_IN_CXX11 _LIBCPP_DEPRECATED
+                                      ^
+/usr/local/google/home/ericwf/libcxx/libcxx/include/__config:974:48: note: expanded from macro '_LIBCPP_DEPRECATED'
+#    define _LIBCPP_DEPRECATED __attribute__ ((deprecated))
+                                               ^
+/usr/local/google/home/ericwf/libcxx/libcxx/test/std/depr/depr.lib.binders/depr.lib.binder.1st/binder1st.pass.cpp:40:19: error: 'binder1st<test_func>' is deprecated [-Werror,-Wdeprecated-declarations]
+    test() : std::binder1st<test_func>(test_func(2), 30) {}
+                  ^
+/usr/local/google/home/ericwf/libcxx/libcxx/include/functional:1043:28: note: 'binder1st<test_func>' has been explicitly marked deprecated here
+class _LIBCPP_TEMPLATE_VIS _LIBCPP_DEPRECATED_IN_CXX11 binder1st
+                           ^
+/usr/local/google/home/ericwf/libcxx/libcxx/include/__config:985:39: note: expanded from macro '_LIBCPP_DEPRECATED_IN_CXX11'
+#  define _LIBCPP_DEPRECATED_IN_CXX11 _LIBCPP_DEPRECATED
+                                      ^
+/usr/local/google/home/ericwf/libcxx/libcxx/include/__config:974:48: note: expanded from macro '_LIBCPP_DEPRECATED'
+#    define _LIBCPP_DEPRECATED __attribute__ ((deprecated))
+                                               ^
+3 errors generated.
+--
+
+Compilation failed unexpectedly!
+********************
+FAIL: libc++ :: std/depr/depr.lib.binders/depr.lib.binder.2nd/binder2nd.pass.cpp (8 of 9)
+******************** TEST 'libc++ :: std/depr/depr.lib.binders/depr.lib.binder.2nd/binder2nd.pass.cpp' FAILED ********************
+Command: ['/usr/local/bin/clang++', '-o', '/usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/test/std/depr/depr.lib.binders/depr.lib.binder.2nd/Output/binder2nd.pass.cpp.o', '-x', 'c++', '/usr/local/google/home/ericwf/libcxx/libcxx/test/std/depr/depr.lib.binders/depr.lib.binder.2nd/binder2nd.pass.cpp', '-c', '-v', '-D_LIBCPP_HAS_MERGED_TYPEINFO_NAMES_DEFAULT=0', '-D_LIBCPP_ABI_UNSTABLE', '-fmodules', '-Xclang', '-fmodules-local-submodule-visibility', '-fmodules-cache-path=/usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/test/modules.cache', '-Werror=thread-safety', '-std=c++14', '-Wno-macro-redefined', '-include', '/usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/__config_site', '-include', '/usr/local/google/home/ericwf/libcxx/libcxx/test/support/nasty_macros.h', '-nostdinc++', '-I/usr/local/google/home/ericwf/libcxx/libcxx/include', '-I/usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/include/c++build', '-D__STDC_FORMAT_MACROS', '-D__STDC_LIMIT_MACROS', '-D__STDC_CONSTANT_MACROS', '-I/usr/local/google/home/ericwf/libcxx/libcxx/test/support', '-ftemplate-depth=270', '-DLIBCXX_FILESYSTEM_STATIC_TEST_ROOT="/usr/local/google/home/ericwf/libcxx/libcxx/test/std/input.output/filesystems/Inputs/static_test_env"', '-DLIBCXX_FILESYSTEM_DYNAMIC_TEST_ROOT="/usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/test/filesystem/Output/dynamic_env"', '-DLIBCXX_FILESYSTEM_DYNAMIC_TEST_HELPER="/usr/bin/python /usr/local/google/home/ericwf/libcxx/libcxx/test/support/filesystem_dynamic_test_helper.py"', '-D_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER', '-Wall', '-Wextra', '-Werror', '-Wuser-defined-warnings', '-Wshadow', '-Wno-unused-command-line-argument', '-Wno-attributes', '-Wno-pessimizing-move', '-Wno-c++11-extensions', '-Wno-user-defined-literals', '-Wno-noexcept-type', '-Wsign-compare', '-Wunused-variable', '-Wunused-parameter', '-Wunreachable-code', '-Wno-macro-redefined', '-c']
+Exit Code: 1
+Standard Error:
+--
+clang version 11.0.0 (https://github.com/llvm/llvm-project.git a9f15832287e72a172faa8faa0c3235de5cba838)
+Target: x86_64-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /usr/local/bin
+Found candidate GCC installation: /usr/lib/gcc/i686-linux-gnu/8
+Found candidate GCC installation: /usr/lib/gcc/i686-linux-gnu/9
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/6
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/6.5.0
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/7
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/7.5.0
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/8
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/9
+Selected GCC installation: /usr/lib/gcc/x86_64-linux-gnu/9
+Candidate multilib: .;@m64
+Selected multilib: .;@m64
+ (in-process)
+ "/usr/local/bin/clang-10" -cc1 -triple x86_64-unknown-linux-gnu -emit-obj -mrelax-all -disable-free -main-file-name binder2nd.pass.cpp -mrelocation-model static -mthread-model posix -mframe-pointer=all -fmath-errno -fno-rounding-math -masm-verbose -mconstructor-aliases -munwind-tables -target-cpu x86-64 -dwarf-column-info -fno-split-dwarf-inlining -debugger-tuning=gdb -v -nostdinc++ -resource-dir /usr/local/lib/clang/11.0.0 -include /usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/__config_site -include /usr/local/google/home/ericwf/libcxx/libcxx/test/support/nasty_macros.h -D _LIBCPP_HAS_MERGED_TYPEINFO_NAMES_DEFAULT=0 -D _LIBCPP_ABI_UNSTABLE -I /usr/local/google/home/ericwf/libcxx/libcxx/include -I /usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/include/c++build -D __STDC_FORMAT_MACROS -D __STDC_LIMIT_MACROS -D __STDC_CONSTANT_MACROS -I /usr/local/google/home/ericwf/libcxx/libcxx/test/support -D "LIBCXX_FILESYSTEM_STATIC_TEST_ROOT=\"/usr/local/google/home/ericwf/libcxx/libcxx/test/std/input.output/filesystems/Inputs/static_test_env\"" -D "LIBCXX_FILESYSTEM_DYNAMIC_TEST_ROOT=\"/usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/test/filesystem/Output/dynamic_env\"" -D "LIBCXX_FILESYSTEM_DYNAMIC_TEST_HELPER=\"/usr/bin/python /usr/local/google/home/ericwf/libcxx/libcxx/test/support/filesystem_dynamic_test_helper.py\"" -D _LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER -internal-isystem /usr/local/include -internal-isystem /usr/local/lib/clang/11.0.0/include -internal-externc-isystem /usr/include/x86_64-linux-gnu -internal-externc-isystem /include -internal-externc-isystem /usr/include -Werror=thread-safety -Wno-macro-redefined -Wall -Wextra -Werror -Wuser-defined-warnings -Wshadow -Wno-unused-command-line-argument -Wno-attributes -Wno-pessimizing-move -Wno-c++11-extensions -Wno-user-defined-literals -Wno-noexcept-type -Wsign-compare -Wunused-variable -Wunused-parameter -Wunreachable-code -Wno-macro-redefined -std=c++14 -fdeprecated-macro -fdebug-compilation-dir /usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/test/std/depr/depr.lib.binders/depr.lib.binder.2nd -ftemplate-depth 270 -ferror-limit 19 -fmessage-length 0 -fgnuc-version=4.2.1 -fmodules -fimplicit-module-maps -fmodules-cache-path=/usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/test/modules.cache -fmodules-validate-system-headers -fobjc-runtime=gcc -fcxx-exceptions -fexceptions -fdiagnostics-show-option -fmodules-local-submodule-visibility -faddrsig -o /usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/test/std/depr/depr.lib.binders/depr.lib.binder.2nd/Output/binder2nd.pass.cpp.o -x c++ /usr/local/google/home/ericwf/libcxx/libcxx/test/std/depr/depr.lib.binders/depr.lib.binder.2nd/binder2nd.pass.cpp
+clang -cc1 version 11.0.0 based upon LLVM 11.0.0git default target x86_64-unknown-linux-gnu
+ignoring nonexistent directory "/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /usr/local/google/home/ericwf/libcxx/libcxx/include
+ /usr/local/google/home/ericwf/libcxx/build/unstable/projects/libcxx/include/c++build
+ /usr/local/google/home/ericwf/libcxx/libcxx/test/support
+ /usr/local/include
+ /usr/local/lib/clang/11.0.0/include
+ /usr/include/x86_64-linux-gnu
+ /usr/include
+End of search list.
+/usr/local/google/home/ericwf/libcxx/libcxx/test/std/depr/depr.lib.binders/depr.lib.binder.2nd/binder2nd.pass.cpp:36:19: error: 'binder2nd<test_func>' is deprecated [-Werror,-Wdeprecated-declarations]
+    : public std::binder2nd<test_func>
+                  ^
+/usr/local/google/home/ericwf/libcxx/libcxx/include/functional:1069:28: note: 'binder2nd<test_func>' has been explicitly marked deprecated here
+class _LIBCPP_TEMPLATE_VIS _LIBCPP_DEPRECATED_IN_CXX11 binder2nd
+                           ^
+/usr/local/google/home/ericwf/libcxx/libcxx/include/__config:985:39: note: expanded from macro '_LIBCPP_DEPRECATED_IN_CXX11'
+#  define _LIBCPP_DEPRECATED_IN_CXX11 _LIBCPP_DEPRECATED
+                                      ^
+/usr/local/google/home/ericwf/libcxx/libcxx/include/__config:974:48: note: expanded from macro '_LIBCPP_DEPRECATED'
+#    define _LIBCPP_DEPRECATED __attribute__ ((deprecated))
+                                               ^
+/usr/local/google/home/ericwf/libcxx/libcxx/test/std/depr/depr.lib.binders/depr.lib.binder.2nd/binder2nd.pass.cpp:38:18: error: 'binder2nd<test_func>' is deprecated [-Werror,-Wdeprecated-declarations]
+    typedef std::binder2nd<test_func> base;
+                 ^
+/usr/local/google/home/ericwf/libcxx/libcxx/include/functional:1069:28: note: 'binder2nd<test_func>' has been explicitly marked deprecated here
+class _LIBCPP_TEMPLATE_VIS _LIBCPP_DEPRECATED_IN_CXX11 binder2nd
+                           ^
+/usr/local/google/home/ericwf/libcxx/libcxx/include/__config:985:39: note: expanded from macro '_LIBCPP_DEPRECATED_IN_CXX11'
+#  define _LIBCPP_DEPRECATED_IN_CXX11 _LIBCPP_DEPRECATED
+                                      ^
+/usr/local/google/home/ericwf/libcxx/libcxx/include/__config:974:48: note: expanded from macro '_LIBCPP_DEPRECATED'
+#    define _LIBCPP_DEPRECATED __attribute__ ((deprecated))
+                                               ^
+/usr/local/google/home/ericwf/libcxx/libcxx/test/std/depr/depr.lib.binders/depr.lib.binder.2nd/binder2nd.pass.cpp:40:19: error: 'binder2nd<test_func>' is deprecated [-Werror,-Wdeprecated-declarations]
+    test() : std::binder2nd<test_func>(test_func(3), 4.5) {}
+                  ^
+/usr/local/google/home/ericwf/libcxx/libcxx/include/functional:1069:28: note: 'binder2nd<test_func>' has been explicitly marked deprecated here
+class _LIBCPP_TEMPLATE_VIS _LIBCPP_DEPRECATED_IN_CXX11 binder2nd
+                           ^
+/usr/local/google/home/ericwf/libcxx/libcxx/include/__config:985:39: note: expanded from macro '_LIBCPP_DEPRECATED_IN_CXX11'
+#  define _LIBCPP_DEPRECATED_IN_CXX11 _LIBCPP_DEPRECATED
+                                      ^
+/usr/local/google/home/ericwf/libcxx/libcxx/include/__config:974:48: note: expanded from macro '_LIBCPP_DEPRECATED'
+#    define _LIBCPP_DEPRECATED __attribute__ ((deprecated))
+                                               ^
+3 errors generated.
+--
+
+Compilation failed unexpectedly!
+********************
+PASS: libc++ :: std/depr/depr.lib.binders/depr.lib.binder.1st/binder1st.depr_in_cxx11.fail.cpp (9 of 9)
+
+Testing Time: 2.23s
+********************
+Failing Tests (4):
+    libc++ :: std/depr/depr.lib.binders/depr.lib.bind.1st/bind1st.pass.cpp
+    libc++ :: std/depr/depr.lib.binders/depr.lib.bind.2nd/bind2nd.pass.cpp
+    libc++ :: std/depr/depr.lib.binders/depr.lib.binder.1st/binder1st.pass.cpp
+    libc++ :: std/depr/depr.lib.binders/depr.lib.binder.2nd/binder2nd.pass.cpp
+
+  Expected Passes    : 5
+  Unexpected Failures: 4
