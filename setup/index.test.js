@@ -6,13 +6,12 @@ const io = require('@actions/io');
 const fs = require('fs');
 const {getActionPaths, createActionPaths} = require('../src/action_paths');
 const { checkoutRuntimes, configureRuntimes, buildRuntimes } = require('../src/setup-action');
-const { mkdirP, run, capture } = requires('../src/utils');
+const { mkdirP, run, capture } = require('../src/utils');
 
 
 function setup(name, workspace) {
     if (!fs.existsSync(workspace)) {
-         mkdirP('/tmp/workspace');
-
+         mkdirP(workspace);
     }
     process.chdir(workspace);
     process.env['INPUT_NAME'] = name;
@@ -29,21 +28,12 @@ function setup(name, workspace) {
 
 }
 
-async function tear_down(workspace) {
+function tear_down(workspace) {
     if (fs.existsSync(workspace)) {
         io.rmRF(workspace);
     }
 }
 
-// shows how the runner will run a javascript action with env / stdout protocol
-test('test action paths', () => {
-    workspace = '/tmp/t1';
-    setup('test-run', workspace);
-    const action_paths = createActionPaths('my_name');
-    console.log(action_paths);
-    console.log('Cool');
-    tear_down(workspace);
-})
 
 test('test checkout ', () => {
     workspace = '/tmp/t2';

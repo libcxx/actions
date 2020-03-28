@@ -16,8 +16,8 @@ const artifactName = "my-artifact";
 
 function checkoutRuntimes() {
   try {
-    var out_path = core.getInput('path') || github.context.workspace;
-    var action_paths = createActionPaths(core.getInput('name'), out_path);
+    var out_path = core.getInput('path');
+    const action_paths = createActionPaths(core.getInput('name'), out_path);
     checkoutRepoShallow(core.getInput('repository'), core.getInput('ref'), action_paths.source);
     core.setOutput('sha', getRevisionAtHead(action_paths.source));
     core.setOutput('artifacts', action_paths.artifacts);
@@ -27,11 +27,12 @@ function checkoutRuntimes() {
     return action_paths;
   } catch (error) {
     core.setFailed(error.message);
+    throw error;
   }
 }
 
 function getRuntimeList() {
-  const parts = core.getInput('runtimes').split(',');
+  const parts = core.getInput('runtimes').split(' ');
   parts.forEach(runtime => {
     if (runtime != 'libcxx' && runtime != 'libcxxrt' && runtime != 'libunwind')
       throw Error("Invalid runtime name: " + runtime);

@@ -3,12 +3,25 @@ const  core  = require("@actions/core");
 const path = require('path');
 const fs = require('fs');
 const process = require('process');
+const { execSync } = require('child_process');
+
+
+function runSync(cmd, args, options = {}) {
+  console.log(`${cmd}`)
+  cmdStr = cmd;
+  cmdStr += ' ';
+  cmdStr += ' '.join(args);
+  options.stdio = [0, 1, 2];
+  execSync(cmdStr, options);
+  return null;
+}
 
 function mkdirP(dir_path) {
    fs.mkdirSync(dir_path, {recursive: true});
 }
 
-async function run(cmd, args, options = {}) {
+ function run(cmd, args, options = {}) {
+  return runSync(cmd, args, options);
   options.listeners = {
     stdout: (data) => {
       process.stdout.write(data);
@@ -17,10 +30,12 @@ async function run(cmd, args, options = {}) {
       process.stderr.write(data);
     }
   };
-  await exec.exec(cmd, args, options);
+  //await exec(cmd, args, options).then(() => {});
 }
 
-async function capture(cmd, args, options = {}) {
+
+
+ function capture(cmd, args, options = {}) {
   let myOutput = '';
 
   options.listeners = {
@@ -32,12 +47,13 @@ async function capture(cmd, args, options = {}) {
     }
   };
 
-  return exec('git', ['rev-parse', 'HEAD'], options).then(() => {
+  let result  = exec('git', ['rev-parse', 'HEAD'], options).exec().then(() => {
     if (core.isDebug()) {
       console.info(myOutput);
     }
     return myOutput;
   });
+  return result;
 }
 
 module.exports = {mkdirP, run, capture}

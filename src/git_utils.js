@@ -20,23 +20,24 @@ function repoNameFromRepository(github_repo) {
   return path.basename(github_repo);
 }
 
-function checkoutRepoShallow(github_repo, ref, output_path) {
+async function checkoutRepoShallow(github_repo, ref, output_path) {
   if (!fs.existsSync(output_path)) {
-    throw new Error("Output path already exists");
+    throw new Error("Output path does not exist!");
   }
-  mkdirP(output_path);
+
   const options = {};
   options.cwd = output_path;
   core.startGroup('checkout');
   run('git', ['init'], options);
-  run('git', ['remote', 'add', 'origin', ''.concat('https://github.com/', github_repo)], options);
-  run('git', ['fetch', '--depth=1', 'origin', ref], options);
-  run('git', ['reset', '--hard', 'FETCH_HEAD'], options);
+   run('git', ['remote', 'add', 'origin', ''.concat('https://github.com/', github_repo)], options);
+   run('git', ['fetch', '--depth=1', 'origin', ref], options);
+   run('git', ['reset', '--hard', 'FETCH_HEAD'], options);
   core.endGroup('checkout');
 }
 
 function getRevisionAtHead(repo_path) {
-  return capture('git', ['rev-parse', 'HEAD'], {cwd: repo_path});
+  return  capture('git', ['rev-parse', 'HEAD'], {cwd: repo_path});
+
 }
 
 module.exports = {checkoutRepoShallow, getRevisionAtHead}

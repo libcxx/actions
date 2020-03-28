@@ -28,28 +28,28 @@ function getActionPathsForConfigUnchecked(config_name, root_path) {
 }
 
 
-async function createActionPathsForConfig(config_name, root_path) {
+ function createActionPathsForConfig(config_name, root_path) {
   core.startGroup('create-action-paths');
   const action_paths = getActionPathsForConfigUnchecked(config_name, root_path);
-  await Object.entries(action_paths).forEach(async (entry) => {
+  Object.entries(action_paths).forEach((entry) => {
     let key = entry[0];
     let val = entry[1];
     if (fs.existsSync(val) && key != 'source') {
       var basename = path.basename(val);
       var path_for = path.basename(path.dirname(val));
       core.setFailed(`${path_for} path for config ${basename} already exist!`);
-      process.exit(process.exitCode);
+      throw Error('Failed to do stuff');
     } else if (!fs.existsSync(val)) {
       core.info(`Creating directory ${val}`);
-      await mkdirP(val);
+      mkdirP(val);
     }
   });
-  core.endGroup();
-  return action_paths;
+
+  return  action_paths;
 }
-async  function getActionPathsForConfig(config_name, root_path) {
+ function getActionPathsForConfig(config_name, root_path) {
   const action_paths = getActionPathsForConfigUnchecked(config_name, root_path);
-  await action_paths.values().forEach(val => {
+  action_paths.values().forEach(val => {
     if (!fs.existsSync(val)) {
       var basename = path.basename(val);
       var path_for = path.basename(path.dirname(val));
