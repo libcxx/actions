@@ -4,8 +4,7 @@ const cp = require('child_process');
 var path = require('path');
 const io = require('@actions/io');
 const fs = require('fs');
-const {getActionPaths, createActionPaths} = require('../src/action_paths');
-const { checkoutRuntimes, configureRuntimes, buildRuntimes } = require('../src/setup-action');
+const { checkoutRuntimes, configureRuntimes, buildRuntimes, getActionPaths, createActionPaths } = require('../src/setup-action');
 const { mkdirP, run, capture, handleErrors } = require('../src/utils');
 
 jest.setTimeout(100000);
