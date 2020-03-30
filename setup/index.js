@@ -32,6 +32,6 @@ const workspace = core.getState('cleanup');
 if (workspace) {
   cleanup(workspace);
 } else {
-  core.setState('cleanup', process.env['GITHUB_WORKSPACE']);
+  core.saveState('cleanup', process.env['GITHUB_WORKSPACE']);
   run()
 }
