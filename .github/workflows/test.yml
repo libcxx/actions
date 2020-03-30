@@ -4,7 +4,7 @@ on: push
 
 jobs:
   basic_test:
-    runs-on: [ubuntu-latest]
+    runs-on: [libcxx-builder]
     steps:
     - name: "Checkout locally"
       uses: actions/checkout@v2
