@@ -6,7 +6,7 @@ const {getActionPaths, createActionPaths} = require('../src/action_paths');
 const xunitViewer = require('xunit-viewer');
 const artifact = require('@actions/artifact');
 const path = require('path');
-const { mkdirP, run, capture} = require('./utils');
+const { mkdirP, run, capture } = require('./utils');
 
 const artifactClient = artifact.create();
 
@@ -43,16 +43,17 @@ function getRuntimeList() {
 
 async function configureRuntimes(action_paths) {
   core.startGroup('configure');
-  let myOutput = '';
-  let myError = '';
-
+  if (fs.existsSync(action_paths.build)) {
+    await io.rmRF(action_paths.build);
+    mkdirP(action_paths.build);
+  }
   let args = ['-GNinja',
     `-DCMAKE_INSTALL_PREFIX=${action_paths.install}`,
     `-DCMAKE_C_COMPILER=${core.getInput('cc')}`,
     `-DCMAKE_CXX_COMPILER=${core.getInput('cxx')}`,
     `"-DLLVM_ENABLE_PROJECTS=${getRuntimeList().join(';')}"`,
     `-DLIBCXX_CXX_ABI=${core.getInput('cxxabi')}`,
-    ];
+  ];
   const extra_cmake_args = core.getInput('cmake_args');
   if (extra_cmake_args)
     args.push(extra_cmake_args);

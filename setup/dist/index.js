@@ -11695,7 +11695,7 @@ const {getActionPaths, createActionPaths} = __webpack_require__(907);
 const xunitViewer = __webpack_require__(579);
 const artifact = __webpack_require__(312);
 const path = __webpack_require__(277);
-const { mkdirP, run, capture} = __webpack_require__(983);
+const { mkdirP, run, capture } = __webpack_require__(983);
 
 const artifactClient = artifact.create();
 
@@ -11732,16 +11732,17 @@ function getRuntimeList() {
 
 async function configureRuntimes(action_paths) {
   core.startGroup('configure');
-  let myOutput = '';
-  let myError = '';
-
+  if (fs.existsSync(action_paths.build)) {
+    await io.rmRF(action_paths.build);
+    mkdirP(action_paths.build);
+  }
   let args = ['-GNinja',
     `-DCMAKE_INSTALL_PREFIX=${action_paths.install}`,
     `-DCMAKE_C_COMPILER=${core.getInput('cc')}`,
     `-DCMAKE_CXX_COMPILER=${core.getInput('cxx')}`,
     `"-DLLVM_ENABLE_PROJECTS=${getRuntimeList().join(';')}"`,
     `-DLIBCXX_CXX_ABI=${core.getInput('cxxabi')}`,
-    ];
+  ];
   const extra_cmake_args = core.getInput('cmake_args');
   if (extra_cmake_args)
     args.push(extra_cmake_args);
@@ -44475,6 +44476,7 @@ async function cleanup(workspace) {
 
 const workspace = core.getState('cleanup');
 if (workspace) {
+  console.log('Cleaning up workspace ' + workspace);
   cleanup(workspace);
 } else {
   core.saveState('cleanup', process.env['GITHUB_WORKSPACE']);
