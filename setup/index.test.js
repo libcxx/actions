@@ -6,8 +6,9 @@ const io = require('@actions/io');
 const fs = require('fs');
 const {getActionPaths, createActionPaths} = require('../src/action_paths');
 const { checkoutRuntimes, configureRuntimes, buildRuntimes } = require('../src/setup-action');
-const { mkdirP, run, capture } = require('../src/utils');
+const { mkdirP, run, capture, handleErrors } = require('../src/utils');
 
+jest.setTimeout(100000);
 
 function setup(name, workspace) {
     if (!fs.existsSync(workspace)) {
@@ -34,13 +35,17 @@ function tear_down(workspace) {
     }
 }
 
-
-test('test checkout ', () => {
-    workspace = '/tmp/t2';
-    setup('test-run', workspace);
-    const action_paths = checkoutRuntimes('my_name');
-    console.log(action_paths);
-    console.log('Cool');
-    tear_down(workspace);
+beforeEach(() => {
+    setup('test-run', '/tmp/test-workspace');
 })
 
+afterEach(() => {
+    tear_down('/tmp/test-workspace');
+})
+
+
+
+
+test('test checkout paths ',  () => {
+   return expect(checkoutRuntimes('my_name')).resolves.toBeDefined();
+})

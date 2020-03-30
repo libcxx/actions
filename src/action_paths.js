@@ -27,27 +27,27 @@ function getActionPathsForConfigUnchecked(config_name, root_path) {
   };
 }
 
-
- function createActionPathsForConfig(config_name, root_path) {
+function createActionPathsForConfig(config_name, root_path) {
   core.startGroup('create-action-paths');
   const action_paths = getActionPathsForConfigUnchecked(config_name, root_path);
   Object.entries(action_paths).forEach((entry) => {
-    let key = entry[0];
-    let val = entry[1];
-    if (fs.existsSync(val) && key != 'source') {
-      var basename = path.basename(val);
-      var path_for = path.basename(path.dirname(val));
-      core.setFailed(`${path_for} path for config ${basename} already exist!`);
-      throw Error('Failed to do stuff');
-    } else if (!fs.existsSync(val)) {
-      core.info(`Creating directory ${val}`);
-      mkdirP(val);
-    }
+      let key = entry[0];
+      let val = entry[1];
+      if (fs.existsSync(val) && key != 'source') {
+        var basename = path.basename(val);
+        var path_for = path.basename(path.dirname(val));
+        //core.setFailed(`${path_for} path for config ${basename} already exist!`);
+        //throw Error('The patch already exists');
+      } else if (!fs.existsSync(val)) {
+        core.info(`Creating directory ${val}`);
+        mkdirP(val);
+      }
   });
+  return action_paths;
 
-  return  action_paths;
 }
- function getActionPathsForConfig(config_name, root_path) {
+
+function getActionPathsForConfig(config_name, root_path) {
   const action_paths = getActionPathsForConfigUnchecked(config_name, root_path);
   action_paths.values().forEach(val => {
     if (!fs.existsSync(val)) {

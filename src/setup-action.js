@@ -14,21 +14,21 @@ const artifactOptions = {
 const artifactName = "my-artifact";
 
 
-function checkoutRuntimes() {
-  try {
+async function checkoutRuntimes() {
     var out_path = core.getInput('path');
-    const action_paths = createActionPaths(core.getInput('name'), out_path);
-    checkoutRepoShallow(core.getInput('repository'), core.getInput('ref'), action_paths.source);
-    core.setOutput('sha', getRevisionAtHead(action_paths.source));
-    core.setOutput('artifacts', action_paths.artifacts);
-    core.setOutput('install', action_paths.install);
-    core.setOutput('build', action_paths.build);
-    core.setOutput('source', action_paths.source);
-    return action_paths;
-  } catch (error) {
-    core.setFailed(error.message);
-    throw error;
-  }
+  const action_paths = await createActionPaths(core.getInput('name'), out_path);
+  console.log(action_paths);
+  return await checkoutRepoShallow(core.getInput('repository'), core.getInput('ref'), action_paths.source)
+    .then(async () => {
+      let sha = await getRevisionAtHead(action_paths.source);
+      core.setOutput('sha', sha);
+      core.setOutput('artifacts', action_paths.artifacts);
+      core.setOutput('install', action_paths.install);
+      core.setOutput('build', action_paths.build);
+      core.setOutput('source', action_paths.source);
+      return action_paths;
+    });
+
 }
 
 function getRuntimeList() {
@@ -49,7 +49,7 @@ function getLLVMProjectsCMakeOption() {
   return `"-DLLVM_ENABLE_PROJECTS=${joined_rt}"`
 }
 
-function configureRuntimes(action_paths) {
+async function configureRuntimes(action_paths) {
   let myOutput = '';
   let myError = '';
 
@@ -73,18 +73,16 @@ function configureRuntimes(action_paths) {
 
   const options = {};
   options.cwd = action_paths.build;
-  exec('cmake', args, options);
+  return run('cmake', args, options);
 }
 
 function buildRuntimes(action_paths) {
   core.startGroup('building-runtimes');
-
   let args = ['-v'];
   args.push(getRuntimeList().map(rt => { return '/'.join('projects', rt, 'all')}));
   const options = {};
   options.cwd = action_paths.build;
-  exec('ninja', args, options)
-  core.endGroup();
+  return run('ninja', args, options).finally(() => { core.endGroup(); });
 }
 
 module.exports = {checkoutRuntimes, configureRuntimes, buildRuntimes};
