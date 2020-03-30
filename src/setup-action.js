@@ -5,6 +5,7 @@ const {checkoutRepoShallow, getRevisionAtHead} = require('../src/git_utils');
 const {getActionPaths, createActionPaths} = require('../src/action_paths');
 const xunitViewer = require('xunit-viewer');
 const artifact = require('@actions/artifact');
+const path = require('path');
 const artifactClient = artifact.create();
 
 const rootDirectory = '.'; // Also possible to use __dirname
@@ -47,7 +48,7 @@ async function configureRuntimes(action_paths) {
     `-DCMAKE_INSTALL_PREFIX=${action_paths.install}`,
     `-DCMAKE_C_COMPILER=${core.getInput('cc')}`,
     `-DCMAKE_CXX_COMPILER=${core.getInput('cxx')}`,
-    `"-DLLVM_ENABLE_PROJECTS=${';'.join(getRuntimeList())}"`,
+    `"-DLLVM_ENABLE_PROJECTS=${getRuntimeList().join(';')}"`,
     `-DLIBCXX_CXX_ABI=${core.getInput('cxxabi')}`,
     ];
   const extra_cmake_args = core.getInput('cmake_args');
@@ -70,7 +71,7 @@ async function configureRuntimes(action_paths) {
 async function buildRuntimes(action_paths) {
   core.startGroup('building-runtimes');
   let args = ['-v'];
-  args.push(getRuntimeList().map(rt => { return '/'.join('projects', rt, 'all')}));
+  args.push(getRuntimeList().map(rt => { return path.join('projects', rt, 'all')}));
   const options = {};
   options.cwd = action_paths.build;
   let exitCode = await run('ninja', args, options);

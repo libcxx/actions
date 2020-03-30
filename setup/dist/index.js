@@ -11694,6 +11694,7 @@ const {checkoutRepoShallow, getRevisionAtHead} = __webpack_require__(774);
 const {getActionPaths, createActionPaths} = __webpack_require__(907);
 const xunitViewer = __webpack_require__(579);
 const artifact = __webpack_require__(312);
+const path = __webpack_require__(277);
 const artifactClient = artifact.create();
 
 const rootDirectory = '.'; // Also possible to use __dirname
@@ -11736,7 +11737,7 @@ async function configureRuntimes(action_paths) {
     `-DCMAKE_INSTALL_PREFIX=${action_paths.install}`,
     `-DCMAKE_C_COMPILER=${core.getInput('cc')}`,
     `-DCMAKE_CXX_COMPILER=${core.getInput('cxx')}`,
-    `"-DLLVM_ENABLE_PROJECTS=${';'.join(getRuntimeList())}"`,
+    `"-DLLVM_ENABLE_PROJECTS=${getRuntimeList().join(';')}"`,
     `-DLIBCXX_CXX_ABI=${core.getInput('cxxabi')}`,
     ];
   const extra_cmake_args = core.getInput('cmake_args');
@@ -11759,7 +11760,7 @@ async function configureRuntimes(action_paths) {
 async function buildRuntimes(action_paths) {
   core.startGroup('building-runtimes');
   let args = ['-v'];
-  args.push(getRuntimeList().map(rt => { return '/'.join('projects', rt, 'all')}));
+  args.push(getRuntimeList().map(rt => { return path.join('projects', rt, 'all')}));
   const options = {};
   options.cwd = action_paths.build;
   let exitCode = await run('ninja', args, options);
