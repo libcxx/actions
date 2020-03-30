@@ -11270,7 +11270,7 @@ async function checkoutRuntimes() {
     var out_path = core.getInput('path');
   const action_paths = await createActionPaths(core.getInput('name'), out_path);
   console.log(action_paths);
-  return await checkoutRepoShallow(core.getInput('repository'), core.getInput('ref'), action_paths.source)
+  let l = await checkoutRepoShallow(core.getInput('repository'), core.getInput('ref'), action_paths.source)
     .then(async () => {
       let sha = await getRevisionAtHead(action_paths.source);
       core.setOutput('sha', sha);
