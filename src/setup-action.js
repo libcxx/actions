@@ -73,7 +73,7 @@ async function configureRuntimes(action_paths) {
 async function buildRuntimes(action_paths) {
   core.startGroup('building-runtimes');
   let args = ['-v'];
-  args.push(getRuntimeList().map(rt => { return path.join('projects', rt, 'all')}));
+  getRuntimeList().map(rt => { return path.join('projects', rt, 'all')}).forEach(rt => { args.push(rt); });
   const options = {};
   options.cwd = action_paths.build;
   let exitCode = await run('ninja', args, options);
