@@ -50,11 +50,12 @@ function getLLVMProjectsCMakeOption() {
 }
 
 async function configureRuntimes(action_paths) {
+  core.startGroup('configure');
   let myOutput = '';
   let myError = '';
 
   let args = ['-GNinja',
-    `-DCMAKE_INSTALL_PREFIX=${action_paths.install}`
+    `-DCMAKE_INSTALL_PREFIX=${action_paths.install}`,
     `-DCMAKE_C_COMPILER=${core.getInput('cc')}`,
     `-DCMAKE_CXX_COMPILER=${core.getInput('cxx')}`,
     `"-DLLVM_ENABLE_RUNTIMES=${';'.join(getRuntimeList())}"`,
@@ -73,6 +74,7 @@ async function configureRuntimes(action_paths) {
   const options = {};
   options.cwd = action_paths.build;
   let exitCode = await run('cmake', args, options);
+  core.endGroup();
   return exitCode;
 }
 
