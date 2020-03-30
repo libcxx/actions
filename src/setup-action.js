@@ -32,7 +32,7 @@ async function checkoutRuntimes() {
 function getRuntimeList() {
   const parts = core.getInput('runtimes').split(' ').map(p => { return p.trim(); });
   parts.forEach(runtime => {
-    if (runtime != 'libcxx' && runtime != 'libcxxrt' && runtime != 'libunwind')
+    if (runtime != 'libcxx' && runtime != 'libcxxabi' && runtime != 'libunwind')
       throw Error("Invalid runtime name: " + runtime);
   });
   return parts;
