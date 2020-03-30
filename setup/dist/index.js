@@ -11707,16 +11707,15 @@ async function checkoutRuntimes() {
   var out_path = core.getInput('path');
   const action_paths = await createActionPaths(core.getInput('name'), out_path);
   console.log(action_paths);
-  let l = await checkoutRepoShallow(core.getInput('repository'), core.getInput('ref'), action_paths.source)
-    .then(async () => {
-      let sha = await getRevisionAtHead(action_paths.source);
-      core.setOutput('sha', sha);
-      core.setOutput('artifacts', action_paths.artifacts);
-      core.setOutput('install', action_paths.install);
-      core.setOutput('build', action_paths.build);
-      core.setOutput('source', action_paths.source);
-      return action_paths;
-    });
+  await checkoutRepoShallow(core.getInput('repository'),
+                            core.getInput('ref'), action_paths.source);
+  let sha = await getRevisionAtHead(action_paths.source);
+  core.setOutput('sha', sha);
+  core.setOutput('artifacts', action_paths.artifacts);
+  core.setOutput('install', action_paths.install);
+  core.setOutput('build', action_paths.build);
+  core.setOutput('source', action_paths.source);
+  return action_paths;
 
 }
 
@@ -44458,6 +44457,7 @@ const {checkoutRuntimes, configureRuntimes, buildRuntimes} = __webpack_require__
 async function run() {
   try {
     const action_paths = await checkoutRuntimes();
+    console.log(action_paths);
     await configureRuntimes(action_paths);
     await buildRuntimes(action_paths);
   } catch (error) {
@@ -70430,9 +70430,9 @@ async function checkoutRepoShallow(github_repo, ref, output_path) {
   await run('git', ['init'], options);
   await run('git', ['remote', 'add', 'origin', ''.concat('https://github.com/', github_repo)], options);
   await run('git', ['fetch', '--depth=1', 'origin', ref], options);
-  await run('git', ['reset', '--hard', 'FETCH_HEAD'], options);
+  let result = await run('git', ['reset', '--hard', 'FETCH_HEAD'], options);
   core.endGroup();
-  return 0;
+  return result;
 }
 
 function getRevisionAtHead(repo_path) {

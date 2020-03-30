@@ -6,6 +6,7 @@ const {checkoutRuntimes, configureRuntimes, buildRuntimes} = require('../src/set
 async function run() {
   try {
     const action_paths = await checkoutRuntimes();
+    console.log(action_paths);
     await configureRuntimes(action_paths);
     await buildRuntimes(action_paths);
   } catch (error) {

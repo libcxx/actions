@@ -22,9 +22,9 @@ async function checkoutRepoShallow(github_repo, ref, output_path) {
   await run('git', ['init'], options);
   await run('git', ['remote', 'add', 'origin', ''.concat('https://github.com/', github_repo)], options);
   await run('git', ['fetch', '--depth=1', 'origin', ref], options);
-  await run('git', ['reset', '--hard', 'FETCH_HEAD'], options);
+  let result = await run('git', ['reset', '--hard', 'FETCH_HEAD'], options);
   core.endGroup();
-  return 0;
+  return result;
 }
 
 function getRevisionAtHead(repo_path) {
