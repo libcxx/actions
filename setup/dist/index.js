@@ -11695,6 +11695,8 @@ const {getActionPaths, createActionPaths} = __webpack_require__(907);
 const xunitViewer = __webpack_require__(579);
 const artifact = __webpack_require__(312);
 const path = __webpack_require__(277);
+const { mkdirP, run, capture} = __webpack_require__(983);
+
 const artifactClient = artifact.create();
 
 const rootDirectory = '.'; // Also possible to use __dirname

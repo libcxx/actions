@@ -6,6 +6,8 @@ const {getActionPaths, createActionPaths} = require('../src/action_paths');
 const xunitViewer = require('xunit-viewer');
 const artifact = require('@actions/artifact');
 const path = require('path');
+const { mkdirP, run, capture} = require('./utils');
+
 const artifactClient = artifact.create();
 
 const rootDirectory = '.'; // Also possible to use __dirname
