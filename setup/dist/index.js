@@ -11696,6 +11696,7 @@ const xunitViewer = __webpack_require__(579);
 const artifact = __webpack_require__(312);
 const path = __webpack_require__(277);
 const fs = __webpack_require__(747);
+const io = __webpack_require__(82);
 const { mkdirP, run, capture } = __webpack_require__(983);
 
 const artifactClient = artifact.create();
