@@ -11716,25 +11716,16 @@ async function checkoutRuntimes() {
   core.setOutput('build', action_paths.build);
   core.setOutput('source', action_paths.source);
   return action_paths;
-
 }
 
 function getRuntimeList() {
-  const parts = core.getInput('runtimes').split(' ');
+  const parts = core.getInput('runtimes').split(' ').map(p => { p.trim(); });
   parts.forEach(runtime => {
+
     if (runtime != 'libcxx' && runtime != 'libcxxrt' && runtime != 'libunwind')
       throw Error("Invalid runtime name: " + runtime);
   });
   return parts;
-}
-
-function getNeededRuntimeTargets() {
-  return getRuntimeList().map(rt => `projects/${rt}/all`);
-}
-
-function getLLVMProjectsCMakeOption() {
-  const joined_rt = ';'.join(getRuntimeList());
-  return `"-DLLVM_ENABLE_PROJECTS=${joined_rt}"`
 }
 
 async function configureRuntimes(action_paths) {
@@ -11746,7 +11737,7 @@ async function configureRuntimes(action_paths) {
     `-DCMAKE_INSTALL_PREFIX=${action_paths.install}`,
     `-DCMAKE_C_COMPILER=${core.getInput('cc')}`,
     `-DCMAKE_CXX_COMPILER=${core.getInput('cxx')}`,
-    `"-DLLVM_ENABLE_RUNTIMES=${';'.join(getRuntimeList())}"`,
+    `"-DLLVM_ENABLE_PROJECTS=${';'.join(getRuntimeList())}"`,
     `-DLIBCXX_CXX_ABI=${core.getInput('cxxabi')}`,
     ];
   const extra_cmake_args = core.getInput('cmake_args');
