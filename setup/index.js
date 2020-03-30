@@ -3,9 +3,9 @@ const {checkoutRuntimes, configureRuntimes, buildRuntimes} = require('../src/set
 // most @actions toolkit packages have async methods
 async function run() {
   try {
-    const action_paths = checkoutRuntimes();
-    configureRuntimes(action_paths);
-    buildRuntimes(action_paths);
+    const action_paths = await checkoutRuntimes();
+    await configureRuntimes(action_paths);
+    await buildRuntimes(action_paths);
   } catch (error) {
     core.setFailed(error.message);
     return;
@@ -19,4 +19,4 @@ async function run() {
     //    files, rootDirectory, artifactOptions);
 }
 
-//run()
+run()

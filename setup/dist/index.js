@@ -11305,7 +11305,6 @@ async function configureRuntimes(action_paths) {
   let myOutput = '';
   let myError = '';
 
-
   let args = ['-GNinja',
     `-DCMAKE_INSTALL_PREFIX=${action_paths.install}`
     `-DCMAKE_C_COMPILER=${core.getInput('cc')}`,
@@ -11325,16 +11324,19 @@ async function configureRuntimes(action_paths) {
 
   const options = {};
   options.cwd = action_paths.build;
-  return run('cmake', args, options);
+  let exitCode = await run('cmake', args, options);
+  return exitCode;
 }
 
-function buildRuntimes(action_paths) {
+async function buildRuntimes(action_paths) {
   core.startGroup('building-runtimes');
   let args = ['-v'];
   args.push(getRuntimeList().map(rt => { return '/'.join('projects', rt, 'all')}));
   const options = {};
   options.cwd = action_paths.build;
-  return run('ninja', args, options).finally(() => { core.endGroup(); });
+  let exitCode = await run('ninja', args, options);
+  core.endGroup();
+  return exitCode;
 }
 
 module.exports = {checkoutRuntimes, configureRuntimes, buildRuntimes};
@@ -44014,9 +44016,9 @@ const {checkoutRuntimes, configureRuntimes, buildRuntimes} = __webpack_require__
 // most @actions toolkit packages have async methods
 async function run() {
   try {
-    const action_paths = checkoutRuntimes();
-    configureRuntimes(action_paths);
-    buildRuntimes(action_paths);
+    const action_paths = await checkoutRuntimes();
+    await configureRuntimes(action_paths);
+    await buildRuntimes(action_paths);
   } catch (error) {
     core.setFailed(error.message);
     return;
@@ -44030,7 +44032,7 @@ async function run() {
     //    files, rootDirectory, artifactOptions);
 }
 
-//run()
+run()
 
 
 /***/ }),
