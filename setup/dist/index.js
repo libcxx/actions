@@ -756,526 +756,204 @@ exports.PersonalAccessTokenCredentialHandler = PersonalAccessTokenCredentialHand
 /* 30 */,
 /* 31 */,
 /* 32 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
-
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var _a;
+Object.defineProperty(exports, "__esModule", { value: true });
+const assert_1 = __webpack_require__(357);
 const fs = __webpack_require__(747);
-const sysPath = __webpack_require__(277);
-const { promisify } = __webpack_require__(669);
-
-let fsevents;
-try {
-  fsevents = __webpack_require__(666);
-} catch (error) {
-  if (process.env.CHOKIDAR_PRINT_FSEVENTS_REQUIRE_ERROR) console.error(error);
-}
-
-if (fsevents) {
-  // TODO: real check
-  const mtch = process.version.match(/v(\d+)\.(\d+)/);
-  if (mtch && mtch[1] && mtch[2]) {
-    const maj = Number.parseInt(mtch[1], 10);
-    const min = Number.parseInt(mtch[2], 10);
-    if (maj === 8 && min < 16) {
-      fsevents = undefined;
-    }
-  }
-}
-
-const {
-  EV_ADD,
-  EV_CHANGE,
-  EV_ADD_DIR,
-  EV_UNLINK,
-  EV_ERROR,
-  STR_DATA,
-  STR_END,
-  FSEVENT_CREATED,
-  FSEVENT_MODIFIED,
-  FSEVENT_DELETED,
-  FSEVENT_MOVED,
-  // FSEVENT_CLONED,
-  FSEVENT_UNKNOWN,
-  FSEVENT_TYPE_DIRECTORY,
-  FSEVENT_TYPE_SYMLINK,
-
-  ROOT_GLOBSTAR,
-  DIR_SUFFIX,
-  DOT_SLASH,
-  FUNCTION_TYPE,
-  EMPTY_FN,
-  IDENTITY_FN
-} = __webpack_require__(777);
-const FS_MODE_READ = 'r';
-
-const Depth = (value) => isNaN(value) ? {} : {depth: value};
-
-const stat = promisify(fs.stat);
-const open = promisify(fs.open);
-const close = promisify(fs.close);
-const lstat = promisify(fs.lstat);
-const realpath = promisify(fs.realpath);
-
-const statMethods = { stat, lstat };
-
-/**
- * @typedef {String} Path
- */
-
-/**
- * @typedef {Object} FsEventsWatchContainer
- * @property {Set<Function>} listeners
- * @property {Function} rawEmitter
- * @property {{stop: Function}} watcher
- */
-
-// fsevents instance helper functions
-/**
- * Object to hold per-process fsevents instances (may be shared across chokidar FSWatcher instances)
- * @type {Map<Path,FsEventsWatchContainer>}
- */
-const FSEventsWatchers = new Map();
-
-// Threshold of duplicate path prefixes at which to start
-// consolidating going forward
-const consolidateThreshhold = 10;
-
-const wrongEventFlags = new Set([
-  69888, 70400, 71424, 72704, 73472, 131328, 131840, 262912
-]);
-
-/**
- * Instantiates the fsevents interface
- * @param {Path} path path to be watched
- * @param {Function} callback called when fsevents is bound and ready
- * @returns {{stop: Function}} new fsevents instance
- */
-const createFSEventsInstance = (path, callback) => {
-  const stop = fsevents.watch(path, callback);
-  return {stop};
-};
-
-/**
- * Instantiates the fsevents interface or binds listeners to an existing one covering
- * the same file tree.
- * @param {Path} path           - to be watched
- * @param {Path} realPath       - real path for symlinks
- * @param {Function} listener   - called when fsevents emits events
- * @param {Function} rawEmitter - passes data to listeners of the 'raw' event
- * @returns {Function} closer
- */
-function setFSEventsListener(path, realPath, listener, rawEmitter, fsw) {
-  let watchPath = sysPath.extname(path) ? sysPath.dirname(path) : path;
-  const parentPath = sysPath.dirname(watchPath);
-  let cont = FSEventsWatchers.get(watchPath);
-
-  // If we've accumulated a substantial number of paths that
-  // could have been consolidated by watching one directory
-  // above the current one, create a watcher on the parent
-  // path instead, so that we do consolidate going forward.
-  if (couldConsolidate(parentPath)) {
-    watchPath = parentPath;
-  }
-
-  const resolvedPath = sysPath.resolve(path);
-  const hasSymlink = resolvedPath !== realPath;
-
-  const filteredListener = (fullPath, flags, info) => {
-    if (hasSymlink) fullPath = fullPath.replace(realPath, resolvedPath);
-    if (
-      fullPath === resolvedPath ||
-      !fullPath.indexOf(resolvedPath + sysPath.sep)
-    ) listener(fullPath, flags, info);
-  };
-
-  // check if there is already a watcher on a parent path
-  // modifies `watchPath` to the parent path when it finds a match
-  let watchedParent = false;
-  for (const watchedPath of FSEventsWatchers.keys()) {
-    if (realPath.indexOf(sysPath.resolve(watchedPath) + sysPath.sep) === 0) {
-      watchPath = watchedPath;
-      cont = FSEventsWatchers.get(watchPath);
-      watchedParent = true;
-      break;
-    }
-  }
-
-  if (cont || watchedParent) {
-    cont.listeners.add(filteredListener);
-  } else {
-    cont = {
-      listeners: new Set([filteredListener]),
-      rawEmitter,
-      watcher: createFSEventsInstance(watchPath, (fullPath, flags) => {
-        if (fsw.closed) return;
-        const info = fsevents.getInfo(fullPath, flags);
-        cont.listeners.forEach(list => {
-          list(fullPath, flags, info);
-        });
-
-        cont.rawEmitter(info.event, fullPath, info);
-      })
-    };
-    FSEventsWatchers.set(watchPath, cont);
-  }
-
-  // removes this instance's listeners and closes the underlying fsevents
-  // instance if there are no more listeners left
-  return () => {
-    const lst = cont.listeners;
-
-    lst.delete(filteredListener);
-    if (!lst.size) {
-      FSEventsWatchers.delete(watchPath);
-      if (cont.watcher) return cont.watcher.stop().then(() => {
-        cont.rawEmitter = cont.watcher = undefined;
-        Object.freeze(cont);
-      });
-    }
-  };
-}
-
-// Decide whether or not we should start a new higher-level
-// parent watcher
-const couldConsolidate = (path) => {
-  let count = 0;
-  for (const watchPath of FSEventsWatchers.keys()) {
-    if (watchPath.indexOf(path) === 0) {
-      count++;
-      if (count >= consolidateThreshhold) {
-        return true;
-      }
-    }
-  }
-
-  return false;
-};
-
-// returns boolean indicating whether fsevents can be used
-const canUse = () => fsevents && FSEventsWatchers.size < 128;
-
-// determines subdirectory traversal levels from root to path
-const calcDepth = (path, root) => {
-  let i = 0;
-  while (!path.indexOf(root) && (path = sysPath.dirname(path)) !== root) i++;
-  return i;
-};
-
-/**
- * @mixin
- */
-class FsEventsHandler {
-
-/**
- * @param {import('../index').FSWatcher} fsw
- */
-constructor(fsw) {
-  this.fsw = fsw;
-}
-checkIgnored(path, stats) {
-  const ipaths = this.fsw._ignoredPaths;
-  if (this.fsw._isIgnored(path, stats)) {
-    ipaths.add(path);
-    if (stats && stats.isDirectory()) {
-      ipaths.add(path + ROOT_GLOBSTAR);
-    }
-    return true;
-  }
-
-  ipaths.delete(path);
-  ipaths.delete(path + ROOT_GLOBSTAR);
-}
-
-addOrChange(path, fullPath, realPath, parent, watchedDir, item, info, opts) {
-  const event = watchedDir.has(item) ? EV_CHANGE : EV_ADD;
-  this.handleEvent(event, path, fullPath, realPath, parent, watchedDir, item, info, opts);
-}
-
-async checkFd(path, fullPath, realPath, parent, watchedDir, item, info, opts) {
-  try {
-    const fd = await open(path, FS_MODE_READ);
-    if (this.fsw.closed) return;
-    await close(fd);
-    if (this.fsw.closed) return;
-    this.addOrChange(path, fullPath, realPath, parent, watchedDir, item, info, opts);
-  } catch (error) {
-    if (error.code === 'EACCES') {
-      this.addOrChange(path, fullPath, realPath, parent, watchedDir, item, info, opts);
-    } else {
-      this.handleEvent(EV_UNLINK, path, fullPath, realPath, parent, watchedDir, item, info, opts);
-    }
-  }
-}
-
-handleEvent(event, path, fullPath, realPath, parent, watchedDir, item, info, opts) {
-  if (this.fsw.closed || this.checkIgnored(path)) return;
-
-  if (event === EV_UNLINK) {
-    // suppress unlink events on never before seen files
-    if (info.type === FSEVENT_TYPE_DIRECTORY || watchedDir.has(item)) {
-      this.fsw._remove(parent, item);
-    }
-  } else {
-    if (event === EV_ADD) {
-      // track new directories
-      if (info.type === FSEVENT_TYPE_DIRECTORY) this.fsw._getWatchedDir(path);
-
-      if (info.type === FSEVENT_TYPE_SYMLINK && opts.followSymlinks) {
-        // push symlinks back to the top of the stack to get handled
-        const curDepth = opts.depth === undefined ?
-          undefined : calcDepth(fullPath, realPath) + 1;
-        return this._addToFsEvents(path, false, true, curDepth);
-      }
-
-      // track new paths
-      // (other than symlinks being followed, which will be tracked soon)
-      this.fsw._getWatchedDir(parent).add(item);
-    }
-    /**
-     * @type {'add'|'addDir'|'unlink'|'unlinkDir'}
-     */
-    const eventName = info.type === FSEVENT_TYPE_DIRECTORY ? event + DIR_SUFFIX : event;
-    this.fsw._emit(eventName, path);
-    if (eventName === EV_ADD_DIR) this._addToFsEvents(path, false, true);
-  }
-}
-
-/**
- * Handle symlinks encountered during directory scan
- * @param {String} watchPath  - file/dir path to be watched with fsevents
- * @param {String} realPath   - real path (in case of symlinks)
- * @param {Function} transform  - path transformer
- * @param {Function} globFilter - path filter in case a glob pattern was provided
- * @returns {Function} closer for the watcher instance
-*/
-_watchWithFsEvents(watchPath, realPath, transform, globFilter) {
-  if (this.fsw.closed) return;
-  if (this.fsw._isIgnored(watchPath)) return;
-  const opts = this.fsw.options;
-  const watchCallback = async (fullPath, flags, info) => {
-    if (this.fsw.closed) return;
-    if (
-      opts.depth !== undefined &&
-      calcDepth(fullPath, realPath) > opts.depth
-    ) return;
-    const path = transform(sysPath.join(
-      watchPath, sysPath.relative(watchPath, fullPath)
-    ));
-    if (globFilter && !globFilter(path)) return;
-    // ensure directories are tracked
-    const parent = sysPath.dirname(path);
-    const item = sysPath.basename(path);
-    const watchedDir = this.fsw._getWatchedDir(
-      info.type === FSEVENT_TYPE_DIRECTORY ? path : parent
-    );
-
-    // correct for wrong events emitted
-    if (wrongEventFlags.has(flags) || info.event === FSEVENT_UNKNOWN) {
-      if (typeof opts.ignored === FUNCTION_TYPE) {
-        let stats;
+const path = __webpack_require__(277);
+_a = fs.promises, exports.chmod = _a.chmod, exports.copyFile = _a.copyFile, exports.lstat = _a.lstat, exports.mkdir = _a.mkdir, exports.readdir = _a.readdir, exports.readlink = _a.readlink, exports.rename = _a.rename, exports.rmdir = _a.rmdir, exports.stat = _a.stat, exports.symlink = _a.symlink, exports.unlink = _a.unlink;
+exports.IS_WINDOWS = process.platform === 'win32';
+function exists(fsPath) {
+    return __awaiter(this, void 0, void 0, function* () {
         try {
-          stats = await stat(path);
-        } catch (error) {}
-        if (this.fsw.closed) return;
-        if (this.checkIgnored(path, stats)) return;
-        if (stats) {
-          this.addOrChange(path, fullPath, realPath, parent, watchedDir, item, info, opts);
-        } else {
-          this.handleEvent(EV_UNLINK, path, fullPath, realPath, parent, watchedDir, item, info, opts);
+            yield exports.stat(fsPath);
         }
-      } else {
-        this.checkFd(path, fullPath, realPath, parent, watchedDir, item, info, opts);
-      }
-    } else {
-      switch (info.event) {
-      case FSEVENT_CREATED:
-      case FSEVENT_MODIFIED:
-        return this.addOrChange(path, fullPath, realPath, parent, watchedDir, item, info, opts);
-      case FSEVENT_DELETED:
-      case FSEVENT_MOVED:
-        return this.checkFd(path, fullPath, realPath, parent, watchedDir, item, info, opts);
-      }
-    }
-  };
-
-  const closer = setFSEventsListener(
-    watchPath,
-    realPath,
-    watchCallback,
-    this.fsw._emitRaw,
-    this.fsw
-  );
-
-  this.fsw._emitReady();
-  return closer;
+        catch (err) {
+            if (err.code === 'ENOENT') {
+                return false;
+            }
+            throw err;
+        }
+        return true;
+    });
 }
-
+exports.exists = exists;
+function isDirectory(fsPath, useStat = false) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const stats = useStat ? yield exports.stat(fsPath) : yield exports.lstat(fsPath);
+        return stats.isDirectory();
+    });
+}
+exports.isDirectory = isDirectory;
 /**
- * Handle symlinks encountered during directory scan
- * @param {String} linkPath path to symlink
- * @param {String} fullPath absolute path to the symlink
- * @param {Function} transform pre-existing path transformer
- * @param {Number} curDepth level of subdirectories traversed to where symlink is
- * @returns {Promise<void>}
+ * On OSX/Linux, true if path starts with '/'. On Windows, true for paths like:
+ * \, \hello, \\hello\share, C:, and C:\hello (and corresponding alternate separator cases).
  */
-async _handleFsEventsSymlink(linkPath, fullPath, transform, curDepth) {
-  // don't follow the same symlink more than once
-  if (this.fsw.closed || this.fsw._symlinkPaths.has(fullPath)) return;
-
-  this.fsw._symlinkPaths.set(fullPath, true);
-  this.fsw._incrReadyCount();
-
-  try {
-    const linkTarget = await realpath(linkPath);
-    if (this.fsw.closed) return;
-    if (this.fsw._isIgnored(linkTarget)) {
-      return this.fsw._emitReady();
+function isRooted(p) {
+    p = normalizeSeparators(p);
+    if (!p) {
+        throw new Error('isRooted() parameter "p" cannot be empty');
     }
-
-    this.fsw._incrReadyCount();
-
-    // add the linkTarget for watching with a wrapper for transform
-    // that causes emitted paths to incorporate the link's path
-    this._addToFsEvents(linkTarget || linkPath, (path) => {
-      let aliasedPath = linkPath;
-      if (linkTarget && linkTarget !== DOT_SLASH) {
-        aliasedPath = path.replace(linkTarget, linkPath);
-      } else if (path !== DOT_SLASH) {
-        aliasedPath = sysPath.join(linkPath, path);
-      }
-      return transform(aliasedPath);
-    }, false, curDepth);
-  } catch(error) {
-    if (this.fsw._handleError(error)) {
-      return this.fsw._emitReady();
+    if (exports.IS_WINDOWS) {
+        return (p.startsWith('\\') || /^[A-Z]:/i.test(p) // e.g. \ or \hello or \\hello
+        ); // e.g. C: or C:\hello
     }
-  }
+    return p.startsWith('/');
 }
-
+exports.isRooted = isRooted;
 /**
+ * Recursively create a directory at `fsPath`.
  *
- * @param {Path} newPath
- * @param {fs.Stats} stats
+ * This implementation is optimistic, meaning it attempts to create the full
+ * path first, and backs up the path stack from there.
+ *
+ * @param fsPath The path to create
+ * @param maxDepth The maximum recursion depth
+ * @param depth The current recursion depth
  */
-emitAdd(newPath, stats, processPath, opts, forceAdd) {
-  const pp = processPath(newPath);
-  const isDir = stats.isDirectory();
-  const dirObj = this.fsw._getWatchedDir(sysPath.dirname(pp));
-  const base = sysPath.basename(pp);
-
-  // ensure empty dirs get tracked
-  if (isDir) this.fsw._getWatchedDir(pp);
-  if (dirObj.has(base)) return;
-  dirObj.add(base);
-
-  if (!opts.ignoreInitial || forceAdd === true) {
-    this.fsw._emit(isDir ? EV_ADD_DIR : EV_ADD, pp, stats);
-  }
+function mkdirP(fsPath, maxDepth = 1000, depth = 1) {
+    return __awaiter(this, void 0, void 0, function* () {
+        assert_1.ok(fsPath, 'a path argument must be provided');
+        fsPath = path.resolve(fsPath);
+        if (depth >= maxDepth)
+            return exports.mkdir(fsPath);
+        try {
+            yield exports.mkdir(fsPath);
+            return;
+        }
+        catch (err) {
+            switch (err.code) {
+                case 'ENOENT': {
+                    yield mkdirP(path.dirname(fsPath), maxDepth, depth + 1);
+                    yield exports.mkdir(fsPath);
+                    return;
+                }
+                default: {
+                    let stats;
+                    try {
+                        stats = yield exports.stat(fsPath);
+                    }
+                    catch (err2) {
+                        throw err;
+                    }
+                    if (!stats.isDirectory())
+                        throw err;
+                }
+            }
+        }
+    });
 }
-
-initWatch(realPath, path, wh, processPath) {
-  if (this.fsw.closed) return;
-  const closer = this._watchWithFsEvents(
-    wh.watchPath,
-    sysPath.resolve(realPath || wh.watchPath),
-    processPath,
-    wh.globFilter
-  );
-  this.fsw._addPathCloser(path, closer);
-}
-
+exports.mkdirP = mkdirP;
 /**
- * Handle added path with fsevents
- * @param {String} path file/dir path or glob pattern
- * @param {Function|Boolean=} transform converts working path to what the user expects
- * @param {Boolean=} forceAdd ensure add is emitted
- * @param {Number=} priorDepth Level of subdirectories already traversed.
- * @returns {Promise<void>}
+ * Best effort attempt to determine whether a file exists and is executable.
+ * @param filePath    file path to check
+ * @param extensions  additional file extensions to try
+ * @return if file exists and is executable, returns the file path. otherwise empty string.
  */
-async _addToFsEvents(path, transform, forceAdd, priorDepth) {
-  if (this.fsw.closed) {
-    return;
-  }
-  const opts = this.fsw.options;
-  const processPath = typeof transform === FUNCTION_TYPE ? transform : IDENTITY_FN;
-
-  const wh = this.fsw._getWatchHelpers(path);
-
-  // evaluate what is at the path we're being asked to watch
-  try {
-    const stats = await statMethods[wh.statMethod](wh.watchPath);
-    if (this.fsw.closed) return;
-    if (this.fsw._isIgnored(wh.watchPath, stats)) {
-      throw null;
-    }
-    if (stats.isDirectory()) {
-      // emit addDir unless this is a glob parent
-      if (!wh.globFilter) this.emitAdd(processPath(path), stats, processPath, opts, forceAdd);
-
-      // don't recurse further if it would exceed depth setting
-      if (priorDepth && priorDepth > opts.depth) return;
-
-      // scan the contents of the dir
-      this.fsw._readdirp(wh.watchPath, {
-        fileFilter: entry => wh.filterPath(entry),
-        directoryFilter: entry => wh.filterDir(entry),
-        ...Depth(opts.depth - (priorDepth || 0))
-      }).on(STR_DATA, (entry) => {
-        // need to check filterPath on dirs b/c filterDir is less restrictive
-        if (this.fsw.closed) {
-          return;
+function tryGetExecutablePath(filePath, extensions) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let stats = undefined;
+        try {
+            // test file exists
+            stats = yield exports.stat(filePath);
         }
-        if (entry.stats.isDirectory() && !wh.filterPath(entry)) return;
-
-        const joinedPath = sysPath.join(wh.watchPath, entry.path);
-        const {fullPath} = entry;
-
-        if (wh.followSymlinks && entry.stats.isSymbolicLink()) {
-          // preserve the current depth here since it can't be derived from
-          // real paths past the symlink
-          const curDepth = opts.depth === undefined ?
-            undefined : calcDepth(joinedPath, sysPath.resolve(wh.watchPath)) + 1;
-
-          this._handleFsEventsSymlink(joinedPath, fullPath, processPath, curDepth);
-        } else {
-          this.emitAdd(joinedPath, entry.stats, processPath, opts, forceAdd);
+        catch (err) {
+            if (err.code !== 'ENOENT') {
+                // eslint-disable-next-line no-console
+                console.log(`Unexpected error attempting to determine if executable file exists '${filePath}': ${err}`);
+            }
         }
-      }).on(EV_ERROR, EMPTY_FN).on(STR_END, () => {
-        this.fsw._emitReady();
-      });
-    } else {
-      this.emitAdd(wh.watchPath, stats, processPath, opts, forceAdd);
-      this.fsw._emitReady();
-    }
-  } catch (error) {
-    if (!error || this.fsw._handleError(error)) {
-      // TODO: Strange thing: "should not choke on an ignored watch path" will be failed without 2 ready calls -__-
-      this.fsw._emitReady();
-      this.fsw._emitReady();
-    }
-  }
-
-  if (opts.persistent && forceAdd !== true) {
-    if (typeof transform === FUNCTION_TYPE) {
-      // realpath has already been resolved
-      this.initWatch(undefined, path, wh, processPath);
-    } else {
-      let realPath;
-      try {
-        realPath = await realpath(wh.watchPath);
-      } catch (e) {}
-      this.initWatch(realPath, path, wh, processPath);
-    }
-  }
+        if (stats && stats.isFile()) {
+            if (exports.IS_WINDOWS) {
+                // on Windows, test for valid extension
+                const upperExt = path.extname(filePath).toUpperCase();
+                if (extensions.some(validExt => validExt.toUpperCase() === upperExt)) {
+                    return filePath;
+                }
+            }
+            else {
+                if (isUnixExecutable(stats)) {
+                    return filePath;
+                }
+            }
+        }
+        // try each extension
+        const originalFilePath = filePath;
+        for (const extension of extensions) {
+            filePath = originalFilePath + extension;
+            stats = undefined;
+            try {
+                stats = yield exports.stat(filePath);
+            }
+            catch (err) {
+                if (err.code !== 'ENOENT') {
+                    // eslint-disable-next-line no-console
+                    console.log(`Unexpected error attempting to determine if executable file exists '${filePath}': ${err}`);
+                }
+            }
+            if (stats && stats.isFile()) {
+                if (exports.IS_WINDOWS) {
+                    // preserve the case of the actual file (since an extension was appended)
+                    try {
+                        const directory = path.dirname(filePath);
+                        const upperName = path.basename(filePath).toUpperCase();
+                        for (const actualName of yield exports.readdir(directory)) {
+                            if (upperName === actualName.toUpperCase()) {
+                                filePath = path.join(directory, actualName);
+                                break;
+                            }
+                        }
+                    }
+                    catch (err) {
+                        // eslint-disable-next-line no-console
+                        console.log(`Unexpected error attempting to determine the actual case of the file '${filePath}': ${err}`);
+                    }
+                    return filePath;
+                }
+                else {
+                    if (isUnixExecutable(stats)) {
+                        return filePath;
+                    }
+                }
+            }
+        }
+        return '';
+    });
 }
-
+exports.tryGetExecutablePath = tryGetExecutablePath;
+function normalizeSeparators(p) {
+    p = p || '';
+    if (exports.IS_WINDOWS) {
+        // convert slashes on Windows
+        p = p.replace(/\//g, '\\');
+        // remove redundant slashes
+        return p.replace(/\\\\+/g, '\\');
+    }
+    // remove redundant slashes
+    return p.replace(/\/\/+/g, '/');
 }
-
-module.exports = FsEventsHandler;
-module.exports.canUse = canUse;
-
+// on Mac/Linux, test the execute bit
+//     R   W  X  R  W X R W X
+//   256 128 64 32 16 8 4 2 1
+function isUnixExecutable(stats) {
+    return ((stats.mode & 1) > 0 ||
+        ((stats.mode & 8) > 0 && stats.gid === process.getgid()) ||
+        ((stats.mode & 64) > 0 && stats.uid === process.getuid()));
+}
+//# sourceMappingURL=io-util.js.map
 
 /***/ }),
 /* 33 */,
@@ -2043,7 +1721,302 @@ module.exports.sync = path => {
 
 /***/ }),
 /* 50 */,
-/* 51 */,
+/* 51 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const childProcess = __webpack_require__(129);
+const path = __webpack_require__(277);
+const util_1 = __webpack_require__(669);
+const ioUtil = __webpack_require__(32);
+const exec = util_1.promisify(childProcess.exec);
+/**
+ * Copies a file or folder.
+ * Based off of shelljs - https://github.com/shelljs/shelljs/blob/9237f66c52e5daa40458f94f9565e18e8132f5a6/src/cp.js
+ *
+ * @param     source    source path
+ * @param     dest      destination path
+ * @param     options   optional. See CopyOptions.
+ */
+function cp(source, dest, options = {}) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { force, recursive } = readCopyOptions(options);
+        const destStat = (yield ioUtil.exists(dest)) ? yield ioUtil.stat(dest) : null;
+        // Dest is an existing file, but not forcing
+        if (destStat && destStat.isFile() && !force) {
+            return;
+        }
+        // If dest is an existing directory, should copy inside.
+        const newDest = destStat && destStat.isDirectory()
+            ? path.join(dest, path.basename(source))
+            : dest;
+        if (!(yield ioUtil.exists(source))) {
+            throw new Error(`no such file or directory: ${source}`);
+        }
+        const sourceStat = yield ioUtil.stat(source);
+        if (sourceStat.isDirectory()) {
+            if (!recursive) {
+                throw new Error(`Failed to copy. ${source} is a directory, but tried to copy without recursive flag.`);
+            }
+            else {
+                yield cpDirRecursive(source, newDest, 0, force);
+            }
+        }
+        else {
+            if (path.relative(source, newDest) === '') {
+                // a file cannot be copied to itself
+                throw new Error(`'${newDest}' and '${source}' are the same file`);
+            }
+            yield copyFile(source, newDest, force);
+        }
+    });
+}
+exports.cp = cp;
+/**
+ * Moves a path.
+ *
+ * @param     source    source path
+ * @param     dest      destination path
+ * @param     options   optional. See MoveOptions.
+ */
+function mv(source, dest, options = {}) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (yield ioUtil.exists(dest)) {
+            let destExists = true;
+            if (yield ioUtil.isDirectory(dest)) {
+                // If dest is directory copy src into dest
+                dest = path.join(dest, path.basename(source));
+                destExists = yield ioUtil.exists(dest);
+            }
+            if (destExists) {
+                if (options.force == null || options.force) {
+                    yield rmRF(dest);
+                }
+                else {
+                    throw new Error('Destination already exists');
+                }
+            }
+        }
+        yield mkdirP(path.dirname(dest));
+        yield ioUtil.rename(source, dest);
+    });
+}
+exports.mv = mv;
+/**
+ * Remove a path recursively with force
+ *
+ * @param inputPath path to remove
+ */
+function rmRF(inputPath) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (ioUtil.IS_WINDOWS) {
+            // Node doesn't provide a delete operation, only an unlink function. This means that if the file is being used by another
+            // program (e.g. antivirus), it won't be deleted. To address this, we shell out the work to rd/del.
+            try {
+                if (yield ioUtil.isDirectory(inputPath, true)) {
+                    yield exec(`rd /s /q "${inputPath}"`);
+                }
+                else {
+                    yield exec(`del /f /a "${inputPath}"`);
+                }
+            }
+            catch (err) {
+                // if you try to delete a file that doesn't exist, desired result is achieved
+                // other errors are valid
+                if (err.code !== 'ENOENT')
+                    throw err;
+            }
+            // Shelling out fails to remove a symlink folder with missing source, this unlink catches that
+            try {
+                yield ioUtil.unlink(inputPath);
+            }
+            catch (err) {
+                // if you try to delete a file that doesn't exist, desired result is achieved
+                // other errors are valid
+                if (err.code !== 'ENOENT')
+                    throw err;
+            }
+        }
+        else {
+            let isDir = false;
+            try {
+                isDir = yield ioUtil.isDirectory(inputPath);
+            }
+            catch (err) {
+                // if you try to delete a file that doesn't exist, desired result is achieved
+                // other errors are valid
+                if (err.code !== 'ENOENT')
+                    throw err;
+                return;
+            }
+            if (isDir) {
+                yield exec(`rm -rf "${inputPath}"`);
+            }
+            else {
+                yield ioUtil.unlink(inputPath);
+            }
+        }
+    });
+}
+exports.rmRF = rmRF;
+/**
+ * Make a directory.  Creates the full path with folders in between
+ * Will throw if it fails
+ *
+ * @param   fsPath        path to create
+ * @returns Promise<void>
+ */
+function mkdirP(fsPath) {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield ioUtil.mkdirP(fsPath);
+    });
+}
+exports.mkdirP = mkdirP;
+/**
+ * Returns path of a tool had the tool actually been invoked.  Resolves via paths.
+ * If you check and the tool does not exist, it will throw.
+ *
+ * @param     tool              name of the tool
+ * @param     check             whether to check if tool exists
+ * @returns   Promise<string>   path to tool
+ */
+function which(tool, check) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!tool) {
+            throw new Error("parameter 'tool' is required");
+        }
+        // recursive when check=true
+        if (check) {
+            const result = yield which(tool, false);
+            if (!result) {
+                if (ioUtil.IS_WINDOWS) {
+                    throw new Error(`Unable to locate executable file: ${tool}. Please verify either the file path exists or the file can be found within a directory specified by the PATH environment variable. Also verify the file has a valid extension for an executable file.`);
+                }
+                else {
+                    throw new Error(`Unable to locate executable file: ${tool}. Please verify either the file path exists or the file can be found within a directory specified by the PATH environment variable. Also check the file mode to verify the file is executable.`);
+                }
+            }
+        }
+        try {
+            // build the list of extensions to try
+            const extensions = [];
+            if (ioUtil.IS_WINDOWS && process.env.PATHEXT) {
+                for (const extension of process.env.PATHEXT.split(path.delimiter)) {
+                    if (extension) {
+                        extensions.push(extension);
+                    }
+                }
+            }
+            // if it's rooted, return it if exists. otherwise return empty.
+            if (ioUtil.isRooted(tool)) {
+                const filePath = yield ioUtil.tryGetExecutablePath(tool, extensions);
+                if (filePath) {
+                    return filePath;
+                }
+                return '';
+            }
+            // if any path separators, return empty
+            if (tool.includes('/') || (ioUtil.IS_WINDOWS && tool.includes('\\'))) {
+                return '';
+            }
+            // build the list of directories
+            //
+            // Note, technically "where" checks the current directory on Windows. From a toolkit perspective,
+            // it feels like we should not do this. Checking the current directory seems like more of a use
+            // case of a shell, and the which() function exposed by the toolkit should strive for consistency
+            // across platforms.
+            const directories = [];
+            if (process.env.PATH) {
+                for (const p of process.env.PATH.split(path.delimiter)) {
+                    if (p) {
+                        directories.push(p);
+                    }
+                }
+            }
+            // return the first match
+            for (const directory of directories) {
+                const filePath = yield ioUtil.tryGetExecutablePath(directory + path.sep + tool, extensions);
+                if (filePath) {
+                    return filePath;
+                }
+            }
+            return '';
+        }
+        catch (err) {
+            throw new Error(`which failed with message ${err.message}`);
+        }
+    });
+}
+exports.which = which;
+function readCopyOptions(options) {
+    const force = options.force == null ? true : options.force;
+    const recursive = Boolean(options.recursive);
+    return { force, recursive };
+}
+function cpDirRecursive(sourceDir, destDir, currentDepth, force) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // Ensure there is not a run away recursive copy
+        if (currentDepth >= 255)
+            return;
+        currentDepth++;
+        yield mkdirP(destDir);
+        const files = yield ioUtil.readdir(sourceDir);
+        for (const fileName of files) {
+            const srcFile = `${sourceDir}/${fileName}`;
+            const destFile = `${destDir}/${fileName}`;
+            const srcFileStat = yield ioUtil.lstat(srcFile);
+            if (srcFileStat.isDirectory()) {
+                // Recurse
+                yield cpDirRecursive(srcFile, destFile, currentDepth, force);
+            }
+            else {
+                yield copyFile(srcFile, destFile, force);
+            }
+        }
+        // Change the mode for the newly created directory
+        yield ioUtil.chmod(destDir, (yield ioUtil.stat(sourceDir)).mode);
+    });
+}
+// Buffered file copy
+function copyFile(srcFile, destFile, force) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if ((yield ioUtil.lstat(srcFile)).isSymbolicLink()) {
+            // unlink/re-link it
+            try {
+                yield ioUtil.lstat(destFile);
+                yield ioUtil.unlink(destFile);
+            }
+            catch (e) {
+                // Try to override file permission
+                if (e.code === 'EPERM') {
+                    yield ioUtil.chmod(destFile, '0666');
+                    yield ioUtil.unlink(destFile);
+                }
+                // other errors = it doesn't exist, no work to do
+            }
+            // Copy over symlink
+            const symlinkFull = yield ioUtil.readlink(srcFile);
+            yield ioUtil.symlink(symlinkFull, destFile, ioUtil.IS_WINDOWS ? 'junction' : null);
+        }
+        else if (!(yield ioUtil.exists(destFile)) || force) {
+            yield ioUtil.copyFile(srcFile, destFile);
+        }
+    });
+}
+//# sourceMappingURL=io.js.map
+
+/***/ }),
 /* 52 */,
 /* 53 */,
 /* 54 */
@@ -6075,57 +6048,521 @@ module.exports = require("os");
 
 "use strict";
 
-const pLimit = __webpack_require__(182);
 
-class EndError extends Error {
-	constructor(value) {
-		super();
-		this.value = value;
-	}
+const fs = __webpack_require__(747);
+const sysPath = __webpack_require__(277);
+const { promisify } = __webpack_require__(669);
+
+let fsevents;
+try {
+  fsevents = __webpack_require__(666);
+} catch (error) {
+  if (process.env.CHOKIDAR_PRINT_FSEVENTS_REQUIRE_ERROR) console.error(error);
 }
 
-// The input can also be a promise, so we await it
-const testElement = async (element, tester) => tester(await element);
+if (fsevents) {
+  // TODO: real check
+  const mtch = process.version.match(/v(\d+)\.(\d+)/);
+  if (mtch && mtch[1] && mtch[2]) {
+    const maj = Number.parseInt(mtch[1], 10);
+    const min = Number.parseInt(mtch[2], 10);
+    if (maj === 8 && min < 16) {
+      fsevents = undefined;
+    }
+  }
+}
 
-// The input can also be a promise, so we `Promise.all()` them both
-const finder = async element => {
-	const values = await Promise.all(element);
-	if (values[1] === true) {
-		throw new EndError(values[0]);
-	}
+const {
+  EV_ADD,
+  EV_CHANGE,
+  EV_ADD_DIR,
+  EV_UNLINK,
+  EV_ERROR,
+  STR_DATA,
+  STR_END,
+  FSEVENT_CREATED,
+  FSEVENT_MODIFIED,
+  FSEVENT_DELETED,
+  FSEVENT_MOVED,
+  // FSEVENT_CLONED,
+  FSEVENT_UNKNOWN,
+  FSEVENT_TYPE_DIRECTORY,
+  FSEVENT_TYPE_SYMLINK,
 
-	return false;
+  ROOT_GLOBSTAR,
+  DIR_SUFFIX,
+  DOT_SLASH,
+  FUNCTION_TYPE,
+  EMPTY_FN,
+  IDENTITY_FN
+} = __webpack_require__(777);
+const FS_MODE_READ = 'r';
+
+const Depth = (value) => isNaN(value) ? {} : {depth: value};
+
+const stat = promisify(fs.stat);
+const open = promisify(fs.open);
+const close = promisify(fs.close);
+const lstat = promisify(fs.lstat);
+const realpath = promisify(fs.realpath);
+
+const statMethods = { stat, lstat };
+
+/**
+ * @typedef {String} Path
+ */
+
+/**
+ * @typedef {Object} FsEventsWatchContainer
+ * @property {Set<Function>} listeners
+ * @property {Function} rawEmitter
+ * @property {{stop: Function}} watcher
+ */
+
+// fsevents instance helper functions
+/**
+ * Object to hold per-process fsevents instances (may be shared across chokidar FSWatcher instances)
+ * @type {Map<Path,FsEventsWatchContainer>}
+ */
+const FSEventsWatchers = new Map();
+
+// Threshold of duplicate path prefixes at which to start
+// consolidating going forward
+const consolidateThreshhold = 10;
+
+const wrongEventFlags = new Set([
+  69888, 70400, 71424, 72704, 73472, 131328, 131840, 262912
+]);
+
+/**
+ * Instantiates the fsevents interface
+ * @param {Path} path path to be watched
+ * @param {Function} callback called when fsevents is bound and ready
+ * @returns {{stop: Function}} new fsevents instance
+ */
+const createFSEventsInstance = (path, callback) => {
+  const stop = fsevents.watch(path, callback);
+  return {stop};
 };
 
-const pLocate = async (iterable, tester, options) => {
-	options = {
-		concurrency: Infinity,
-		preserveOrder: true,
-		...options
-	};
+/**
+ * Instantiates the fsevents interface or binds listeners to an existing one covering
+ * the same file tree.
+ * @param {Path} path           - to be watched
+ * @param {Path} realPath       - real path for symlinks
+ * @param {Function} listener   - called when fsevents emits events
+ * @param {Function} rawEmitter - passes data to listeners of the 'raw' event
+ * @returns {Function} closer
+ */
+function setFSEventsListener(path, realPath, listener, rawEmitter, fsw) {
+  let watchPath = sysPath.extname(path) ? sysPath.dirname(path) : path;
+  const parentPath = sysPath.dirname(watchPath);
+  let cont = FSEventsWatchers.get(watchPath);
 
-	const limit = pLimit(options.concurrency);
+  // If we've accumulated a substantial number of paths that
+  // could have been consolidated by watching one directory
+  // above the current one, create a watcher on the parent
+  // path instead, so that we do consolidate going forward.
+  if (couldConsolidate(parentPath)) {
+    watchPath = parentPath;
+  }
 
-	// Start all the promises concurrently with optional limit
-	const items = [...iterable].map(element => [element, limit(testElement, element, tester)]);
+  const resolvedPath = sysPath.resolve(path);
+  const hasSymlink = resolvedPath !== realPath;
 
-	// Check the promises either serially or concurrently
-	const checkLimit = pLimit(options.preserveOrder ? 1 : Infinity);
+  const filteredListener = (fullPath, flags, info) => {
+    if (hasSymlink) fullPath = fullPath.replace(realPath, resolvedPath);
+    if (
+      fullPath === resolvedPath ||
+      !fullPath.indexOf(resolvedPath + sysPath.sep)
+    ) listener(fullPath, flags, info);
+  };
 
-	try {
-		await Promise.all(items.map(element => checkLimit(finder, element)));
-	} catch (error) {
-		if (error instanceof EndError) {
-			return error.value;
-		}
+  // check if there is already a watcher on a parent path
+  // modifies `watchPath` to the parent path when it finds a match
+  let watchedParent = false;
+  for (const watchedPath of FSEventsWatchers.keys()) {
+    if (realPath.indexOf(sysPath.resolve(watchedPath) + sysPath.sep) === 0) {
+      watchPath = watchedPath;
+      cont = FSEventsWatchers.get(watchPath);
+      watchedParent = true;
+      break;
+    }
+  }
 
-		throw error;
-	}
+  if (cont || watchedParent) {
+    cont.listeners.add(filteredListener);
+  } else {
+    cont = {
+      listeners: new Set([filteredListener]),
+      rawEmitter,
+      watcher: createFSEventsInstance(watchPath, (fullPath, flags) => {
+        if (fsw.closed) return;
+        const info = fsevents.getInfo(fullPath, flags);
+        cont.listeners.forEach(list => {
+          list(fullPath, flags, info);
+        });
+
+        cont.rawEmitter(info.event, fullPath, info);
+      })
+    };
+    FSEventsWatchers.set(watchPath, cont);
+  }
+
+  // removes this instance's listeners and closes the underlying fsevents
+  // instance if there are no more listeners left
+  return () => {
+    const lst = cont.listeners;
+
+    lst.delete(filteredListener);
+    if (!lst.size) {
+      FSEventsWatchers.delete(watchPath);
+      if (cont.watcher) return cont.watcher.stop().then(() => {
+        cont.rawEmitter = cont.watcher = undefined;
+        Object.freeze(cont);
+      });
+    }
+  };
+}
+
+// Decide whether or not we should start a new higher-level
+// parent watcher
+const couldConsolidate = (path) => {
+  let count = 0;
+  for (const watchPath of FSEventsWatchers.keys()) {
+    if (watchPath.indexOf(path) === 0) {
+      count++;
+      if (count >= consolidateThreshhold) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 };
 
-module.exports = pLocate;
-// TODO: Remove this for the next major release
-module.exports.default = pLocate;
+// returns boolean indicating whether fsevents can be used
+const canUse = () => fsevents && FSEventsWatchers.size < 128;
+
+// determines subdirectory traversal levels from root to path
+const calcDepth = (path, root) => {
+  let i = 0;
+  while (!path.indexOf(root) && (path = sysPath.dirname(path)) !== root) i++;
+  return i;
+};
+
+/**
+ * @mixin
+ */
+class FsEventsHandler {
+
+/**
+ * @param {import('../index').FSWatcher} fsw
+ */
+constructor(fsw) {
+  this.fsw = fsw;
+}
+checkIgnored(path, stats) {
+  const ipaths = this.fsw._ignoredPaths;
+  if (this.fsw._isIgnored(path, stats)) {
+    ipaths.add(path);
+    if (stats && stats.isDirectory()) {
+      ipaths.add(path + ROOT_GLOBSTAR);
+    }
+    return true;
+  }
+
+  ipaths.delete(path);
+  ipaths.delete(path + ROOT_GLOBSTAR);
+}
+
+addOrChange(path, fullPath, realPath, parent, watchedDir, item, info, opts) {
+  const event = watchedDir.has(item) ? EV_CHANGE : EV_ADD;
+  this.handleEvent(event, path, fullPath, realPath, parent, watchedDir, item, info, opts);
+}
+
+async checkFd(path, fullPath, realPath, parent, watchedDir, item, info, opts) {
+  try {
+    const fd = await open(path, FS_MODE_READ);
+    if (this.fsw.closed) return;
+    await close(fd);
+    if (this.fsw.closed) return;
+    this.addOrChange(path, fullPath, realPath, parent, watchedDir, item, info, opts);
+  } catch (error) {
+    if (error.code === 'EACCES') {
+      this.addOrChange(path, fullPath, realPath, parent, watchedDir, item, info, opts);
+    } else {
+      this.handleEvent(EV_UNLINK, path, fullPath, realPath, parent, watchedDir, item, info, opts);
+    }
+  }
+}
+
+handleEvent(event, path, fullPath, realPath, parent, watchedDir, item, info, opts) {
+  if (this.fsw.closed || this.checkIgnored(path)) return;
+
+  if (event === EV_UNLINK) {
+    // suppress unlink events on never before seen files
+    if (info.type === FSEVENT_TYPE_DIRECTORY || watchedDir.has(item)) {
+      this.fsw._remove(parent, item);
+    }
+  } else {
+    if (event === EV_ADD) {
+      // track new directories
+      if (info.type === FSEVENT_TYPE_DIRECTORY) this.fsw._getWatchedDir(path);
+
+      if (info.type === FSEVENT_TYPE_SYMLINK && opts.followSymlinks) {
+        // push symlinks back to the top of the stack to get handled
+        const curDepth = opts.depth === undefined ?
+          undefined : calcDepth(fullPath, realPath) + 1;
+        return this._addToFsEvents(path, false, true, curDepth);
+      }
+
+      // track new paths
+      // (other than symlinks being followed, which will be tracked soon)
+      this.fsw._getWatchedDir(parent).add(item);
+    }
+    /**
+     * @type {'add'|'addDir'|'unlink'|'unlinkDir'}
+     */
+    const eventName = info.type === FSEVENT_TYPE_DIRECTORY ? event + DIR_SUFFIX : event;
+    this.fsw._emit(eventName, path);
+    if (eventName === EV_ADD_DIR) this._addToFsEvents(path, false, true);
+  }
+}
+
+/**
+ * Handle symlinks encountered during directory scan
+ * @param {String} watchPath  - file/dir path to be watched with fsevents
+ * @param {String} realPath   - real path (in case of symlinks)
+ * @param {Function} transform  - path transformer
+ * @param {Function} globFilter - path filter in case a glob pattern was provided
+ * @returns {Function} closer for the watcher instance
+*/
+_watchWithFsEvents(watchPath, realPath, transform, globFilter) {
+  if (this.fsw.closed) return;
+  if (this.fsw._isIgnored(watchPath)) return;
+  const opts = this.fsw.options;
+  const watchCallback = async (fullPath, flags, info) => {
+    if (this.fsw.closed) return;
+    if (
+      opts.depth !== undefined &&
+      calcDepth(fullPath, realPath) > opts.depth
+    ) return;
+    const path = transform(sysPath.join(
+      watchPath, sysPath.relative(watchPath, fullPath)
+    ));
+    if (globFilter && !globFilter(path)) return;
+    // ensure directories are tracked
+    const parent = sysPath.dirname(path);
+    const item = sysPath.basename(path);
+    const watchedDir = this.fsw._getWatchedDir(
+      info.type === FSEVENT_TYPE_DIRECTORY ? path : parent
+    );
+
+    // correct for wrong events emitted
+    if (wrongEventFlags.has(flags) || info.event === FSEVENT_UNKNOWN) {
+      if (typeof opts.ignored === FUNCTION_TYPE) {
+        let stats;
+        try {
+          stats = await stat(path);
+        } catch (error) {}
+        if (this.fsw.closed) return;
+        if (this.checkIgnored(path, stats)) return;
+        if (stats) {
+          this.addOrChange(path, fullPath, realPath, parent, watchedDir, item, info, opts);
+        } else {
+          this.handleEvent(EV_UNLINK, path, fullPath, realPath, parent, watchedDir, item, info, opts);
+        }
+      } else {
+        this.checkFd(path, fullPath, realPath, parent, watchedDir, item, info, opts);
+      }
+    } else {
+      switch (info.event) {
+      case FSEVENT_CREATED:
+      case FSEVENT_MODIFIED:
+        return this.addOrChange(path, fullPath, realPath, parent, watchedDir, item, info, opts);
+      case FSEVENT_DELETED:
+      case FSEVENT_MOVED:
+        return this.checkFd(path, fullPath, realPath, parent, watchedDir, item, info, opts);
+      }
+    }
+  };
+
+  const closer = setFSEventsListener(
+    watchPath,
+    realPath,
+    watchCallback,
+    this.fsw._emitRaw,
+    this.fsw
+  );
+
+  this.fsw._emitReady();
+  return closer;
+}
+
+/**
+ * Handle symlinks encountered during directory scan
+ * @param {String} linkPath path to symlink
+ * @param {String} fullPath absolute path to the symlink
+ * @param {Function} transform pre-existing path transformer
+ * @param {Number} curDepth level of subdirectories traversed to where symlink is
+ * @returns {Promise<void>}
+ */
+async _handleFsEventsSymlink(linkPath, fullPath, transform, curDepth) {
+  // don't follow the same symlink more than once
+  if (this.fsw.closed || this.fsw._symlinkPaths.has(fullPath)) return;
+
+  this.fsw._symlinkPaths.set(fullPath, true);
+  this.fsw._incrReadyCount();
+
+  try {
+    const linkTarget = await realpath(linkPath);
+    if (this.fsw.closed) return;
+    if (this.fsw._isIgnored(linkTarget)) {
+      return this.fsw._emitReady();
+    }
+
+    this.fsw._incrReadyCount();
+
+    // add the linkTarget for watching with a wrapper for transform
+    // that causes emitted paths to incorporate the link's path
+    this._addToFsEvents(linkTarget || linkPath, (path) => {
+      let aliasedPath = linkPath;
+      if (linkTarget && linkTarget !== DOT_SLASH) {
+        aliasedPath = path.replace(linkTarget, linkPath);
+      } else if (path !== DOT_SLASH) {
+        aliasedPath = sysPath.join(linkPath, path);
+      }
+      return transform(aliasedPath);
+    }, false, curDepth);
+  } catch(error) {
+    if (this.fsw._handleError(error)) {
+      return this.fsw._emitReady();
+    }
+  }
+}
+
+/**
+ *
+ * @param {Path} newPath
+ * @param {fs.Stats} stats
+ */
+emitAdd(newPath, stats, processPath, opts, forceAdd) {
+  const pp = processPath(newPath);
+  const isDir = stats.isDirectory();
+  const dirObj = this.fsw._getWatchedDir(sysPath.dirname(pp));
+  const base = sysPath.basename(pp);
+
+  // ensure empty dirs get tracked
+  if (isDir) this.fsw._getWatchedDir(pp);
+  if (dirObj.has(base)) return;
+  dirObj.add(base);
+
+  if (!opts.ignoreInitial || forceAdd === true) {
+    this.fsw._emit(isDir ? EV_ADD_DIR : EV_ADD, pp, stats);
+  }
+}
+
+initWatch(realPath, path, wh, processPath) {
+  if (this.fsw.closed) return;
+  const closer = this._watchWithFsEvents(
+    wh.watchPath,
+    sysPath.resolve(realPath || wh.watchPath),
+    processPath,
+    wh.globFilter
+  );
+  this.fsw._addPathCloser(path, closer);
+}
+
+/**
+ * Handle added path with fsevents
+ * @param {String} path file/dir path or glob pattern
+ * @param {Function|Boolean=} transform converts working path to what the user expects
+ * @param {Boolean=} forceAdd ensure add is emitted
+ * @param {Number=} priorDepth Level of subdirectories already traversed.
+ * @returns {Promise<void>}
+ */
+async _addToFsEvents(path, transform, forceAdd, priorDepth) {
+  if (this.fsw.closed) {
+    return;
+  }
+  const opts = this.fsw.options;
+  const processPath = typeof transform === FUNCTION_TYPE ? transform : IDENTITY_FN;
+
+  const wh = this.fsw._getWatchHelpers(path);
+
+  // evaluate what is at the path we're being asked to watch
+  try {
+    const stats = await statMethods[wh.statMethod](wh.watchPath);
+    if (this.fsw.closed) return;
+    if (this.fsw._isIgnored(wh.watchPath, stats)) {
+      throw null;
+    }
+    if (stats.isDirectory()) {
+      // emit addDir unless this is a glob parent
+      if (!wh.globFilter) this.emitAdd(processPath(path), stats, processPath, opts, forceAdd);
+
+      // don't recurse further if it would exceed depth setting
+      if (priorDepth && priorDepth > opts.depth) return;
+
+      // scan the contents of the dir
+      this.fsw._readdirp(wh.watchPath, {
+        fileFilter: entry => wh.filterPath(entry),
+        directoryFilter: entry => wh.filterDir(entry),
+        ...Depth(opts.depth - (priorDepth || 0))
+      }).on(STR_DATA, (entry) => {
+        // need to check filterPath on dirs b/c filterDir is less restrictive
+        if (this.fsw.closed) {
+          return;
+        }
+        if (entry.stats.isDirectory() && !wh.filterPath(entry)) return;
+
+        const joinedPath = sysPath.join(wh.watchPath, entry.path);
+        const {fullPath} = entry;
+
+        if (wh.followSymlinks && entry.stats.isSymbolicLink()) {
+          // preserve the current depth here since it can't be derived from
+          // real paths past the symlink
+          const curDepth = opts.depth === undefined ?
+            undefined : calcDepth(joinedPath, sysPath.resolve(wh.watchPath)) + 1;
+
+          this._handleFsEventsSymlink(joinedPath, fullPath, processPath, curDepth);
+        } else {
+          this.emitAdd(joinedPath, entry.stats, processPath, opts, forceAdd);
+        }
+      }).on(EV_ERROR, EMPTY_FN).on(STR_END, () => {
+        this.fsw._emitReady();
+      });
+    } else {
+      this.emitAdd(wh.watchPath, stats, processPath, opts, forceAdd);
+      this.fsw._emitReady();
+    }
+  } catch (error) {
+    if (!error || this.fsw._handleError(error)) {
+      // TODO: Strange thing: "should not choke on an ignored watch path" will be failed without 2 ready calls -__-
+      this.fsw._emitReady();
+      this.fsw._emitReady();
+    }
+  }
+
+  if (opts.persistent && forceAdd !== true) {
+    if (typeof transform === FUNCTION_TYPE) {
+      // realpath has already been resolved
+      this.initWatch(undefined, path, wh, processPath);
+    } else {
+      let realPath;
+      try {
+        realPath = await realpath(wh.watchPath);
+      } catch (e) {}
+      this.initWatch(realPath, path, wh, processPath);
+    }
+  }
+}
+
+}
+
+module.exports = FsEventsHandler;
+module.exports.canUse = canUse;
 
 
 /***/ }),
@@ -11267,7 +11704,7 @@ const artifactName = "my-artifact";
 
 
 async function checkoutRuntimes() {
-    var out_path = core.getInput('path');
+  var out_path = core.getInput('path');
   const action_paths = await createActionPaths(core.getInput('name'), out_path);
   console.log(action_paths);
   let l = await checkoutRepoShallow(core.getInput('repository'), core.getInput('ref'), action_paths.source)
@@ -16306,7 +16743,7 @@ const braces = __webpack_require__(634);
 const normalizePath = __webpack_require__(178);
 
 const NodeFsHandler = __webpack_require__(961);
-const FsEventsHandler = __webpack_require__(32);
+const FsEventsHandler = __webpack_require__(88);
 const {
   EV_ALL,
   EV_READY,
@@ -28380,7 +28817,7 @@ module.exports = {"application/1d-interleaved-parityfec":{"source":"iana"},"appl
 const path = __webpack_require__(277);
 const fs = __webpack_require__(747);
 const {promisify} = __webpack_require__(669);
-const pLocate = __webpack_require__(88);
+const pLocate = __webpack_require__(752);
 
 const fsStat = promisify(fs.stat);
 const fsLStat = promisify(fs.lstat);
@@ -44014,6 +44451,8 @@ exports.Octokit = Octokit;
 /***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
 
 const core = __webpack_require__(827);
+const io = __webpack_require__(51);
+const fs = __webpack_require__(747);
 const {checkoutRuntimes, configureRuntimes, buildRuntimes} = __webpack_require__(195);
 // most @actions toolkit packages have async methods
 async function run() {
@@ -44034,7 +44473,20 @@ async function run() {
     //    files, rootDirectory, artifactOptions);
 }
 
-run()
+async function cleanup(workspace) {
+  if (fs.existsSync(workspace)) {
+    let r = await io.rmRF(workspace);
+  }
+  return 0;
+}
+
+const workspace = core.getState('cleanup');
+if (workspace) {
+  cleanup(workspace);
+} else {
+  core.setState('cleanup', process.env['GITHUB_WORKSPACE']);
+  run()
+}
 
 
 /***/ }),
@@ -54677,7 +55129,65 @@ function isUnixExecutable(stats) {
 /***/ }),
 /* 750 */,
 /* 751 */,
-/* 752 */,
+/* 752 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const pLimit = __webpack_require__(182);
+
+class EndError extends Error {
+	constructor(value) {
+		super();
+		this.value = value;
+	}
+}
+
+// The input can also be a promise, so we await it
+const testElement = async (element, tester) => tester(await element);
+
+// The input can also be a promise, so we `Promise.all()` them both
+const finder = async element => {
+	const values = await Promise.all(element);
+	if (values[1] === true) {
+		throw new EndError(values[0]);
+	}
+
+	return false;
+};
+
+const pLocate = async (iterable, tester, options) => {
+	options = {
+		concurrency: Infinity,
+		preserveOrder: true,
+		...options
+	};
+
+	const limit = pLimit(options.concurrency);
+
+	// Start all the promises concurrently with optional limit
+	const items = [...iterable].map(element => [element, limit(testElement, element, tester)]);
+
+	// Check the promises either serially or concurrently
+	const checkLimit = pLimit(options.preserveOrder ? 1 : Infinity);
+
+	try {
+		await Promise.all(items.map(element => checkLimit(finder, element)));
+	} catch (error) {
+		if (error instanceof EndError) {
+			return error.value;
+		}
+
+		throw error;
+	}
+};
+
+module.exports = pLocate;
+// TODO: Remove this for the next major release
+module.exports.default = pLocate;
+
+
+/***/ }),
 /* 753 */,
 /* 754 */,
 /* 755 */

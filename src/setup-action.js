@@ -15,7 +15,7 @@ const artifactName = "my-artifact";
 
 
 async function checkoutRuntimes() {
-    var out_path = core.getInput('path');
+  var out_path = core.getInput('path');
   const action_paths = await createActionPaths(core.getInput('name'), out_path);
   console.log(action_paths);
   let l = await checkoutRepoShallow(core.getInput('repository'), core.getInput('ref'), action_paths.source)

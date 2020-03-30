@@ -1,4 +1,6 @@
 const core = require('@actions/core');
+const io = require('@actions/io');
+const fs = require('fs');
 const {checkoutRuntimes, configureRuntimes, buildRuntimes} = require('../src/setup-action');
 // most @actions toolkit packages have async methods
 async function run() {
@@ -19,4 +21,17 @@ async function run() {
     //    files, rootDirectory, artifactOptions);
 }
 
-run()
+async function cleanup(workspace) {
+  if (fs.existsSync(workspace)) {
+    let r = await io.rmRF(workspace);
+  }
+  return 0;
+}
+
+const workspace = core.getState('cleanup');
+if (workspace) {
+  cleanup(workspace);
+} else {
+  core.setState('cleanup', process.env['GITHUB_WORKSPACE']);
+  run()
+}
