@@ -108,7 +108,6 @@ async function buildRuntimes(action_paths) {
   return exitCode;
 }
 
-
 async function installRuntimes(action_paths) {
   let exitCode = await core.group('installing runtimes', async () => {
     let args = ['-v'];

@@ -33,7 +33,8 @@
     "assert": "^2.0.0",
     "checkout": "github:actions/checkout",
     "xmldom": "^0.3.0",
-    "xunit-viewer": "^6.2.1"
+    "xunit-viewer": "^6.2.1",
+    "minimist": ">=1.2.2"
   },
   "devDependencies": {
     "@zeit/ncc": "^0.20.5",

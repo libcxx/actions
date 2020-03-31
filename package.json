@@ -28,6 +28,7 @@
     "@octokit/rest": "^17.1.4",
     "checkout": "github:actions/checkout#v2",
     "xmldom": "^0.3.0",
-    "xunit-viewer": "^6.2.1"
+    "xunit-viewer": "^6.2.1",
+    "minimist": ">=1.2.2"
   }
 }

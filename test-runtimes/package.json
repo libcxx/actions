@@ -32,7 +32,8 @@
     "@actions/io": "^1.0.2",
     "@octokit/rest": "^17.1.4",
     "xmldom": "^0.3.0",
-    "xunit-viewer": "^6.2.1"
+    "xunit-viewer": "^6.2.1",
+    "minimist": ">=1.2.2"
   },
   "devDependencies": {
     "@zeit/ncc": "^0.20.5",
