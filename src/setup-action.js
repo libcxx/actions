@@ -93,7 +93,7 @@ async function checkoutRuntimes() {
     await run('git', ['remote', 'add', 'origin', repo_url], options);
     await run('git', ['fetch', '--depth=1', 'origin', ref], options);
     await run('git', ['reset', '--hard', 'FETCH_HEAD'], options);
-    let sha = capture('git', ['rev-parse', 'HEAD'], options);
+    let sha = await capture('git', ['rev-parse', 'HEAD'], options);
     core.setOutput('sha', sha);
     return sha;
   });
