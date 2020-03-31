@@ -79,10 +79,6 @@ function getRuntimeList() {
 
 async function configureRuntimes(action_paths) {
   let exitCode = await core.group('configure', async () => {
-    if (fs.existsSync(action_paths.build)) {
-      io.rmRF(action_paths.build);
-      mkdirP(action_paths.build);
-    }
     let args = ['-GNinja',
       `-DCMAKE_INSTALL_PREFIX=${action_paths.install}`,
       `-DCMAKE_C_COMPILER=${core.getInput('cc')}`,
