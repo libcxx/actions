@@ -44475,7 +44475,7 @@ exports.Octokit = Octokit;
 const core = __webpack_require__(827);
 const io = __webpack_require__(51);
 const fs = __webpack_require__(747);
-const {checkoutRuntimes, configureRuntimes, buildRuntimes} = __webpack_require__(195);
+const {checkoutRuntimes, configureRuntimes, buildRuntimes, createActionPaths} = __webpack_require__(195);
 // most @actions toolkit packages have async methods
 async function run() {
   try {

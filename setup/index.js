@@ -1,7 +1,7 @@
 const core = require('@actions/core');
 const io = require('@actions/io');
 const fs = require('fs');
-const {checkoutRuntimes, configureRuntimes, buildRuntimes} = require('../src/setup-action');
+const {checkoutRuntimes, configureRuntimes, buildRuntimes, createActionPaths} = require('../src/setup-action');
 // most @actions toolkit packages have async methods
 async function run() {
   try {
