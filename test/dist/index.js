@@ -17221,7 +17221,7 @@ async function checkoutRuntimes(action_paths) {
 
 function getRuntimeList() {
   const all = ['libcxx', 'libcxxabi', 'libunwind']
-  const raw_intput = core.getInput('runtimes');
+  const raw_input = core.getInput('runtimes');
   if (!raw_input) {
     return all;
   }
