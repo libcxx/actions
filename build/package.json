@@ -37,9 +37,9 @@
     "xunit-viewer": "^6.2.1"
   },
   "devDependencies": {
+    "@actions/glob": "^0.1.0",
     "@zeit/ncc": "^0.20.5",
     "eslint": "^6.8.0",
-    "jest": "^24.9.0",
-        "@actions/glob": "^0.1.0"
+    "jest": "^24.9.0"
   }
 }
