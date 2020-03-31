@@ -11,5 +11,7 @@ jobs:
         path: 'actions'
     - uses: ./actions/build
     - uses: ./actions/test
+      with:
+        runtimes: 'libunwind'
 
 
