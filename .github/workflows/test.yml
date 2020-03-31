@@ -12,5 +12,11 @@ jobs:
     - uses: ./libcxx-actions/setup
       with:
         name: 'debug'
+    - uses: ./libcxx-actions/test-runtimes
+      with:
+        runtime: 'libcxxabi'
+    - uses: ./libcxx-actions/test-runtimes
+      with:
+        runtime: 'libcxx'
 
 
