@@ -26,14 +26,12 @@ function getActionPaths(config_name, root_path = '') {
 async function createActionPaths(config_name, root_path = '') {
   let action_paths = await core.group('setup paths', async() => {
     const action_paths = getActionPaths(config_name, root_path);
-    Object.entries(action_paths).forEach( (entry) => {
-      let key = entry[0];
-      let val = entry[1];
-      if (fs.existsSync(val)) {
-        let r = io.rmRF(val);
-      }
-      return 0;
-    });
+    if (fs.existsSync(action_paths.source)) {
+      await io.rmRF(action_paths.source);
+    }
+    if (fs.existsSync(action_paths.output)) {
+      await io.rmRF(action_paths.output);
+    }
     Object.entries(action_paths).forEach((entry) => {
       let key = entry[0];
       let val = entry[1];
