@@ -7,6 +7,7 @@ async function run() {
   try {
     const config_name = core.getInput('name');
     const action_paths = await createActionPaths(config_name);
+    core.saveState('action_paths', action_paths);
     await checkoutRuntimes(action_paths)
     await configureRuntimes(action_paths);
     await buildRuntimes(action_paths);
@@ -23,22 +24,14 @@ async function run() {
     //    files, rootDirectory, artifactOptions);
 }
 
-async function cleanup(workspace) {
-  try {
-    if (fs.existsSync(workspace)) {
-      let r = await io.rmRF(workspace);
-    }
-    return 0;
-  } catch (error) {
-    console.log('Failed during cleanup to remove ' + workspace);
-  }
+async function cleanup() {
+  const action_paths = core.getState('action_paths');
 }
 
 const workspace = core.getState('cleanup');
-if (workspace) {
-  console.log('Cleaning up workspace ' + workspace);
-  cleanup(workspace);
+if (core.getState('cleanup')) {
+  cleanup();
 } else {
-  core.saveState('cleanup', process.env['GITHUB_WORKSPACE']);
+  core.saveState('cleanup', 1);
   run()
 }
