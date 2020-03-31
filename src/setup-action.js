@@ -145,7 +145,7 @@ async function testRuntime(action_paths, runtime, name, options) {
     if (user_options) {
       options.push(user_options);
     }
-    let result = await run(llvm_lit, options, {cwd: actions.build});
+    let result = await run(llvm_lit, options, {cwd: actions_path.build});
     return xunit_output;
   });
   return result;
