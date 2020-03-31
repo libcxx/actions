@@ -49461,7 +49461,7 @@ async function run() {
     let sha = await checkoutRuntimes(action_paths);
     await configureRuntimes(action_paths);
 
-    await core.startGroup('upload-cmake-cache', async () => {
+    await core.group('upload-cmake-cache', async () => {
       let files = await globDirectory(action_paths.build);
       console.log(files);
       let a1 = await artifactClient.uploadArtifact(
@@ -49473,7 +49473,7 @@ async function run() {
     await buildRuntimes(action_paths);
     await installRuntimes(action_paths);
 
-    await core.startGroup('upload-installation', async () => {
+    await core.group('upload-installation', async () => {
       let files = await globDirectoryRecursive(action_paths.install);
       let a2 = await artifactClient.uploadArtifact(
           `runtimes-${config_name}-install-${sha}`, files,
