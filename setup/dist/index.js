@@ -49446,22 +49446,15 @@ async function globDirectoryRecursive(dir) {
   return files;
 }
 
-function getArtifactName(base_name) {
-  name = 'runtimes-'
-  name += core.getInput('name');
-  name += '-';
-  name += base_name;
-  return name;
-}
 
-async function uploadArtifact(base_name, files, root) {
-  return artifactClient.uploadArtifact(getArtifactName(base_name),
+async function uploadArtifact(name, files, root) {
+  return artifactClient.uploadArtifact(name,
     files, root, {continueOnError: true});
 }
 
-async function uploadArtifactDir(base_name, root) {
+async function uploadArtifactDir(name, root) {
   const files = await globDirectoryRecursive(root);
-  return uploadArtifact(base_name, files, root)
+  return uploadArtifact(name, files, root)
 }
 
 async function run() {
@@ -49469,13 +49462,14 @@ async function run() {
     const config_name = core.getInput('name');
     const action_paths = await createActionPaths(config_name);
 
-    await checkoutRuntimes(action_paths)
+    let sha = await checkoutRuntimes(action_paths)
     await configureRuntimes(action_paths);
 
-    let a1 = core.startGroup('upload-cmake-cache', async () => {
+    await core.startGroup('upload-cmake-cache', async () => {
       let files = await globDirectory(action_paths.build)
       console.log(files);
-      return uploadArtifact('config', ['./CMakeCache.txt'], action_paths.build);
+      let a1 = await uploadArtifact(`runtimes-${config_name}-config-${sha}`, ['./CMakeCache.txt'], action_paths.build);
+      return a1;
     });
 
 
@@ -49484,7 +49478,7 @@ async function run() {
     await a1;
 
     await core.startGroup('upload-installation', async () => {
-      let a2 = await uploadArtifactDir('install', action_paths.install);
+      let a2 = await uploadArtifactDir(`runtimes-${config_name}-install-${sha}`, action_paths.install);
       return a2;
     });
 

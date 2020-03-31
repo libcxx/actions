@@ -1,26 +1,16 @@
-name: breathing test
+name: Build Runtimes
 
 on: push
 
 jobs:
-  basic_test:
+  debug:
     runs-on: [libcxx-builder]
     steps:
-    - name: "Checkout locally"
-      uses: actions/checkout@v2
+    - uses: actions/checkout@v2
       with:
         path: 'libcxx-actions'
-    - name: 'Print Context'
-      run: |
-        echo $(ls)
-        echo $(pwd)
-    - name: "Test setup breathing"
-      uses: ./libcxx-actions/setup
+    - uses: ./libcxx-actions/setup
       with:
-        name: 'breathing'
-    - name: 'Print New Context'
-      run: |
-        echo $(ls)
-        echo $(pwd)
+        name: 'debug'
 
 
