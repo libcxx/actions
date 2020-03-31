@@ -49461,26 +49461,25 @@ async function run() {
     let sha = await checkoutRuntimes(action_paths);
     await configureRuntimes(action_paths);
 
-    await core.group('upload-cmake-cache', async () => {
+    let a1 = core.group('upload-cmake-cache', async () => {
       let files = await globDirectory(action_paths.build);
       console.log(files);
-      let a1 = await artifactClient.uploadArtifact(
+      return artifactClient.uploadArtifact(
           `runtimes-${config_name}-config-${sha}`, [ './CMakeCache.txt' ],
           action_paths.build);
-      return a1;
     });
 
     await buildRuntimes(action_paths);
     await installRuntimes(action_paths);
 
-    await core.group('upload-installation', async () => {
+    let a2 = await core.group('upload-installation', async () => {
       let files = await globDirectoryRecursive(action_paths.install);
-      let a2 = await artifactClient.uploadArtifact(
+      return artifactClient.uploadArtifact(
           `runtimes-${config_name}-install-${sha}`, files,
           action_paths.install);
-      return a2;
     });
-
+    await a1;
+    await a2;
   } catch (error) {
     core.setFailed(error.message);
     return;
