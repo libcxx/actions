@@ -3707,6 +3707,9 @@ async function testRuntime(action_paths, runtime, name, options) {
       }
       core.setOutput('results', xunit_output)
       const llvm_lit = path.join(action_paths.build, 'bin', 'llvm-lit');
+      let result = await run(llvm_lit, ['--version'], {}); // Breathing test
+      assert(result === 0);
+
       assert(llvm_lit !== undefined);
       const test_path = path.join(action_paths.source, runtime, 'test');
       const options = [
@@ -3715,7 +3718,11 @@ async function testRuntime(action_paths, runtime, name, options) {
       if (user_options) {
         options.push(user_options);
       }
-      let result = await run(llvm_lit, options, {});
+      try {
+        let result = await run(llvm_lit, options, {});
+      } catch (error) {
+        console.log(error);
+      }
       return xunit_output;
     });
     return result;
@@ -7580,22 +7587,10 @@ const {
   getActionPaths
 } = __webpack_require__(195);
 const {
-  rmRfIgnoreError
+  rmRfIgnoreError,
+  globDirectoryRecursive
 } = __webpack_require__(983);
 
-async function globDirectory(dir) {
-  const globber =
-      await glob.create(path.join(dir, '*'), {followSymbolicLinks : false});
-  const files = await globber.glob()
-  return files;
-}
-
-async function globDirectoryRecursive(dir) {
-  const globber =
-      await glob.create(path.join(dir, '**'), {followSymbolicLinks : false});
-  const files = await globber.glob()
-  return files;
-}
 
 async function run() {
   try {
@@ -10585,7 +10580,7 @@ var fs = __webpack_require__(747)
 var rp = __webpack_require__(925)
 var minimatch = __webpack_require__(60)
 var Minimatch = minimatch.Minimatch
-var inherits = __webpack_require__(973)
+var inherits = __webpack_require__(904)
 var EE = __webpack_require__(614).EventEmitter
 var path = __webpack_require__(277)
 var assert = __webpack_require__(357)
@@ -13662,6 +13657,22 @@ exports.UploadHttpClient = UploadHttpClient;
 
 /***/ }),
 
+/***/ 904:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+try {
+  var util = __webpack_require__(669);
+  /* istanbul ignore next */
+  if (typeof util.inherits !== 'function') throw '';
+  module.exports = util.inherits;
+} catch (e) {
+  /* istanbul ignore next */
+  module.exports = __webpack_require__(612);
+}
+
+
+/***/ }),
+
 /***/ 910:
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -13849,17 +13860,9 @@ exports.create = create;
 /***/ }),
 
 /***/ 973:
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(module) {
 
-try {
-  var util = __webpack_require__(669);
-  /* istanbul ignore next */
-  if (typeof util.inherits !== 'function') throw '';
-  module.exports = util.inherits;
-} catch (e) {
-  /* istanbul ignore next */
-  module.exports = __webpack_require__(612);
-}
+module.exports = eval("require")("@actions/glob");
 
 
 /***/ }),
@@ -13869,11 +13872,13 @@ try {
 
 const exec = __webpack_require__(221);
 const  core  = __webpack_require__(412);
+const glob = __webpack_require__(973);
 const path = __webpack_require__(277);
 const fs = __webpack_require__(747);
 const process = __webpack_require__(765);
 const { execSync } = __webpack_require__(129);
 const rimraf = __webpack_require__(560);
+
 
 function mkdirP(dir_path) {
    fs.mkdirSync(dir_path, {recursive: true});
@@ -13914,7 +13919,23 @@ async function capture(cmd, args, options = {}) {
   return myOutput;
 }
 
-module.exports = {mkdirP, run, capture, handleErrors, rmRf, rmRfIgnoreError, unlinkIgnoreError}
+
+async function globDirectory(dir) {
+  const globber =
+      await glob.create(path.join(dir, '*'), {followSymbolicLinks : false});
+  const files = await globber.glob()
+  return files;
+}
+
+async function globDirectoryRecursive(dir) {
+  const globber =
+      await glob.create(path.join(dir, '**'), {followSymbolicLinks : false});
+  const files = await globber.glob()
+  return files;
+}
+
+module.exports = {mkdirP, run, capture, handleErrors, rmRf, rmRfIgnoreError, unlinkIgnoreError,
+globDirectory, globDirectoryRecursive}
 
 
 /***/ }),

@@ -142,6 +142,9 @@ async function testRuntime(action_paths, runtime, name, options) {
       }
       core.setOutput('results', xunit_output)
       const llvm_lit = path.join(action_paths.build, 'bin', 'llvm-lit');
+      let result = await run(llvm_lit, ['--version'], {}); // Breathing test
+      assert(result === 0);
+
       assert(llvm_lit !== undefined);
       const test_path = path.join(action_paths.source, runtime, 'test');
       const options = [
@@ -150,7 +153,11 @@ async function testRuntime(action_paths, runtime, name, options) {
       if (user_options) {
         options.push(user_options);
       }
-      let result = await run(llvm_lit, options, {});
+      try {
+        let result = await run(llvm_lit, options, {});
+      } catch (error) {
+        console.log(error);
+      }
       return xunit_output;
     });
     return result;

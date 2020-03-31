@@ -14,22 +14,10 @@ const {
   getActionPaths
 } = require('../src/setup-action');
 const {
-  rmRfIgnoreError
+  rmRfIgnoreError,
+  globDirectoryRecursive
 } = require('../src/utils');
 
-async function globDirectory(dir) {
-  const globber =
-      await glob.create(path.join(dir, '*'), {followSymbolicLinks : false});
-  const files = await globber.glob()
-  return files;
-}
-
-async function globDirectoryRecursive(dir) {
-  const globber =
-      await glob.create(path.join(dir, '**'), {followSymbolicLinks : false});
-  const files = await globber.glob()
-  return files;
-}
 
 async function run() {
   try {

@@ -4,7 +4,8 @@ const cp = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const {rmRf, rmRfIgnoreError, unlinkIgnoreError} = require('../src/utils');
-const {createTestSuiteAnnotations, getTestSuiteAnnotations, createTestSuiteHTMLResults} = require('../src/lit-utils');
+
+const {createTestSuiteAnnotations, getTestSuiteAnnotations, createTestSuiteHTMLResults} = require('../src/lit_utils');
 
 
 

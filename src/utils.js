@@ -1,10 +1,12 @@
 const exec = require('@actions/exec');
 const  core  = require("@actions/core");
+const glob = require('@actions/glob');
 const path = require('path');
 const fs = require('fs');
 const process = require('process');
 const { execSync } = require('child_process');
 const rimraf = require('rimraf');
+
 
 function mkdirP(dir_path) {
    fs.mkdirSync(dir_path, {recursive: true});
@@ -45,4 +47,20 @@ async function capture(cmd, args, options = {}) {
   return myOutput;
 }
 
-module.exports = {mkdirP, run, capture, handleErrors, rmRf, rmRfIgnoreError, unlinkIgnoreError}
+
+async function globDirectory(dir) {
+  const globber =
+      await glob.create(path.join(dir, '*'), {followSymbolicLinks : false});
+  const files = await globber.glob()
+  return files;
+}
+
+async function globDirectoryRecursive(dir) {
+  const globber =
+      await glob.create(path.join(dir, '**'), {followSymbolicLinks : false});
+  const files = await globber.glob()
+  return files;
+}
+
+module.exports = {mkdirP, run, capture, handleErrors, rmRf, rmRfIgnoreError, unlinkIgnoreError,
+globDirectory, globDirectoryRecursive}

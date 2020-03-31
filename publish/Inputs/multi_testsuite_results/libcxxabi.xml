@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites>
+<testsuite name="libc++abi" tests="63" failures="0" skipped="10">
+<testcase classname="libc++abi.libc++abi" name="backtrace_test.pass.cpp" time="0.18"/>
+<testcase classname="libc++abi.libc++abi" name="catch_array_01.pass.cpp" time="0.17"/>
+<testcase classname="libc++abi.libc++abi" name="catch_array_02.pass.cpp" time="0.18"/>
+<testcase classname="libc++abi.libc++abi" name="catch_class_01.pass.cpp" time="0.27"/>
+<testcase classname="libc++abi.libc++abi" name="catch_class_02.pass.cpp" time="0.27"/>
+<testcase classname="libc++abi.libc++abi" name="catch_class_03.pass.cpp" time="0.27"/>
+<testcase classname="libc++abi.libc++abi" name="catch_class_04.pass.cpp" time="0.26"/>
+<testcase classname="libc++abi.libc++abi" name="catch_const_pointer_nullptr.pass.cpp" time="0.17"/>
+<testcase classname="libc++abi.libc++abi" name="catch_function_01.pass.cpp" time="0.14"/>
+<testcase classname="libc++abi.libc++abi" name="catch_function_02.pass.cpp" time="0.16"/>
+<testcase classname="libc++abi.libc++abi" name="catch_function_03.pass.cpp" time="0.17"/>
+<testcase classname="libc++abi.libc++abi" name="catch_in_noexcept.pass.cpp" time="0.26"/>
+<testcase classname="libc++abi.libc++abi" name="catch_member_data_pointer_01.pass.cpp" time="0.17"/>
+<testcase classname="libc++abi.libc++abi" name="catch_member_function_pointer_01.pass.cpp" time="0.17"/>
+<testcase classname="libc++abi.libc++abi" name="catch_member_function_pointer_02.pass.cpp" time="0.16"/>
+<testcase classname="libc++abi.libc++abi" name="catch_member_pointer_nullptr.pass.cpp" time="0.17"/>
+<testcase classname="libc++abi.libc++abi" name="catch_multi_level_pointer.pass.cpp" time="23.22"/>
+<testcase classname="libc++abi.libc++abi" name="catch_pointer_nullptr.pass.cpp" time="0.27"/>
+<testcase classname="libc++abi.libc++abi" name="catch_pointer_reference.pass.cpp" time="0.43"/>
+<testcase classname="libc++abi.libc++abi" name="catch_ptr.pass.cpp" time="0.25"/>
+<testcase classname="libc++abi.libc++abi" name="catch_ptr_02.pass.cpp" time="0.16"/>
+<testcase classname="libc++abi.libc++abi" name="catch_reference_nullptr.pass.cpp" time="0.28"/>
+<testcase classname="libc++abi.libc++abi" name="cxa_bad_cast.pass.cpp" time="0.24"/>
+<testcase classname="libc++abi.libc++abi" name="cxa_bad_typeid.pass.cpp" time="0.83"/>
+<testcase classname="libc++abi.libc++abi" name="cxa_thread_atexit_test.pass.cpp" time="0.15"/>
+<testcase classname="libc++abi.libc++abi" name="cxa_vec_new_overflow_PR41395.pass.cpp" time="0.24"/>
+<testcase classname="libc++abi.libc++abi" name="dynamic_cast.pass.cpp" time="0.22"/>
+<testcase classname="libc++abi.libc++abi" name="dynamic_cast14.pass.cpp" time="0.67"/>
+<testcase classname="libc++abi.libc++abi" name="dynamic_cast3.pass.cpp" time="0.65"/>
+<testcase classname="libc++abi.libc++abi" name="dynamic_cast5.pass.cpp" time="0.54"/>
+<testcase classname="libc++abi.libc++abi" name="dynamic_cast_stress.pass.cpp" time="0.55"/>
+<testcase classname="libc++abi.libc++abi" name="exception_object_alignment.2.pass.cpp" time="0.16"/>
+<testcase classname="libc++abi.libc++abi" name="exception_object_alignment.pass.cpp" time="0.18"/>
+<testcase classname="libc++abi.libc++abi" name="guard_test_basic.pass.cpp" time="0.63"/>
+<testcase classname="libc++abi.libc++abi" name="guard_threaded_test.pass.cpp" time="9.57"/>
+<testcase classname="libc++abi.libc++abi" name="incomplete_type.sh.cpp" time="0.35"/>
+<testcase classname="libc++abi.libc++abi" name="inherited_exception.pass.cpp" time="0.15"/>
+<testcase classname="libc++abi.native/arm-linux-eabi" name="ttype-encoding-00.pass.sh.s" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++abi.native/arm-linux-eabi" name="ttype-encoding-90.pass.sh.s" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++abi.libc++abi" name="noexception1.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++abi.libc++abi" name="noexception2.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++abi.libc++abi" name="noexception3.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++abi.libc++abi" name="noexception4.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++abi.libc++abi" name="test_aux_runtime.pass.cpp" time="0.82"/>
+<testcase classname="libc++abi.libc++abi" name="test_aux_runtime_op_array_new.pass.cpp" time="0.81"/>
+<testcase classname="libc++abi.libc++abi" name="test_demangle.pass.cpp" time="1.59"/>
+<testcase classname="libc++abi.libc++abi" name="test_exception_address_alignment.pass.cpp" time="0.15"/>
+<testcase classname="libc++abi.libc++abi" name="test_exception_storage.pass.cpp" time="1.77"/>
+<testcase classname="libc++abi.libc++abi" name="test_fallback_malloc.pass.cpp" time="1.07"/>
+<testcase classname="libc++abi.libc++abi" name="test_guard.pass.cpp" time="0.68"/>
+<testcase classname="libc++abi.libc++abi" name="test_vector1.pass.cpp" time="0.92"/>
+<testcase classname="libc++abi.libc++abi" name="test_vector2.pass.cpp" time="0.79"/>
+<testcase classname="libc++abi.libc++abi" name="test_vector3.pass.cpp" time="0.59"/>
+<testcase classname="libc++abi.libc++abi" name="thread_local_destruction_order.pass.cpp" time="0.69"/>
+<testcase classname="libc++abi.libc++abi" name="uncaught_exception.pass.cpp" time="0.15"/>
+<testcase classname="libc++abi.libc++abi" name="uncaught_exceptions.pass.cpp" time="0.14"/>
+<testcase classname="libc++abi.libc++abi" name="unittest_demangle.pass.cpp" time="1.25"/>
+<testcase classname="libc++abi.libc++abi" name="unwind_01.pass.cpp" time="0.16"/>
+<testcase classname="libc++abi.libc++abi" name="unwind_02.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++abi.libc++abi" name="unwind_03.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++abi.libc++abi" name="unwind_04.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++abi.libc++abi" name="unwind_05.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++abi.libc++abi" name="unwind_06.pass.cpp" time="0.23"/>
+</testsuite>
+</testsuites>
