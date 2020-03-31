@@ -11699,7 +11699,9 @@ const io = __webpack_require__(82);
 const { mkdirP, run, capture } = __webpack_require__(983);
 
 
-function getActionPathsForConfigUnchecked(config_name, root_path) {
+function getActionPaths(config_name, root_path = '') {
+  if (!root_name)
+    root_name = process.env['GITHUB_WORKSPACE'];
   const output_path = path.join(root_path, 'output', config_name);
   return {
     source: path.join(root_path, 'llvm-project'),
@@ -11710,10 +11712,9 @@ function getActionPathsForConfigUnchecked(config_name, root_path) {
   };
 }
 
-async function createActionPathsForConfig(config_name, root_path) {
-  core.startGroup('create-action-paths');
-  let action_paths = await core.group('create-action-paths', () => {
-    const action_paths = getActionPathsForConfigUnchecked(config_name, root_path);
+async function createActionPaths(config_name, root_path = '') {
+  let action_paths = await core.group('setup paths', async() => {
+    const action_paths = getActionPaths(config_name, root_path);
     Object.entries(action_paths).forEach((entry) => {
       let key = entry[0];
       let val = entry[1];
@@ -11726,39 +11727,8 @@ async function createActionPathsForConfig(config_name, root_path) {
         core.info(`Creating directory ${val}`);
         mkdirP(val);
       }
+      core.setOutput(key, val);
     });
-    return action_paths;
-  });
-  return action_paths;
-}
-
-function getActionPathsForConfig(config_name, root_path) {
-  const action_paths = getActionPathsForConfigUnchecked(config_name, root_path);
-  action_paths.values().forEach(val => {
-    if (!fs.existsSync(val)) {
-      var basename = path.basename(val);
-      var path_for = path.basename(path.dirname(val));
-      core.setFailed(`${path_for} path for config ${basename} does not already exist!`);
-    }
-  });
-  return action_paths;
-}
-
-function getActionPaths(config_name, root_path = '') {
-  if (!root_path)
-    root_path = process.env['GITHUB_WORKSPACE'];
-  return getActionPathsForConfig(config_name, root_path);
-}
-
-async function createActionPaths(config_name, root_path = '') {
-  let action_paths = await core.group('setup paths', async() => {
-    if (!root_path)
-      root_path = process.env['GITHUB_WORKSPACE'];
-    const action_paths = await createActionPathsForConfig(config_name, root_path);
-    core.setOutput('artifacts', action_paths.artifacts);
-    core.setOutput('install', action_paths.install);
-    core.setOutput('build', action_paths.build);
-    core.setOutput('source', action_paths.source);
     return action_paths;
   });
   return action_paths;
