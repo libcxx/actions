@@ -1,23 +1,37 @@
 const core = require('@actions/core');
-const github = require('@actions/github');
-const create_annotations_for_results = require('./xml_annotate');
-const xunitViewer = require('xunit-viewer');
+const io = require('@actions/io');
 const artifact = require('@actions/artifact');
-const artifactClient = artifact.create();
-const rootDirectory = '.'; // Also possible to use __dirname
-const artifactOptions = {
-  continueOnError: false
-};
-const artifactName = "my-artifact";
+const glob = require('@actions/glob');
+const path = require('path');
+const fs = require('fs');
+const {
+  checkoutRuntimes,
+  configureRuntimes,
+  buildRuntimes,
+  createActionPaths,
+  installRuntimes,
+  getActionPaths,
+  testRuntime
+} = require('../src/setup-action');
 
 // most @actions toolkit packages have async methods
 async function run() {
   try {
-    const input = core.getInput('xunit_path');
-    create_annotations_for_results(input);
+    const test_config  = core.getInput('name');
+    const runtime = core.getInput('runtime');
+    const build_config = core.getInput('build');
+    const options = core.getInput('options');
+
+    const action_paths = await createActionPaths(build_config);
+    let xunit_path = await testRuntime(action_paths, runtime, test_config, options);
+
+    await create_annotations_for_results(xunit_path);
+
+
+    return;
 
     await xunitViewer({
-      server: false,
+      server: xunit_path,
       results: input,
       ignore: ['_thingy', 'invalid'],
       title: 'Xunit View Sample Tests',

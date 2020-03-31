@@ -38,10 +38,8 @@ async function run() {
     await configureRuntimes(action_paths);
 
     let a1 = core.group('upload-cmake-cache', async () => {
-      let files = await globDirectory(action_paths.build);
-      console.log(files);
       return artifactClient.uploadArtifact(
-          `runtimes-${config_name}-config`, [ path.join(actions.build, 'CMakeCache.txt') ],
+          `runtimes-${config_name}-config`, [ path.join(action_paths.build, 'CMakeCache.txt') ],
           action_paths.build);
     });
 
