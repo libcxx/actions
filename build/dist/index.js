@@ -3567,6 +3567,7 @@ const core = __webpack_require__(412);
 const path = __webpack_require__(277);
 const fs = __webpack_require__(747);
 const io = __webpack_require__(82);
+const assert = __webpack_require__(357);
 const { mkdirP, run, capture } = __webpack_require__(983);
 
 
