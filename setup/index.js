@@ -1,5 +1,6 @@
 const core = require('@actions/core');
 const io = require('@actions/io');
+const artifact = require('@actions/artifact');
 const fs = require('fs');
 const {checkoutRuntimes, configureRuntimes, buildRuntimes, createActionPaths, installRuntimes} = require('../src/setup-action');
 // most @actions toolkit packages have async methods
