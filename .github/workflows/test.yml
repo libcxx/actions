@@ -12,6 +12,6 @@ jobs:
     - uses: ./actions/build
     - uses: ./actions/test
       with:
-        runtimes: 'libunwind'
+        runtimes: 'libcxxabi'
 
 
