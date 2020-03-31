@@ -26,6 +26,7 @@ async function run() {
     const action_paths = await getActionPaths(config_name);
     const runtimes = getRuntimeList();
     for (const runtime of runtimes) {
+      console.log(`RUNTIME IS: '${runtime}'`)
       let xunit_path = await testRuntime(action_paths, runtime, test_config, options);
       await createTestSuiteAnnotations(xunit_path);
     }
