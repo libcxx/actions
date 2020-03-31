@@ -11703,19 +11703,21 @@ function getActionPathsForConfigUnchecked(config_name, root_path) {
   const output_path = path.join(root_path, 'output', config_name);
   return {
     source: path.join(root_path, 'llvm-project'),
+    output: output_path,
     install: path.join(output_path, 'install'),
     build: path.join(output_path, 'build'),
     artifacts: path.join(output_path, 'artifacts')
   };
 }
 
-function createActionPathsForConfig(config_name, root_path) {
+async function createActionPathsForConfig(config_name, root_path) {
   core.startGroup('create-action-paths');
-  const action_paths = getActionPathsForConfigUnchecked(config_name, root_path);
-  Object.entries(action_paths).forEach((entry) => {
+  let action_paths = await core.group('create-action-paths', () => {
+    const action_paths = getActionPathsForConfigUnchecked(config_name, root_path);
+    Object.entries(action_paths).forEach((entry) => {
       let key = entry[0];
       let val = entry[1];
-      if (fs.existsSync(val) && key != 'source') {
+      if (fs.existsSync(val) && key != 'source' && key != 'output') {
         var basename = path.basename(val);
         var path_for = path.basename(path.dirname(val));
         //core.setFailed(`${path_for} path for config ${basename} already exist!`);
@@ -11724,10 +11726,10 @@ function createActionPathsForConfig(config_name, root_path) {
         core.info(`Creating directory ${val}`);
         mkdirP(val);
       }
+    });
+    return action_paths;
   });
-  core.endGroup();
   return action_paths;
-
 }
 
 function getActionPathsForConfig(config_name, root_path) {
@@ -11748,32 +11750,21 @@ function getActionPaths(config_name, root_path = '') {
   return getActionPathsForConfig(config_name, root_path);
 }
 
-function createActionPaths(config_name, root_path = '') {
-  if (!root_path)
-    root_path = process.env['GITHUB_WORKSPACE'];
-  return createActionPathsForConfig(config_name, root_path);
-}
-
-const artifactClient = artifact.create();
-
-const rootDirectory = '.'; // Also possible to use __dirname
-const artifactOptions = {
-  continueOnError: false
-};
-const artifactName = "my-artifact";
-
-
-async function checkoutRuntimes() {
+async function createActionPaths(config_name, root_path = '') {
   let action_paths = await core.group('setup paths', async() => {
-    const out_path = core.getInput('path');
-    const action_paths = await createActionPaths(core.getInput('name'), out_path);
+    if (!root_path)
+      root_path = process.env['GITHUB_WORKSPACE'];
+    const action_paths = await createActionPathsForConfig(config_name, root_path);
     core.setOutput('artifacts', action_paths.artifacts);
     core.setOutput('install', action_paths.install);
     core.setOutput('build', action_paths.build);
     core.setOutput('source', action_paths.source);
     return action_paths;
   });
+  return action_paths;
+}
 
+async function checkoutRuntimes(action_paths) {
   let sha = await core.group('checkout', async () => {
     const repo_url = ''.concat('https://github.com/', core.getInput('repository'));
     const ref = core.getInput('ref');
@@ -44518,8 +44509,9 @@ const {checkoutRuntimes, configureRuntimes, buildRuntimes} = __webpack_require__
 // most @actions toolkit packages have async methods
 async function run() {
   try {
-    const action_paths = await checkoutRuntimes();
-    console.log(action_paths);
+    const config_name = core.getInput('name');
+    const action_paths = await createActionPaths(config_name);
+    await checkoutRuntimes(action_paths.source)
     await configureRuntimes(action_paths);
     await buildRuntimes(action_paths);
   } catch (error) {
