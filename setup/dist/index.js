@@ -2770,13 +2770,13 @@ async function testRuntime(action_paths, runtime, name, options) {
     core.setOutput('results', xunit_output)
     const llvm_lit = path.join(action_paths.build, 'bin', 'llvm-lit');
     const test_path = path.join(action_paths.source, runtime, 'test');
-    const options = [llvm_lit,
+    const options = [
       '--no-progress-bar', '--show-xfail', '--show-unsupported', '-v', '--xunit-xml-output', xunit_output, test_path]
     const user_options = core.getInput('options');
     if (user_options) {
       options.push(user_options);
     }
-    let result = await run('python', options, {cwd: action_paths.build});
+    let result = await run(`python ${llvm_lit}`, options, {cwd: action_paths.build});
     return xunit_output;
   });
   return result;
