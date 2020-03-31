@@ -41,7 +41,7 @@ async function run() {
       let files = await globDirectory(action_paths.build);
       console.log(files);
       return artifactClient.uploadArtifact(
-          `runtimes-${config_name}-config-${sha}`, [ './CMakeCache.txt' ],
+          `runtimes-${config_name}-config`, [ './CMakeCache.txt' ],
           action_paths.build);
     });
 
@@ -51,7 +51,7 @@ async function run() {
     let a2 = await core.group('upload-installation', async () => {
       let files = await globDirectoryRecursive(action_paths.install);
       return artifactClient.uploadArtifact(
-          `runtimes-${config_name}-install-${sha}`, files,
+          `runtimes-${config_name}-install.zip`, files,
           action_paths.install);
     });
     await a1;
