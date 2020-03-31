@@ -13714,7 +13714,7 @@ async function testRuntime(action_paths, runtime, name, options) {
   return result;
 }
 
-module.exports = {checkoutRuntimes, configureRuntimes, buildRuntimes, getActionPaths, createActionPaths, installRuntimes};
+module.exports = {checkoutRuntimes, configureRuntimes, buildRuntimes, getActionPaths, createActionPaths, installRuntimes, testRuntime};
 
 
 /***/ }),
