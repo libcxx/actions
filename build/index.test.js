@@ -1,25 +1,50 @@
-const wait = require('./wait');
+
 const process = require('process');
 const cp = require('child_process');
-const path = require('path');
+var path = require('path');
+const io = require('@actions/io');
+const fs = require('fs');
+const { checkoutRuntimes, configureRuntimes, buildRuntimes, getActionPaths, createActionPaths } = require('../src/setup-action');
+const { mkdirP, run, capture, handleErrors } = require('../src/utils');
+
+jest.setTimeout(100000);
+
+function setup(name, workspace) {
+    if (!fs.existsSync(workspace)) {
+         mkdirP(workspace);
+    }
+    process.chdir(workspace);
+    process.env['INPUT_NAME'] = name;
+    process.env['INPUT_REPOSITORY'] = 'llvm/llvm-project';
+    process.env['INPUT_REF'] = 'master';
+    process.env['INPUT_PATH'] = 'my-out';
+    process.env['INPUT_CC'] = 'clang';
+    process.env['INPUT_CXX'] = 'clang++';
+    process.env['INPUT_RUNTIMES'] = 'libcxx libcxxabi libunwind';
+    process.env['INPUT_CXXABI'] = 'default';
+    process.env['GITHUB_WORKSPACE'] = workspace;
+    process.env['GITHUB_REPOSITORY'] = 'foo/bar';
+    process.env['GITHUB_EVENT_PATH'] = path.join(workspace, 'payload.json');
+
+}
+
+function tear_down(workspace) {
+    if (fs.existsSync(workspace)) {
+        io.rmRF(workspace);
+    }
+}
+
+beforeEach(() => {
+    setup('test-run', '/tmp/test-workspace');
+})
+
+afterEach(() => {
+    tear_down('/tmp/test-workspace');
+})
 
 
 
-test('throws invalid number', async() => {
-    await expect(wait('foo')).rejects.toThrow('milleseconds not a number');
-});
 
-test('wait 500 ms', async() => {
-    const start = new Date();
-    await wait(500);
-    const end = new Date();
-    var delta = Math.abs(end - start);
-    expect(delta).toBeGreaterThan(450);
-});
-
-// shows how the runner will run a javascript action with env / stdout protocol
-test('test runs', () => {
-    process.env['INPUT_MILLISECONDS'] = 500;
-    const ip = path.join(__dirname, 'index.js');
-    console.log(cp.execSync(`node ${ip}`).toString());
+test('test checkout paths ',  () => {
+   return expect(checkoutRuntimes('my_name')).resolves.toBeDefined();
 })

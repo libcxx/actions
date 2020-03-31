@@ -8,15 +8,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        path: 'libcxx-actions'
-    - uses: ./libcxx-actions/setup
-      with:
-        name: 'debug'
-    - uses: ./libcxx-actions/test-runtimes
-      with:
-        runtime: 'libcxxabi'
-    - uses: ./libcxx-actions/test-runtimes
-      with:
-        runtime: 'libcxx'
+        path: 'actions'
+    - uses: ./actions/build
+    - uses: ./actions/test
 
 

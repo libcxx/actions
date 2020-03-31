@@ -5,6 +5,30 @@ inputs:
   name:
     description: 'The name of the build configuration'
     required: true
+  repository:
+    description: 'Repository name with owner. For example, actions/checkout'
+    default: 'llvm/llvm-project'
+    required: false
+  ref:
+    description: >
+      The branch, tag or SHA to checkout. When checking out the repository that
+      triggered a workflow, this defaults to the reference or SHA for that
+      event.  Otherwise, defaults to `master`.
+    required: false
+    default: 'master'
+  token:
+    description: >
+      Personal access token (PAT) used to fetch the repository. The PAT is configured
+      with the local git config, which enables your scripts to run authenticated git
+      commands. The post-job step removes the PAT.
+      We recommend using a service account with the least permissions necessary.
+      Also when generating a new PAT, select the least scopes necessary.
+      [Learn more about creating and using encrypted secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)
+    default: ${{ github.token }}
+    required: false
+  path:
+    description: 'Relative path under $GITHUB_WORKSPACE to place the repository'
+    required: false
   runtimes:
     description: 'The runtimes to configure and build'
     required: false
@@ -28,24 +52,19 @@ inputs:
   cmake_args:
     description: 'Additional arguments to pass to CMake when configuring'
     required: false
-  repo:
-    description: 'The repository to pull from in the form ":owner/:repo"'
-    required: false
-    default: llvm/llvm-project
-  ref:
-    description: 'The branch or sha to checkout'
-    required: false
-    default: 'master'
 outputs:
-  commit_sha:
+  sha:
     description: 'The git SHA of the specified ref'
-  artifacts_path:
+  artifacts:
     description: 'The artifacts path for this configuration'
-  install_path:
+  install:
     description: 'The runtimes installation path'
-  build_path:
+  build:
     description: 'The build directory used by this configuration'
+  source:
+    description: 'The directory containing the llvm sources'
 runs:
   using: 'node12'
   main: 'dist/index.js'
+  post: 'dist/index.js'
 

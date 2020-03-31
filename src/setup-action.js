@@ -64,11 +64,18 @@ async function checkoutRuntimes(action_paths) {
 }
 
 function getRuntimeList() {
-  const parts = core.getInput('runtimes').split(' ').map(p => { return p.trim(); });
+  const all = ['libcxx', 'libcxxabi', 'libunwind']
+  const raw_intput = core.getInput('runtimes');
+  if (!raw_input) {
+    return all;
+  }
+  const parts = raw_input.split(' ').map(p => { return p.trim(); });
   parts.forEach(runtime => {
     if (runtime != 'libcxx' && runtime != 'libcxxabi' && runtime != 'libunwind')
       throw Error("Invalid runtime name: " + runtime);
   });
+  if (parts.length == 0)
+    throw Error("non-empty string consists entirely of whitespace");
   return parts;
 }
 
@@ -145,6 +152,7 @@ async function testRuntime(action_paths, runtime, name, options) {
   });
   return result;
 }
+
 
 module.exports = {checkoutRuntimes, configureRuntimes, buildRuntimes, getActionPaths,
   createActionPaths, installRuntimes, testRuntime};

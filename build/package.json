@@ -1,12 +1,12 @@
 {
-  "name": "javascript-action",
+  "name": "setup-runtimes",
   "version": "1.0.0",
-  "description": "JavaScript Action Template",
+  "description": "Setup the build env for LLVM runtimes",
   "main": "index.js",
   "scripts": {
     "lint": "eslint index.js",
     "package": "ncc build index.js -o dist",
-    "test": "eslint index.js && jest"
+    "test": "eslint index.js && jest --detectOpenHandles --useStderr --verbose"
   },
   "repository": {
     "type": "git",
@@ -28,10 +28,13 @@
     "@actions/core": "^1.2.3",
     "@actions/exec": "^1.0.3",
     "@actions/github": "^2.1.1",
+    "@actions/glob": "^0.1.0",
     "@octokit/rest": "^17.1.4",
     "assert": "^2.0.0",
+    "checkout": "github:actions/checkout",
     "xmldom": "^0.3.0",
-    "xunit-viewer": "^6.2.1"
+    "xunit-viewer": "^6.2.1",
+    "minimist": ">=1.2.2"
   },
   "devDependencies": {
     "@zeit/ncc": "^0.20.5",
