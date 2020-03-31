@@ -23,10 +23,14 @@ async function run() {
 }
 
 async function cleanup(workspace) {
-  if (fs.existsSync(workspace)) {
-    let r = await io.rmRF(workspace);
+  try {
+    if (fs.existsSync(workspace)) {
+      let r = await io.rmRF(workspace);
+    }
+    return 0;
+  } catch (error) {
+    console.log('Failed during cleanup to remove ' + workspace);
   }
-  return 0;
 }
 
 const workspace = core.getState('cleanup');

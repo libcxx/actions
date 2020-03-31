@@ -36,6 +36,7 @@ function createActionPathsForConfig(config_name, root_path) {
         mkdirP(val);
       }
   });
+  core.endGroup();
   return action_paths;
 
 }
@@ -47,7 +48,6 @@ function getActionPathsForConfig(config_name, root_path) {
       var basename = path.basename(val);
       var path_for = path.basename(path.dirname(val));
       core.setFailed(`${path_for} path for config ${basename} does not already exist!`);
-      process.exit(process.exitCode);
     }
   });
   return action_paths;
@@ -88,12 +88,12 @@ async function checkoutRuntimes() {
   let sha = await core.group('checkout', async () => {
     const repo_url = ''.concat('https://github.com/', core.getInput('repository'));
     const ref = core.getInput('ref');
-    const options = {cwd: action_paths.source };
+    const options = { cwd: action_paths.source };
     await run('git', ['init'], options);
     await run('git', ['remote', 'add', 'origin', repo_url], options);
     await run('git', ['fetch', '--depth=1', 'origin', ref], options);
     await run('git', ['reset', '--hard', 'FETCH_HEAD'], options);
-    let sha = await capture('git' ['rev-parse', 'HEAD'], options);
+    let sha = capture('git' ['rev-parse', 'HEAD'], options);
     core.setOutput('sha', sha);
     return sha;
   });
