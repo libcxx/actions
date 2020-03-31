@@ -11715,11 +11715,11 @@ function getActionPaths(config_name, root_path = '') {
 async function createActionPaths(config_name, root_path = '') {
   let action_paths = await core.group('setup paths', async() => {
     const action_paths = getActionPaths(config_name, root_path);
-    await Object.entries(action_paths).forEach(async (entry) => {
+    await Object.entries(action_paths).forEach( (entry) => {
       let key = entry[0];
       let val = entry[1];
       if (fs.existsSync(val)) {
-        let r = await io.rmRF(val);
+        let r = io.rmRF(val);
       }
       return 0;
     });
@@ -11771,7 +11771,7 @@ function getRuntimeList() {
 async function configureRuntimes(action_paths) {
   let exitCode = await core.group('configure', async () => {
     if (fs.existsSync(action_paths.build)) {
-      await io.rmRF(action_paths.build);
+      io.rmRF(action_paths.build);
       mkdirP(action_paths.build);
     }
     let args = ['-GNinja',
