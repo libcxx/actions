@@ -8,23 +8,35 @@ const {checkoutRuntimes, configureRuntimes, buildRuntimes, createActionPaths, in
 
 const artifactClient = artifact.create();
 
+async function globDirectory(dir) {
+  const globber = await glob.create(path.join(dir, '*'),
+  {followSymbolicLinks: false});
+  const files = await globber.glob()
+  return files;
+}
+
+async function globDirectoryRecursive(dir) {
+  const globber = await glob.create(path.join(dir, '**'),
+  {followSymbolicLinks: false});
+  const files = await globber.glob()
+  return files;
+}
+
 function getArtifactName(base_name) {
   name = 'runtimes-'
   name += core.getInput('name');
+  name += '-';
   name += base_name;
   return name;
 }
 
-function uploadArtifact(base_name, files, root) {
+async function uploadArtifact(base_name, files, root) {
   return artifactClient.uploadArtifact(getArtifactName(base_name),
     files, root, {continueOnError: true});
 }
 
 async function uploadArtifactDir(base_name, root) {
-  const globber = await glob.create(path.join(root, '**'),
-  {followSymbolicLinks: false});
-  const files = await globber.glob()
-  console.log(files)
+  const files = await globDirectoryRecursive(root);
   return uploadArtifact(base_name, files, root)
 }
 
@@ -35,12 +47,22 @@ async function run() {
 
     await checkoutRuntimes(action_paths)
     await configureRuntimes(action_paths);
-    let a1 = uploadArtifact('config', ['CMakeCache.txt'], action_paths.build);
+
+    let a1 = core.startGroup('upload-cmake-cache', async () => {
+      let files = await globDirectory(action_paths.build)
+      console.log(files);
+      return uploadArtifact('config', ['./CMakeCache.txt'], action_paths.build);
+    });
+
 
     await buildRuntimes(action_paths);
     await installRuntimes(action_paths);
-    let a2 = uploadArtifactDir('install', action_paths.install);
 
+    let a2 = core.startGroup('upload-installation', async () => {
+      return uploadArtifactDir('install', action_paths.install);
+    });
+
+    await Promise.all([a1, a2]);
   } catch (error) {
     core.setFailed(error.message);
     return;
