@@ -17284,29 +17284,33 @@ async function installRuntimes(action_paths) {
 }
 
 async function testRuntime(action_paths, runtime, name, options) {
-  let result = await core.group(`test-runtime-${runtime}`,async () => {
-    if (!name)
-      name = 'default';
-    const config_name = `test-${runtime}-${name}`;
-    const xunit_output = path.join(action_paths.artifacts, `${config_name}.xml`)
+  try {
+    let result = await core.group(`test-runtime-${runtime}`,async () => {
+      if (!name)
+        name = 'default';
+      const config_name = `test-${runtime}-${name}`;
+      const xunit_output = path.join(action_paths.artifacts, `${config_name}.xml`)
 
-    if (fs.existsSync(xunit_output)) {
-      core.setFailed(`Duplicate test suite entry for ${config_name}`);
+      if (fs.existsSync(xunit_output)) {
+        core.setFailed(`Duplicate test suite entry for ${config_name}`);
+        return xunit_output;
+      }
+      core.setOutput('results', xunit_output)
+      const llvm_lit = path.join(action_paths.build, 'bin', 'llvm-lit');
+      const test_path = path.join(action_paths.source, runtime, 'test');
+      const options = [
+        '--no-progress-bar', '--show-xfail', '--show-unsupported', '-v', '--xunit-xml-output', xunit_output, test_path]
+      const user_options = core.getInput('options');
+      if (user_options) {
+        options.push(user_options);
+      }
+      let result = await run(`${llvm_lit}`, options, {cwd: action_paths.build});
       return xunit_output;
-    }
-    core.setOutput('results', xunit_output)
-    const llvm_lit = path.join(action_paths.build, 'bin', 'llvm-lit');
-    const test_path = path.join(action_paths.source, runtime, 'test');
-    const options = [
-      '--no-progress-bar', '--show-xfail', '--show-unsupported', '-v', '--xunit-xml-output', xunit_output, test_path]
-    const user_options = core.getInput('options');
-    if (user_options) {
-      options.push(user_options);
-    }
-    let result = await run(`python ${llvm_lit}`, options, {cwd: action_paths.build});
-    return xunit_output;
-  });
-  return result;
+    });
+    return result;
+  } catch (error) {
+    core.setFailed(error.message);
+  }
 }
 
 
