@@ -49459,7 +49459,7 @@ async function run() {
     const action_paths = await createActionPaths(config_name);
 
     let sha = await checkoutRuntimes(action_paths);
-      await configureRuntimes(action_paths);
+    await configureRuntimes(action_paths);
 
     await core.startGroup('upload-cmake-cache', async () => {
       let files = await globDirectory(action_paths.build);
