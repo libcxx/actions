@@ -1,14 +1,23 @@
 
 .PHONY : all
 all:
-	cd test/ && ncc build index.js
-	cd build/ && ncc build index.js
-	cd publish/ && ncc build index.js
+	cd test/ && npm run package
+	cd build/ && npm run package
+	cd publish/ && npm run package
 
 .PHONY : test
 test:
 	cd test/ && npm test
 	cd publish/ && npm test
+
+
+.PHONY : reinstall
+reinstall:
+	rm -rf node_modules/ package-lock.json && npm install --save
+	cd test/ && rm -rf node_modules/ package-lock.json && npm install --save
+	cd publish/ && rm -rf node_modules/ package-lock.json && npm install --save
+	cd build/ && rm -rf node_modules/ package-lock.json && npm install --save
+
 
 .PHONY : commit
 push: all

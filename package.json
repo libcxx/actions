@@ -27,7 +27,6 @@
     "@actions/github": "^2.1.1",
     "@actions/glob": "^0.1.0",
     "@octokit/rest": "^17.1.4",
-    "checkout": "github:actions/checkout#v2",
     "minimist": ">=1.2.2",
     "xmldom": "^0.3.0",
     "xunit-viewer": "^6.2.1"
