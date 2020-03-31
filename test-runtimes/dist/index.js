@@ -42514,6 +42514,9 @@ async function run() {
     const options = core.getInput('options');
 
     const action_paths = await getActionPaths(build_config);
+
+
+
     let xunit_path = await testRuntime(action_paths, runtime, test_config, options);
 
     await create_annotations_for_results(xunit_path);
@@ -42522,7 +42525,7 @@ async function run() {
     return;
 
     await xunitViewer({
-      server: xunit_path,
+      server: false,
       results: input,
       ignore: ['_thingy', 'invalid'],
       title: 'Xunit View Sample Tests',

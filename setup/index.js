@@ -44,6 +44,10 @@ async function run() {
     });
 
     await buildRuntimes(action_paths);
+
+    let files = await globDirectory(path.join(action_paths.build, 'bin'))
+    core.warning(files);
+
     await installRuntimes(action_paths);
 
     let a2 = await core.group('upload-installation', async () => {
