@@ -11700,8 +11700,8 @@ const { mkdirP, run, capture } = __webpack_require__(983);
 
 
 function getActionPaths(config_name, root_path = '') {
-  if (!root_name)
-    root_name = process.env['GITHUB_WORKSPACE'];
+  if (!root_path)
+    root_path = process.env['GITHUB_WORKSPACE'];
   const output_path = path.join(root_path, 'output', config_name);
   return {
     source: path.join(root_path, 'llvm-project'),
@@ -11715,6 +11715,14 @@ function getActionPaths(config_name, root_path = '') {
 async function createActionPaths(config_name, root_path = '') {
   let action_paths = await core.group('setup paths', async() => {
     const action_paths = getActionPaths(config_name, root_path);
+    Object.entries(action_paths).forEach(async (entry) => {
+      let key = entry[0];
+      let val = entry[1];
+      if (fs.existsSync(val)) {
+        let r = await io.rmRF(val);
+      }
+      return 0;
+    });
     Object.entries(action_paths).forEach((entry) => {
       let key = entry[0];
       let val = entry[1];
