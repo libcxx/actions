@@ -10,3 +10,8 @@ test:
 	cd test/ && npm test
 	cd publish/ && npm test
 
+.PHONY : commit
+push: all
+	git add -A :/
+	git commit -am 'dummy commit'
+	git push

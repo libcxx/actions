@@ -1,7 +1,6 @@
 const core = require('@actions/core');
 const io = require('@actions/io');
 const artifact = require('@actions/artifact');
-const glob = require('@actions/glob');
 const path = require('path');
 const fs = require('fs');
 const assert = require('assert');
