@@ -3706,6 +3706,7 @@ async function testRuntime(action_paths, runtime, name, options) {
       }
       core.setOutput('results', xunit_output)
       const llvm_lit = path.join(action_paths.build, 'bin', 'llvm-lit');
+      assert(llvm_lit !== undefined);
       const test_path = path.join(action_paths.source, runtime, 'test');
       const options = [
         '--no-progress-bar', '--show-xfail', '--show-unsupported', '-v', '--xunit-xml-output', xunit_output, test_path]
