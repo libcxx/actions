@@ -4,7 +4,8 @@ author: 'eric@efcs.ca'
 inputs:
   name:
     description: 'The name of the build configuration'
-    required: true
+    required: false
+    default: 'default'
   repository:
     description: 'Repository name with owner. For example, actions/checkout'
     default: 'llvm/llvm-project'
@@ -32,7 +33,7 @@ inputs:
   runtimes:
     description: 'The runtimes to configure and build'
     required: false
-    default: 'libcxx libcxxabi libunwind'
+    default: ''
   cc:
     description: 'The C compiler'
     required: false

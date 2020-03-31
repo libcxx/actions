@@ -6,10 +6,7 @@ inputs:
     description: 'The runtimes to test, defaults to libcxx, libcxxabi ,and libunwind.'
     required: False
     default: ''
-  build:
-    description: 'The build directory to target'
-    required: false
-    default: 'debug'
+
   name:
     description: 'The name used to identify this test suite run'
     required: False
