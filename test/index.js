@@ -14,7 +14,7 @@ const {
   getActionPaths,
   testRuntime
 } = require('../src/setup-action');
-const {create_annotations_from_xunit_results} = require('../src/lit_utils');
+const {createTestSuiteAnnotations} = require('../src/lit_utils');
 const xunitViewer = require('xunit-viewer');
 
 // most @actions toolkit packages have async methods
@@ -27,11 +27,11 @@ async function run() {
     const runtimes = getRuntimeList();
     for (const runtime of runtimes) {
       let xunit_path = await testRuntime(action_paths, runtime, test_config, options);
-      await create_annotations_from_xunit_results(xunit_path);
+      await createTestSuiteAnnotations(xunit_path);
     }
 
     return;
-
+/*
     await xunitViewer({
       server: false,
       results: input,
@@ -42,7 +42,7 @@ async function run() {
     const files = ['output.html'];
     const uploadResponse = await artifactClient.uploadArtifact(artifactName,
         files, rootDirectory, artifactOptions);
-
+    */
   } catch (error) {
     core.setFailed(error.message);
   }

@@ -10,82 +10,82 @@ const { spawn, spawnSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const process = require('process');
+const xunitViewer = require('xunit-viewer');
 
-function handle_error(err) {
-  core.error(err);
-  core.setFailed(err.message);
-}
+
 
 function read_xml_from_file(xml_file) {
   const xml_string = fs.readFileSync(xml_file, 'utf8');
-    var parser = new DOMParser({
-      errorHandler: {
-        warning: function (w) {
-          console.warn(w)
-        }, error: handle_error, fatalError: handle_error
-      }
-    });
-    var doc = parser.parseFromString(xml_string);
-    return doc;
-}
+  function handle_error(err) {
+    core.error(err);
+    core.setFailed(err.message);
+  }
 
-// The LIT XML stores the name 'libc++ :: std/foo/bar.pass.cpp' as two
-// XML attributes:
-//    'classname': 'libc++.std/foo'
-//    'name'     : 'bar.pass.cpp'
-// This function re-formats that into a test-suite name, 'libc++', and the
-// test path and name, 'std/foo/bar.pass.cpp'
-function split_test_case_name(test_path, test_file) {
-  const split_idx = test_path.indexOf('.');
-  assert(split_idx != -1, 'failed to find test suite delimiter');
-  const suite_name = test_path.split(0, split_idx);
-  const test_base_path = test_path.split(split_idx + 1);
-  var test_full_path = '/'.concat(test_base_path, test_file);
-  return {
-    test_suite: suite_name,
-    test_case: test_full_path
-  };
-}
-
-function format_test_case_failure(tc_elem) {
-  const failures = tc_elem.getElementsByTagName("failure");
-      if (failures.length != 1) {
-        throw "Unexpected XML format";
-      }
-
-      const {test_suite, test_case} = split_test_case_name(
-        tc_elem.getAttribute('classname'), tc_elem.getAttribute('name'));
-      const failure_text = failures[0].firstChild.data;
-
-      return `TEST '${test_suite} :: ${test_case} FAILED\n${failure_text}`
-}
-
-function collect_failure_messages(xml_doc) {
-  var failure_messages = [];
-    var elems = xml_doc.getElementsByTagName("testcase");
-    for (var i = 0; i < elems.length; ++i) {
-      const tc = elems[i];
-      if (!tc.hasChildNodes())
-        continue;
-
-      failure_messages.push(format_test_case_failure(tc));
+  var parser = new DOMParser({
+    errorHandler: {
+      warning: function (w) {
+        core.warning(w)
+      }, error: handle_error, fatalError: handle_error
     }
-    return failure_messages;
+  });
+  var doc = parser.parseFromString(xml_string);
+  return doc;
 }
 
-function create_annotations_from_xunit_results(xml_file_path) {
+function get_corrected_names(test_case) {
+  const ts = test_case.parentNode;
+  assert(ts && ts.nodeName == "testsuite");
+  const ts_name = ts.getAttribute("name");
+
+  const file_name = test_case.getAttribute('name');
+  const file_path_and_suite = test_case.getAttribute('classname');
+  assert(file_path_and_suite.startsWith(ts_name));
+  const test_case_name = path.join(file_path_and_suite.substring(ts_name.length), file_name);
+
+  return {test_suite: ts_name, test_case: test_case_name};
+}
+
+function visit_all_failures(xml_doc) {
+  var failure_messages = [];
+  var elems = xml_doc.getElementsByTagName("failure");
+  for (var i = 0; i < elems.length; ++i) {
+    const failure = elems[i];
+    assert(failure.hasChildNodes());
+    assert(failure.childNodes.length == 1);
+    const failure_text = failure.childNodes[0].nodeValue;
+
+    const tc = failure.parentNode;
+    assert(tc && tc.nodeName == "testcase");
+    const {test_suite_name, test_case_name} = get_corrected_names(tc);
+
+    const failure_message =  `TEST '${test_suite_name} :: ${test_case_name} FAILED\n${failure_text}`
+
+    failure_messages.push(failure_message);
+  }
+  return failure_messages;
+}
+
+function getTestSuiteAnnotations(xml_file_path) {
   const xml_dom = read_xml_from_file(xml_file_path);
-  const failures = collect_failure_messages(xml_dom);
-  failures.forEach(failure => { core.error(failure); });
+  const failures = visit_all_failures(xml_dom);
+  return failures;
 }
 
-function create_html_from_xunit_results(title, xml_file_path, html_output_path) {
-  return xunitViewer({
+function createTestSuiteAnnotations(xml_file_path) {
+  const failures = getTestSuiteAnnotations(xml_file_path);
+  count = 0;
+  failures.forEach(failure => { count += 1; core.error(failure); });
+  return count;
+}
+
+async function createTestSuiteHTMLResults(title, xml_file_path, html_output_path) {
+  await Promise.all([xunitViewer({
       server: false,
       results: xml_file_path,
       title: title,
       output: html_output_path,
-    });
+    })]
+    );
 }
 
-module.exports = {create_annotations_from_xunit_results, create_html_from_xunit_results}
+module.exports = {getTestSuiteAnnotations, createTestSuiteAnnotations, createTestSuiteHTMLResults}

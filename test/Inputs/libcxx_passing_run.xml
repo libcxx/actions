@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites>
+<testsuite name="libc++" tests="151" failures="0" skipped="45">
+<testcase classname="libc++.std/depr/depr_auto_ptr/auto_ptr/auto_ptr_cons" name="assignment.fail.cpp" time="0.56"/>
+<testcase classname="libc++.std/depr/depr_auto_ptr/auto_ptr/auto_ptr_cons" name="assignment.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_auto_ptr/auto_ptr/auto_ptr_cons" name="convert.fail.cpp" time="0.53"/>
+<testcase classname="libc++.std/depr/depr_auto_ptr/auto_ptr/auto_ptr_cons" name="convert.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_auto_ptr/auto_ptr/auto_ptr_cons" name="convert_assignment.fail.cpp" time="0.54"/>
+<testcase classname="libc++.std/depr/depr_auto_ptr/auto_ptr/auto_ptr_cons" name="convert_assignment.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_auto_ptr/auto_ptr/auto_ptr_cons" name="copy.fail.cpp" time="0.49"/>
+<testcase classname="libc++.std/depr/depr_auto_ptr/auto_ptr/auto_ptr_cons" name="copy.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_auto_ptr/auto_ptr/auto_ptr_cons" name="explicit.fail.cpp" time="0.56"/>
+<testcase classname="libc++.std/depr/depr_auto_ptr/auto_ptr/auto_ptr_cons" name="pointer.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_auto_ptr/auto_ptr/auto_ptr_conv" name="assign_from_auto_ptr_ref.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_auto_ptr/auto_ptr/auto_ptr_conv" name="convert_from_auto_ptr_ref.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_auto_ptr/auto_ptr/auto_ptr_conv" name="convert_to_auto_ptr.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_auto_ptr/auto_ptr/auto_ptr_conv" name="convert_to_auto_ptr_ref.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_auto_ptr/auto_ptr/auto_ptr_members" name="arrow.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_auto_ptr/auto_ptr/auto_ptr_members" name="deref.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_auto_ptr/auto_ptr/auto_ptr_members" name="release.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_auto_ptr/auto_ptr/auto_ptr_members" name="reset.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_auto_ptr/auto_ptr" name="element_type.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_auto_ptr" name="nothing_to_do.pass.cpp" time="0.25"/>
+<testcase classname="libc++.std/depr/depr_c_headers" name="assert_h.pass.cpp" time="0.25"/>
+<testcase classname="libc++.std/depr/depr_c_headers" name="ciso646.pass.cpp" time="0.25"/>
+<testcase classname="libc++.std/depr/depr_c_headers" name="complex.h.pass.cpp" time="0.33"/>
+<testcase classname="libc++.std/depr/depr_c_headers" name="ctype_h.pass.cpp" time="0.25"/>
+<testcase classname="libc++.std/depr/depr_c_headers" name="errno_h.pass.cpp" time="0.25"/>
+<testcase classname="libc++.std/depr/depr_c_headers" name="fenv_h.pass.cpp" time="0.25"/>
+<testcase classname="libc++.std/depr/depr_c_headers" name="float_h.pass.cpp" time="0.25"/>
+<testcase classname="libc++.std/depr/depr_c_headers" name="inttypes_h.pass.cpp" time="0.24"/>
+<testcase classname="libc++.std/depr/depr_c_headers" name="iso646_h.pass.cpp" time="0.24"/>
+<testcase classname="libc++.std/depr/depr_c_headers" name="limits_h.pass.cpp" time="0.24"/>
+<testcase classname="libc++.std/depr/depr_c_headers" name="locale_h.pass.cpp" time="0.24"/>
+<testcase classname="libc++.std/depr/depr_c_headers" name="math_h.pass.cpp" time="0.53"/>
+<testcase classname="libc++.std/depr/depr_c_headers" name="setjmp_h.pass.cpp" time="0.24"/>
+<testcase classname="libc++.std/depr/depr_c_headers" name="signal_h.pass.cpp" time="0.24"/>
+<testcase classname="libc++.std/depr/depr_c_headers" name="stdarg_h.pass.cpp" time="0.24"/>
+<testcase classname="libc++.std/depr/depr_c_headers" name="stdbool_h.pass.cpp" time="0.23"/>
+<testcase classname="libc++.std/depr/depr_c_headers" name="stddef_h.pass.cpp" time="0.23"/>
+<testcase classname="libc++.std/depr/depr_c_headers" name="stdint_h.pass.cpp" time="0.23"/>
+<testcase classname="libc++.std/depr/depr_c_headers" name="stdint_h.sh.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_c_headers" name="stdio_h.pass.cpp" time="0.23"/>
+<testcase classname="libc++.std/depr/depr_c_headers" name="stdlib_h.pass.cpp" time="0.28"/>
+<testcase classname="libc++.std/depr/depr_c_headers" name="string_h.pass.cpp" time="0.23"/>
+<testcase classname="libc++.std/depr/depr_c_headers" name="tgmath_h.pass.cpp" time="0.34"/>
+<testcase classname="libc++.std/depr/depr_c_headers" name="time_h.pass.cpp" time="0.22"/>
+<testcase classname="libc++.std/depr/depr_c_headers" name="uchar_h.pass.cpp" time="0.22"/>
+<testcase classname="libc++.std/depr/depr_c_headers" name="wchar_h.pass.cpp" time="0.22"/>
+<testcase classname="libc++.std/depr/depr_c_headers" name="wctype_h.pass.cpp" time="0.22"/>
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_function_pointer_adaptors" name="pointer_to_binary_function.cxx1z.fail.cpp" time="0.51"/>
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_function_pointer_adaptors" name="pointer_to_binary_function.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_function_pointer_adaptors" name="pointer_to_unary_function.cxx1z.fail.cpp" time="0.52"/>
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_function_pointer_adaptors" name="pointer_to_unary_function.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_function_pointer_adaptors" name="ptr_fun1.cxx1z.fail.cpp" time="0.58"/>
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_function_pointer_adaptors" name="ptr_fun1.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_function_pointer_adaptors" name="ptr_fun2.cxx1z.fail.cpp" time="0.54"/>
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_function_pointer_adaptors" name="ptr_fun2.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_member_pointer_adaptors" name="const_mem_fun.cxx1z.fail.cpp" time="0.57"/>
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_member_pointer_adaptors" name="const_mem_fun.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_member_pointer_adaptors" name="const_mem_fun1.cxx1z.fail.cpp" time="0.54"/>
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_member_pointer_adaptors" name="const_mem_fun1.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_member_pointer_adaptors" name="const_mem_fun1_ref_t.cxx1z.fail.cpp" time="0.56"/>
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_member_pointer_adaptors" name="const_mem_fun1_ref_t.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_member_pointer_adaptors" name="const_mem_fun1_t.cxx1z.fail.cpp" time="0.58"/>
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_member_pointer_adaptors" name="const_mem_fun1_t.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_member_pointer_adaptors" name="const_mem_fun_ref.cxx1z.fail.cpp" time="0.57"/>
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_member_pointer_adaptors" name="const_mem_fun_ref.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_member_pointer_adaptors" name="const_mem_fun_ref1.cxx1z.fail.cpp" time="0.63"/>
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_member_pointer_adaptors" name="const_mem_fun_ref1.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_member_pointer_adaptors" name="const_mem_fun_ref_t.cxx1z.fail.cpp" time="0.56"/>
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_member_pointer_adaptors" name="const_mem_fun_ref_t.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_member_pointer_adaptors" name="const_mem_fun_t.cxx1z.fail.cpp" time="0.54"/>
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_member_pointer_adaptors" name="const_mem_fun_t.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_member_pointer_adaptors" name="mem_fun.cxx1z.fail.cpp" time="0.53"/>
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_member_pointer_adaptors" name="mem_fun.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_member_pointer_adaptors" name="mem_fun1.cxx1z.fail.cpp" time="0.54"/>
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_member_pointer_adaptors" name="mem_fun1.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_member_pointer_adaptors" name="mem_fun1_ref_t.cxx1z.fail.cpp" time="0.56"/>
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_member_pointer_adaptors" name="mem_fun1_ref_t.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_member_pointer_adaptors" name="mem_fun1_t.cxx1z.fail.cpp" time="0.57"/>
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_member_pointer_adaptors" name="mem_fun1_t.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_member_pointer_adaptors" name="mem_fun_ref.cxx1z.fail.cpp" time="0.59"/>
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_member_pointer_adaptors" name="mem_fun_ref.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_member_pointer_adaptors" name="mem_fun_ref1.cxx1z.fail.cpp" time="0.54"/>
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_member_pointer_adaptors" name="mem_fun_ref1.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_member_pointer_adaptors" name="mem_fun_ref_t.cxx1z.fail.cpp" time="0.54"/>
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_member_pointer_adaptors" name="mem_fun_ref_t.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_member_pointer_adaptors" name="mem_fun_t.cxx1z.fail.cpp" time="0.57"/>
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors/depr_member_pointer_adaptors" name="mem_fun_t.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_function_objects/depr_adaptors" name="nothing_to_do.pass.cpp" time="0.19"/>
+<testcase classname="libc++.std/depr/depr_function_objects/depr_base" name="binary_function.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_function_objects/depr_base" name="unary_function.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_function_objects" name="nothing_to_do.pass.cpp" time="0.19"/>
+<testcase classname="libc++.std/depr/depr_ios_members" name="io_state.pass.cpp" time="0.93"/>
+<testcase classname="libc++.std/depr/depr_ios_members" name="open_mode.pass.cpp" time="1.08"/>
+<testcase classname="libc++.std/depr/depr_ios_members" name="seek_dir.pass.cpp" time="1.11"/>
+<testcase classname="libc++.std/depr/depr_ios_members" name="streamoff.pass.cpp" time="0.98"/>
+<testcase classname="libc++.std/depr/depr_ios_members" name="streampos.pass.cpp" time="0.89"/>
+<testcase classname="libc++.std/depr/depr_lib_binders/depr_lib_bind_1st" name="bind1st.depr_in_cxx11.fail.cpp" time="0.54"/>
+<testcase classname="libc++.std/depr/depr_lib_binders/depr_lib_bind_1st" name="bind1st.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_lib_binders/depr_lib_bind_2nd" name="bind2nd.depr_in_cxx11.fail.cpp" time="0.57"/>
+<testcase classname="libc++.std/depr/depr_lib_binders/depr_lib_bind_2nd" name="bind2nd.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_lib_binders/depr_lib_binder_1st" name="binder1st.depr_in_cxx11.fail.cpp" time="0.56"/>
+<testcase classname="libc++.std/depr/depr_lib_binders/depr_lib_binder_1st" name="binder1st.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_lib_binders/depr_lib_binder_2nd" name="binder2nd.depr_in_cxx11.fail.cpp" time="0.54"/>
+<testcase classname="libc++.std/depr/depr_lib_binders/depr_lib_binder_2nd" name="binder2nd.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/depr_lib_binders" name="nothing_to_do.pass.cpp" time="0.18"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_istrstream/depr_istrstream_cons" name="ccp.pass.cpp" time="1.12"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_istrstream/depr_istrstream_cons" name="ccp_size.pass.cpp" time="0.94"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_istrstream/depr_istrstream_cons" name="cp.pass.cpp" time="1.02"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_istrstream/depr_istrstream_cons" name="cp_size.pass.cpp" time="0.99"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_istrstream/depr_istrstream_members" name="rdbuf.pass.cpp" time="1.10"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_istrstream/depr_istrstream_members" name="str.pass.cpp" time="0.93"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_istrstream" name="types.pass.cpp" time="0.93"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_ostrstream/depr_ostrstream_cons" name="cp_size_mode.pass.cpp" time="1.09"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_ostrstream/depr_ostrstream_cons" name="default.pass.cpp" time="1.13"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_ostrstream/depr_ostrstream_members" name="freeze.pass.cpp" time="0.90"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_ostrstream/depr_ostrstream_members" name="pcount.pass.cpp" time="1.14"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_ostrstream/depr_ostrstream_members" name="rdbuf.pass.cpp" time="0.86"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_ostrstream/depr_ostrstream_members" name="str.pass.cpp" time="0.91"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_ostrstream" name="types.pass.cpp" time="0.99"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_strstream/depr_strstream_cons" name="cp_size_mode.pass.cpp" time="0.91"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_strstream/depr_strstream_cons" name="default.pass.cpp" time="0.90"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_strstream/depr_strstream_dest" name="rdbuf.pass.cpp" time="0.97"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_strstream/depr_strstream_oper" name="freeze.pass.cpp" time="0.88"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_strstream/depr_strstream_oper" name="pcount.pass.cpp" time="1.12"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_strstream/depr_strstream_oper" name="str.pass.cpp" time="0.92"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_strstream" name="types.pass.cpp" time="0.84"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_strstreambuf/depr_strstreambuf_cons" name="ccp_size.pass.cpp" time="0.86"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_strstreambuf/depr_strstreambuf_cons" name="cp_size_cp.pass.cpp" time="1.03"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_strstreambuf/depr_strstreambuf_cons" name="cscp_size.pass.cpp" time="1.05"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_strstreambuf/depr_strstreambuf_cons" name="cucp_size.pass.cpp" time="1.09"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_strstreambuf/depr_strstreambuf_cons" name="custom_alloc.pass.cpp" time="1.08"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_strstreambuf/depr_strstreambuf_cons" name="default.pass.cpp" time="1.07"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_strstreambuf/depr_strstreambuf_cons" name="scp_size_scp.pass.cpp" time="0.88"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_strstreambuf/depr_strstreambuf_cons" name="ucp_size_ucp.pass.cpp" time="1.23"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_strstreambuf/depr_strstreambuf_members" name="freeze.pass.cpp" time="1.10"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_strstreambuf/depr_strstreambuf_members" name="overflow.pass.cpp" time="0.86"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_strstreambuf/depr_strstreambuf_members" name="pcount.pass.cpp" time="1.13"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_strstreambuf/depr_strstreambuf_members" name="str.pass.cpp" time="1.02"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_strstreambuf/depr_strstreambuf_virtuals" name="overflow.pass.cpp" time="0.89"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_strstreambuf/depr_strstreambuf_virtuals" name="pbackfail.pass.cpp" time="1.10"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_strstreambuf/depr_strstreambuf_virtuals" name="seekoff.pass.cpp" time="0.85"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_strstreambuf/depr_strstreambuf_virtuals" name="seekpos.pass.cpp" time="0.84"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_strstreambuf/depr_strstreambuf_virtuals" name="setbuf.pass.cpp" time="0.77"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_strstreambuf/depr_strstreambuf_virtuals" name="underflow.pass.cpp" time="0.79"/>
+<testcase classname="libc++.std/depr/depr_str_strstreams/depr_strstreambuf" name="types.pass.cpp" time="1.09"/>
+<testcase classname="libc++.std/depr/exception_unexpected" name="nothing_to_do.pass.cpp" time="0.14"/>
+<testcase classname="libc++.std/depr/exception_unexpected/set_unexpected" name="get_unexpected.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/exception_unexpected/set_unexpected" name="set_unexpected.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/exception_unexpected/unexpected_handler" name="unexpected_handler.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr/exception_unexpected/unexpected" name="unexpected.pass.cpp" time="0.00">
+	<skipped message="Skipping because of configuration." />
+</testcase>
+
+<testcase classname="libc++.std/depr" name="nothing_to_do.pass.cpp" time="0.14"/>
+</testsuite>
+</testsuites>

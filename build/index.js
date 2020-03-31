@@ -4,6 +4,7 @@ const artifact = require('@actions/artifact');
 const glob = require('@actions/glob');
 const path = require('path');
 const fs = require('fs');
+const assert = require('assert');
 const {
   checkoutRuntimes,
   configureRuntimes,
@@ -12,6 +13,9 @@ const {
   installRuntimes,
   getActionPaths
 } = require('../src/setup-action');
+const {
+  rmRfIgnoreError
+} = require('../src/utils');
 
 async function globDirectory(dir) {
   const globber =
@@ -32,6 +36,7 @@ async function run() {
     const artifactClient = artifact.create();
 
     const config_name = core.getInput('name');
+    core.saveState('config_name', config_name);
     const action_paths = await createActionPaths(config_name);
 
     let sha = await checkoutRuntimes(action_paths);
@@ -63,12 +68,15 @@ async function run() {
 async function cleanup() {
   let result = await core.group('cleanup', async () => {
     try {
-      const action_paths = getActionPaths();
+      const action_paths = getActionPaths(core.getState('config_name'));
+      assert(action_paths);
+      assert(action_paths.source);
+      assert(action_paths.output);
       if (fs.existsSync(action_paths.source)) {
-        await io.rmRF(action_paths.source);
+        rmRfIgnoreError(action_paths.source);
       }
       if (fs.existsSync(action_paths.output)) {
-        await io.rmRF(action_paths.output);
+        rmRfIgnoreError(action_paths.output);
       }
     } catch (error) { core.setFailed(error.message); }
   });
