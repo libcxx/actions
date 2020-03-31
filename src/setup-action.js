@@ -108,7 +108,7 @@ async function configureRuntimes(action_paths) {
 }
 
 async function buildRuntimes(action_paths) {
-  let exitCode = await core.group('Building runtimes', async () => {
+  let exitCode = await core.group('building runtimes', async () => {
     let args = ['-v'];
     getRuntimeList().forEach(rt => {
       args.push(path.join('projects', rt, 'all'));
@@ -121,7 +121,7 @@ async function buildRuntimes(action_paths) {
 
 
 async function installRuntimes(action_paths) {
-  let exitCode = await core.group('Building runtimes', async () => {
+  let exitCode = await core.group('installing runtimes', async () => {
     let args = ['-v'];
     getRuntimeList().forEach(rt => {
       args.push(path.join('projects', rt, 'install'));
