@@ -5959,14 +5959,15 @@ async function run() {
 
 async function cleanup() {
   let result = await core.group('cleanup', async () => {
-
-    const action_paths = getActionPaths();
-    if (fs.existsSync(action_paths.source)) {
-      await io.rmRF(action_paths.source);
-    }
-    if (fs.existsSync(action_paths.output)) {
-      await io.rmRF(action_paths.output);
-    }
+    try {
+      const action_paths = getActionPaths();
+      if (fs.existsSync(action_paths.source)) {
+        await io.rmRF(action_paths.source);
+      }
+      if (fs.existsSync(action_paths.output)) {
+        await io.rmRF(action_paths.output);
+      }
+    } catch (error) { core.setFailed(error.message); }
   });
   return result;
 }
