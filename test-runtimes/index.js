@@ -13,6 +13,8 @@ const {
   getActionPaths,
   testRuntime
 } = require('../src/setup-action');
+const {create_annotations_from_xunit_results} = require('../src/lit_utils');
+const xunitViewer = require('xunit-viewer');
 
 // most @actions toolkit packages have async methods
 async function run() {
