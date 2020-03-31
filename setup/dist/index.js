@@ -49427,59 +49427,60 @@ const io = __webpack_require__(51);
 const artifact = __webpack_require__(633);
 const glob = __webpack_require__(938);
 const fs = __webpack_require__(747);
-const {checkoutRuntimes, configureRuntimes, buildRuntimes, createActionPaths, installRuntimes} = __webpack_require__(195);
-// most @actions toolkit packages have async methods
+const {checkoutRuntimes, configureRuntimes, buildRuntimes, createActionPaths, installRuntimes, getActionPaths} = __webpack_require__(195);
 
-function uploadConfigurationArtifacts(action_paths, artifactClient) {
-   const artifactOptions = {
-      continueOnError: true
-    }
-    artifactClient.uploadArtifact('CMake Cache', ['CMakeCache.txt'],
-                                   action_paths.build, artifactOptions);
+const artifactClient = artifact.create();
+
+function getArtifactName(base_name) {
+  name = 'runtimes-'
+  name += core.getInput('name');
+  name += base_name;
+  return name;
 }
 
-async function uploadInstallationArtifacts(action_paths, artifactClient) {
-   const artifactOptions = {
-      continueOnError: true,
-    }
-    const globber = await glob.create(path.join(action_paths.install, '**'), {
-    followSymbolicLinks: false});
-    const files = await globber.glob()
-    console.log(files)
-    artifactClient.uploadArtifact('Installation', files,
-                                   action_paths.install, artifactOptions);
+function uploadArtifact(base_name, files, root) {
+  return artifactClient.uploadArtifact(getArtifactName(base_name),
+    files, root, {continueOnError: true});
+}
+
+async function uploadArtifactDir(base_name, root) {
+  const globber = await glob.create(path.join(root, '**'),
+  {followSymbolicLinks: false});
+  const files = await globber.glob()
+  console.log(files)
+  return uploadArtifact(base_name, files, root)
 }
 
 async function run() {
   try {
-    const artifactClient = artifact.create();
-
     const config_name = core.getInput('name');
     const action_paths = await createActionPaths(config_name);
 
     await checkoutRuntimes(action_paths)
     await configureRuntimes(action_paths);
-    uploadConfigurationArtifacts(action_paths, artifactClient);
+    let a1 = uploadArtifact('config', ['CMakeCache.txt'], action_paths.build);
 
     await buildRuntimes(action_paths);
     await installRuntimes(action_paths);
-    uploadInstallationArtifacts(action_paths, artifactClient);
+    let a2 = uploadArtifactDir('install', action_paths.install);
 
   } catch (error) {
     core.setFailed(error.message);
     return;
   }
-   //const input = core.getInput('xunit_path');
-    //create_annotations_for_results(input);
-
-
-    //const files = ['output.html'];
-    //const uploadResponse = await artifactClient.uploadArtifact(artifactName,
-    //    files, rootDirectory, artifactOptions);
 }
 
 async function cleanup() {
- // const action_paths = core.getState('action_paths');
+  let result = await core.group('cleanup', async () => {
+    const action_paths = getActionPaths(core.getInput('name'));
+    if (fs.existsSync(action_paths.source)) {
+      await io.rmRF(action_paths.source);
+    }
+    if (fs.existsSync(action_paths.output)) {
+      await io.rmRF(action_paths.output);
+    }
+  });
+  return result;
 }
 
 if (core.getState('cleanup')) {
