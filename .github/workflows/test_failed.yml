@@ -1,0 +1,17 @@
+name: Build Runtimes
+
+on: push
+
+jobs:
+  debug:
+    runs-on: [libcxx-builder]
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        path: 'actions'
+    - uses: ./actions/build
+    - uses: ./actions/test
+      with:
+        runtimes: 'libunwind'
+
+
