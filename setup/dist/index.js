@@ -11808,7 +11808,20 @@ async function buildRuntimes(action_paths) {
   return exitCode;
 }
 
-module.exports = {checkoutRuntimes, configureRuntimes, buildRuntimes, getActionPaths, createActionPaths};
+
+async function installRuntimes(action_paths) {
+  let exitCode = await core.group('Building runtimes', async () => {
+    let args = ['-v'];
+    getRuntimeList().forEach(rt => {
+      args.push(path.join('projects', rt, 'install'));
+    });
+    const result = await run('ninja', args, {cwd: action_paths.build});
+    return result;
+  });
+  return exitCode;
+}
+
+module.exports = {checkoutRuntimes, configureRuntimes, buildRuntimes, getActionPaths, createActionPaths, installRuntimes};
 
 
 /***/ }),
@@ -44483,7 +44496,7 @@ exports.Octokit = Octokit;
 const core = __webpack_require__(827);
 const io = __webpack_require__(51);
 const fs = __webpack_require__(747);
-const {checkoutRuntimes, configureRuntimes, buildRuntimes, createActionPaths} = __webpack_require__(195);
+const {checkoutRuntimes, configureRuntimes, buildRuntimes, createActionPaths, installRuntimes} = __webpack_require__(195);
 // most @actions toolkit packages have async methods
 async function run() {
   try {
@@ -44493,6 +44506,7 @@ async function run() {
     await checkoutRuntimes(action_paths)
     await configureRuntimes(action_paths);
     await buildRuntimes(action_paths);
+    await installRuntimes(action_paths);
   } catch (error) {
     core.setFailed(error.message);
     return;

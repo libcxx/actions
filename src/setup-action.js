@@ -119,4 +119,17 @@ async function buildRuntimes(action_paths) {
   return exitCode;
 }
 
-module.exports = {checkoutRuntimes, configureRuntimes, buildRuntimes, getActionPaths, createActionPaths};
+
+async function installRuntimes(action_paths) {
+  let exitCode = await core.group('Building runtimes', async () => {
+    let args = ['-v'];
+    getRuntimeList().forEach(rt => {
+      args.push(path.join('projects', rt, 'install'));
+    });
+    const result = await run('ninja', args, {cwd: action_paths.build});
+    return result;
+  });
+  return exitCode;
+}
+
+module.exports = {checkoutRuntimes, configureRuntimes, buildRuntimes, getActionPaths, createActionPaths, installRuntimes};
