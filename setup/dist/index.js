@@ -44489,7 +44489,7 @@ async function run() {
   try {
     const config_name = core.getInput('name');
     const action_paths = await createActionPaths(config_name);
-    core.saveState('action_paths', action_paths);
+    //core.saveState('action_paths', action_paths);
     await checkoutRuntimes(action_paths)
     await configureRuntimes(action_paths);
     await buildRuntimes(action_paths);
@@ -44507,10 +44507,9 @@ async function run() {
 }
 
 async function cleanup() {
-  const action_paths = core.getState('action_paths');
+ // const action_paths = core.getState('action_paths');
 }
 
-const workspace = core.getState('cleanup');
 if (core.getState('cleanup')) {
   cleanup();
 } else {
