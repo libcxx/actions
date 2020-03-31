@@ -31,6 +31,6 @@ async function cleanup() {
 if (core.getState('cleanup')) {
   cleanup();
 } else {
-  core.saveState('cleanup', 1);
+  core.saveState('cleanup', '1');
   run()
 }
