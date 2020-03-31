@@ -5,6 +5,13 @@ all:
 	cd build/ && npm run package
 	cd publish/ && npm run package
 
+.PHONY : clean
+clean:
+	cd test/ && rm -rf dist/ && mkdir dist
+	cd build/ && rm -rf dist/ && mkdir dist
+	cd package/ && rm -rf dist/ && mkdir dist
+
+
 .PHONY : test
 test:
 	cd test/ && npm test
