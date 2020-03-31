@@ -22,7 +22,7 @@ async function run() {
     const build_config = core.getInput('build');
     const options = core.getInput('options');
 
-    const action_paths = await createActionPaths(build_config);
+    const action_paths = await getActionPaths(build_config);
     let xunit_path = await testRuntime(action_paths, runtime, test_config, options);
 
     await create_annotations_for_results(xunit_path);

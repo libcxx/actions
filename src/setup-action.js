@@ -1,9 +1,4 @@
 const core = require('@actions/core');
-const github = require('@actions/github');
-const {create_annotations_from_xunit_results} = require('../src/lit_utils');
-const {checkoutRepoShallow, getRevisionAtHead} = require('../src/git_utils');
-const xunitViewer = require('xunit-viewer');
-const artifact = require('@actions/artifact');
 const path = require('path');
 const fs = require('fs');
 const io = require('@actions/io');
@@ -151,4 +146,5 @@ async function testRuntime(action_paths, runtime, name, options) {
   return result;
 }
 
-module.exports = {checkoutRuntimes, configureRuntimes, buildRuntimes, getActionPaths, createActionPaths, installRuntimes, testRuntime};
+module.exports = {checkoutRuntimes, configureRuntimes, buildRuntimes, getActionPaths,
+createActionPaths, installRuntimes, testRuntime};
