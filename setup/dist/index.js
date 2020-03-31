@@ -49428,57 +49428,56 @@ const artifact = __webpack_require__(633);
 const glob = __webpack_require__(938);
 const path = __webpack_require__(277);
 const fs = __webpack_require__(747);
-const {checkoutRuntimes, configureRuntimes, buildRuntimes, createActionPaths, installRuntimes, getActionPaths} = __webpack_require__(195);
-
-const artifactClient = artifact.create();
+const {
+  checkoutRuntimes,
+  configureRuntimes,
+  buildRuntimes,
+  createActionPaths,
+  installRuntimes,
+  getActionPaths
+} = __webpack_require__(195);
 
 async function globDirectory(dir) {
-  const globber = await glob.create(path.join(dir, '*'),
-  {followSymbolicLinks: false});
+  const globber =
+      await glob.create(path.join(dir, '*'), {followSymbolicLinks : false});
   const files = await globber.glob()
   return files;
 }
 
 async function globDirectoryRecursive(dir) {
-  const globber = await glob.create(path.join(dir, '**'),
-  {followSymbolicLinks: false});
+  const globber =
+      await glob.create(path.join(dir, '**'), {followSymbolicLinks : false});
   const files = await globber.glob()
   return files;
 }
 
-
-async function uploadArtifact(name, files, root) {
-  return artifactClient.uploadArtifact(name,
-    files, root, {continueOnError: true});
-}
-
-async function uploadArtifactDir(name, root) {
-  const files = await globDirectoryRecursive(root);
-  return uploadArtifact(name, files, root)
-}
-
 async function run() {
   try {
+    const artifactClient = artifact.create();
+
     const config_name = core.getInput('name');
     const action_paths = await createActionPaths(config_name);
 
-    let sha = await checkoutRuntimes(action_paths)
-    await configureRuntimes(action_paths);
+    let sha = await checkoutRuntimes(action_paths);
+      await configureRuntimes(action_paths);
 
     await core.startGroup('upload-cmake-cache', async () => {
-      let files = await globDirectory(action_paths.build)
+      let files = await globDirectory(action_paths.build);
       console.log(files);
-      let a1 = await uploadArtifact(`runtimes-${config_name}-config-${sha}`, ['./CMakeCache.txt'], action_paths.build);
+      let a1 = await artifactClient.uploadArtifact(
+          `runtimes-${config_name}-config-${sha}`, [ './CMakeCache.txt' ],
+          action_paths.build);
       return a1;
     });
 
-
     await buildRuntimes(action_paths);
     await installRuntimes(action_paths);
-    await a1;
 
     await core.startGroup('upload-installation', async () => {
-      let a2 = await uploadArtifactDir(`runtimes-${config_name}-install-${sha}`, action_paths.install);
+      let files = await globDirectoryRecursive(action_paths.install);
+      let a2 = await artifactClient.uploadArtifact(
+          `runtimes-${config_name}-install-${sha}`, files,
+          action_paths.install);
       return a2;
     });
 
