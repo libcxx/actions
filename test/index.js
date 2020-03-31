@@ -26,7 +26,7 @@ async function run() {
     const action_paths = await getActionPaths(build_config);
     const runtimes = getRuntimeList();
 
-    runtimes.forEach(async (rt) => {
+    runtimes.forEach(async (runtime) => {
       let xunit_path = await testRuntime(action_paths, runtime, test_config, options);
       let l = await create_annotations_from_xunit_results(xunit_path);
       return l;
