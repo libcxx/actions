@@ -1,6 +1,6 @@
 const exec = require('@actions/exec');
 const  core  = require("@actions/core");
-const glob = require('@actions/glob');
+const {glob} = require('@actions/glob');
 const path = require('path');
 const fs = require('fs');
 const process = require('process');
@@ -62,5 +62,4 @@ async function globDirectoryRecursive(dir) {
   return files;
 }
 
-module.exports = {mkdirP, run, capture, handleErrors, rmRf, rmRfIgnoreError, unlinkIgnoreError,
-globDirectory, globDirectoryRecursive}
+module.exports = {mkdirP, run, capture, handleErrors, rmRf, rmRfIgnoreError, unlinkIgnoreError, globDirectory, globDirectoryRecursive}

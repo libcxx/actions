@@ -949,7 +949,42 @@ exports.HttpClient = HttpClient;
 
 /***/ }),
 /* 8 */,
-/* 9 */,
+/* 9 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const core = __webpack_require__(412);
+/**
+ * Returns a copy with defaults filled in.
+ */
+function getOptions(copy) {
+    const result = {
+        followSymbolicLinks: true,
+        implicitDescendants: true,
+        omitBrokenSymbolicLinks: true
+    };
+    if (copy) {
+        if (typeof copy.followSymbolicLinks === 'boolean') {
+            result.followSymbolicLinks = copy.followSymbolicLinks;
+            core.debug(`followSymbolicLinks '${result.followSymbolicLinks}'`);
+        }
+        if (typeof copy.implicitDescendants === 'boolean') {
+            result.implicitDescendants = copy.implicitDescendants;
+            core.debug(`implicitDescendants '${result.implicitDescendants}'`);
+        }
+        if (typeof copy.omitBrokenSymbolicLinks === 'boolean') {
+            result.omitBrokenSymbolicLinks = copy.omitBrokenSymbolicLinks;
+            core.debug(`omitBrokenSymbolicLinks '${result.omitBrokenSymbolicLinks}'`);
+        }
+    }
+    return result;
+}
+exports.getOptions = getOptions;
+//# sourceMappingURL=internal-glob-options-helper.js.map
+
+/***/ }),
 /* 10 */,
 /* 11 */
 /***/ (function(module) {
@@ -18469,7 +18504,187 @@ module.exports = toRegexRange;
 /***/ }),
 /* 226 */,
 /* 227 */,
-/* 228 */,
+/* 228 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const assert = __webpack_require__(357);
+const path = __webpack_require__(277);
+const IS_WINDOWS = process.platform === 'win32';
+/**
+ * Similar to path.dirname except normalizes the path separators and slightly better handling for Windows UNC paths.
+ *
+ * For example, on Linux/macOS:
+ * - `/               => /`
+ * - `/hello          => /`
+ *
+ * For example, on Windows:
+ * - `C:\             => C:\`
+ * - `C:\hello        => C:\`
+ * - `C:              => C:`
+ * - `C:hello         => C:`
+ * - `\               => \`
+ * - `\hello          => \`
+ * - `\\hello         => \\hello`
+ * - `\\hello\world   => \\hello\world`
+ */
+function dirname(p) {
+    // Normalize slashes and trim unnecessary trailing slash
+    p = safeTrimTrailingSeparator(p);
+    // Windows UNC root, e.g. \\hello or \\hello\world
+    if (IS_WINDOWS && /^\\\\[^\\]+(\\[^\\]+)?$/.test(p)) {
+        return p;
+    }
+    // Get dirname
+    let result = path.dirname(p);
+    // Trim trailing slash for Windows UNC root, e.g. \\hello\world\
+    if (IS_WINDOWS && /^\\\\[^\\]+\\[^\\]+\\$/.test(result)) {
+        result = safeTrimTrailingSeparator(result);
+    }
+    return result;
+}
+exports.dirname = dirname;
+/**
+ * Roots the path if not already rooted. On Windows, relative roots like `\`
+ * or `C:` are expanded based on the current working directory.
+ */
+function ensureAbsoluteRoot(root, itemPath) {
+    assert(root, `ensureAbsoluteRoot parameter 'root' must not be empty`);
+    assert(itemPath, `ensureAbsoluteRoot parameter 'itemPath' must not be empty`);
+    // Already rooted
+    if (hasAbsoluteRoot(itemPath)) {
+        return itemPath;
+    }
+    // Windows
+    if (IS_WINDOWS) {
+        // Check for itemPath like C: or C:foo
+        if (itemPath.match(/^[A-Z]:[^\\/]|^[A-Z]:$/i)) {
+            let cwd = process.cwd();
+            assert(cwd.match(/^[A-Z]:\\/i), `Expected current directory to start with an absolute drive root. Actual '${cwd}'`);
+            // Drive letter matches cwd? Expand to cwd
+            if (itemPath[0].toUpperCase() === cwd[0].toUpperCase()) {
+                // Drive only, e.g. C:
+                if (itemPath.length === 2) {
+                    // Preserve specified drive letter case (upper or lower)
+                    return `${itemPath[0]}:\\${cwd.substr(3)}`;
+                }
+                // Drive + path, e.g. C:foo
+                else {
+                    if (!cwd.endsWith('\\')) {
+                        cwd += '\\';
+                    }
+                    // Preserve specified drive letter case (upper or lower)
+                    return `${itemPath[0]}:\\${cwd.substr(3)}${itemPath.substr(2)}`;
+                }
+            }
+            // Different drive
+            else {
+                return `${itemPath[0]}:\\${itemPath.substr(2)}`;
+            }
+        }
+        // Check for itemPath like \ or \foo
+        else if (normalizeSeparators(itemPath).match(/^\\$|^\\[^\\]/)) {
+            const cwd = process.cwd();
+            assert(cwd.match(/^[A-Z]:\\/i), `Expected current directory to start with an absolute drive root. Actual '${cwd}'`);
+            return `${cwd[0]}:\\${itemPath.substr(1)}`;
+        }
+    }
+    assert(hasAbsoluteRoot(root), `ensureAbsoluteRoot parameter 'root' must have an absolute root`);
+    // Otherwise ensure root ends with a separator
+    if (root.endsWith('/') || (IS_WINDOWS && root.endsWith('\\'))) {
+        // Intentionally empty
+    }
+    else {
+        // Append separator
+        root += path.sep;
+    }
+    return root + itemPath;
+}
+exports.ensureAbsoluteRoot = ensureAbsoluteRoot;
+/**
+ * On Linux/macOS, true if path starts with `/`. On Windows, true for paths like:
+ * `\\hello\share` and `C:\hello` (and using alternate separator).
+ */
+function hasAbsoluteRoot(itemPath) {
+    assert(itemPath, `hasAbsoluteRoot parameter 'itemPath' must not be empty`);
+    // Normalize separators
+    itemPath = normalizeSeparators(itemPath);
+    // Windows
+    if (IS_WINDOWS) {
+        // E.g. \\hello\share or C:\hello
+        return itemPath.startsWith('\\\\') || /^[A-Z]:\\/i.test(itemPath);
+    }
+    // E.g. /hello
+    return itemPath.startsWith('/');
+}
+exports.hasAbsoluteRoot = hasAbsoluteRoot;
+/**
+ * On Linux/macOS, true if path starts with `/`. On Windows, true for paths like:
+ * `\`, `\hello`, `\\hello\share`, `C:`, and `C:\hello` (and using alternate separator).
+ */
+function hasRoot(itemPath) {
+    assert(itemPath, `isRooted parameter 'itemPath' must not be empty`);
+    // Normalize separators
+    itemPath = normalizeSeparators(itemPath);
+    // Windows
+    if (IS_WINDOWS) {
+        // E.g. \ or \hello or \\hello
+        // E.g. C: or C:\hello
+        return itemPath.startsWith('\\') || /^[A-Z]:/i.test(itemPath);
+    }
+    // E.g. /hello
+    return itemPath.startsWith('/');
+}
+exports.hasRoot = hasRoot;
+/**
+ * Removes redundant slashes and converts `/` to `\` on Windows
+ */
+function normalizeSeparators(p) {
+    p = p || '';
+    // Windows
+    if (IS_WINDOWS) {
+        // Convert slashes on Windows
+        p = p.replace(/\//g, '\\');
+        // Remove redundant slashes
+        const isUnc = /^\\\\+[^\\]/.test(p); // e.g. \\hello
+        return (isUnc ? '\\' : '') + p.replace(/\\\\+/g, '\\'); // preserve leading \\ for UNC
+    }
+    // Remove redundant slashes
+    return p.replace(/\/\/+/g, '/');
+}
+exports.normalizeSeparators = normalizeSeparators;
+/**
+ * Normalizes the path separators and trims the trailing separator (when safe).
+ * For example, `/foo/ => /foo` but `/ => /`
+ */
+function safeTrimTrailingSeparator(p) {
+    // Short-circuit if empty
+    if (!p) {
+        return '';
+    }
+    // Normalize separators
+    p = normalizeSeparators(p);
+    // No trailing slash
+    if (!p.endsWith(path.sep)) {
+        return p;
+    }
+    // Check '/' on Linux/macOS and '\' on Windows
+    if (p === path.sep) {
+        return p;
+    }
+    // On Windows check if drive root. E.g. C:\
+    if (IS_WINDOWS && /^[A-Z]:\\$/i.test(p)) {
+        return p;
+    }
+    // Otherwise trim trailing slash
+    return p.substr(0, p.length - 1);
+}
+exports.safeTrimTrailingSeparator = safeTrimTrailingSeparator;
+//# sourceMappingURL=internal-path-helper.js.map
+
+/***/ }),
 /* 229 */,
 /* 230 */,
 /* 231 */,
@@ -20310,7 +20525,102 @@ module.exports = ParentNamespace;
 
 
 /***/ }),
-/* 285 */,
+/* 285 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const assert = __webpack_require__(357);
+const path = __webpack_require__(277);
+const pathHelper = __webpack_require__(228);
+const IS_WINDOWS = process.platform === 'win32';
+/**
+ * Helper class for parsing paths into segments
+ */
+class Path {
+    /**
+     * Constructs a Path
+     * @param itemPath Path or array of segments
+     */
+    constructor(itemPath) {
+        this.segments = [];
+        // String
+        if (typeof itemPath === 'string') {
+            assert(itemPath, `Parameter 'itemPath' must not be empty`);
+            // Normalize slashes and trim unnecessary trailing slash
+            itemPath = pathHelper.safeTrimTrailingSeparator(itemPath);
+            // Not rooted
+            if (!pathHelper.hasRoot(itemPath)) {
+                this.segments = itemPath.split(path.sep);
+            }
+            // Rooted
+            else {
+                // Add all segments, while not at the root
+                let remaining = itemPath;
+                let dir = pathHelper.dirname(remaining);
+                while (dir !== remaining) {
+                    // Add the segment
+                    const basename = path.basename(remaining);
+                    this.segments.unshift(basename);
+                    // Truncate the last segment
+                    remaining = dir;
+                    dir = pathHelper.dirname(remaining);
+                }
+                // Remainder is the root
+                this.segments.unshift(remaining);
+            }
+        }
+        // Array
+        else {
+            // Must not be empty
+            assert(itemPath.length > 0, `Parameter 'itemPath' must not be an empty array`);
+            // Each segment
+            for (let i = 0; i < itemPath.length; i++) {
+                let segment = itemPath[i];
+                // Must not be empty
+                assert(segment, `Parameter 'itemPath' must not contain any empty segments`);
+                // Normalize slashes
+                segment = pathHelper.normalizeSeparators(itemPath[i]);
+                // Root segment
+                if (i === 0 && pathHelper.hasRoot(segment)) {
+                    segment = pathHelper.safeTrimTrailingSeparator(segment);
+                    assert(segment === pathHelper.dirname(segment), `Parameter 'itemPath' root segment contains information for multiple segments`);
+                    this.segments.push(segment);
+                }
+                // All other segments
+                else {
+                    // Must not contain slash
+                    assert(!segment.includes(path.sep), `Parameter 'itemPath' contains unexpected path separators`);
+                    this.segments.push(segment);
+                }
+            }
+        }
+    }
+    /**
+     * Converts the path to it's string representation
+     */
+    toString() {
+        // First segment
+        let result = this.segments[0];
+        // All others
+        let skipSlash = result.endsWith(path.sep) || (IS_WINDOWS && /^[A-Z]:$/i.test(result));
+        for (let i = 1; i < this.segments.length; i++) {
+            if (skipSlash) {
+                skipSlash = false;
+            }
+            else {
+                result += path.sep;
+            }
+            result += this.segments[i];
+        }
+        return result;
+    }
+}
+exports.Path = Path;
+//# sourceMappingURL=internal-path.js.map
+
+/***/ }),
 /* 286 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -23956,7 +24266,243 @@ module.exports = function getCallerFile(position) {
 /* 364 */,
 /* 365 */,
 /* 366 */,
-/* 367 */,
+/* 367 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const assert = __webpack_require__(357);
+const os = __webpack_require__(87);
+const path = __webpack_require__(277);
+const pathHelper = __webpack_require__(228);
+const minimatch_1 = __webpack_require__(60);
+const internal_match_kind_1 = __webpack_require__(616);
+const internal_path_1 = __webpack_require__(285);
+const IS_WINDOWS = process.platform === 'win32';
+class Pattern {
+    constructor(patternOrNegate, segments) {
+        /**
+         * Indicates whether matches should be excluded from the result set
+         */
+        this.negate = false;
+        // Pattern overload
+        let pattern;
+        if (typeof patternOrNegate === 'string') {
+            pattern = patternOrNegate.trim();
+        }
+        // Segments overload
+        else {
+            // Convert to pattern
+            segments = segments || [];
+            assert(segments.length, `Parameter 'segments' must not empty`);
+            const root = Pattern.getLiteral(segments[0]);
+            assert(root && pathHelper.hasAbsoluteRoot(root), `Parameter 'segments' first element must be a root path`);
+            pattern = new internal_path_1.Path(segments).toString().trim();
+            if (patternOrNegate) {
+                pattern = `!${pattern}`;
+            }
+        }
+        // Negate
+        while (pattern.startsWith('!')) {
+            this.negate = !this.negate;
+            pattern = pattern.substr(1).trim();
+        }
+        // Normalize slashes and ensures absolute root
+        pattern = Pattern.fixupPattern(pattern);
+        // Segments
+        this.segments = new internal_path_1.Path(pattern).segments;
+        // Trailing slash indicates the pattern should only match directories, not regular files
+        this.trailingSeparator = pathHelper
+            .normalizeSeparators(pattern)
+            .endsWith(path.sep);
+        pattern = pathHelper.safeTrimTrailingSeparator(pattern);
+        // Search path (literal path prior to the first glob segment)
+        let foundGlob = false;
+        const searchSegments = this.segments
+            .map(x => Pattern.getLiteral(x))
+            .filter(x => !foundGlob && !(foundGlob = x === ''));
+        this.searchPath = new internal_path_1.Path(searchSegments).toString();
+        // Root RegExp (required when determining partial match)
+        this.rootRegExp = new RegExp(Pattern.regExpEscape(searchSegments[0]), IS_WINDOWS ? 'i' : '');
+        // Create minimatch
+        const minimatchOptions = {
+            dot: true,
+            nobrace: true,
+            nocase: IS_WINDOWS,
+            nocomment: true,
+            noext: true,
+            nonegate: true
+        };
+        pattern = IS_WINDOWS ? pattern.replace(/\\/g, '/') : pattern;
+        this.minimatch = new minimatch_1.Minimatch(pattern, minimatchOptions);
+    }
+    /**
+     * Matches the pattern against the specified path
+     */
+    match(itemPath) {
+        // Last segment is globstar?
+        if (this.segments[this.segments.length - 1] === '**') {
+            // Normalize slashes
+            itemPath = pathHelper.normalizeSeparators(itemPath);
+            // Append a trailing slash. Otherwise Minimatch will not match the directory immediately
+            // preceeding the globstar. For example, given the pattern `/foo/**`, Minimatch returns
+            // false for `/foo` but returns true for `/foo/`. Append a trailing slash to handle that quirk.
+            if (!itemPath.endsWith(path.sep)) {
+                // Note, this is safe because the constructor ensures the pattern has an absolute root.
+                // For example, formats like C: and C:foo on Windows are resolved to an aboslute root.
+                itemPath = `${itemPath}${path.sep}`;
+            }
+        }
+        else {
+            // Normalize slashes and trim unnecessary trailing slash
+            itemPath = pathHelper.safeTrimTrailingSeparator(itemPath);
+        }
+        // Match
+        if (this.minimatch.match(itemPath)) {
+            return this.trailingSeparator ? internal_match_kind_1.MatchKind.Directory : internal_match_kind_1.MatchKind.All;
+        }
+        return internal_match_kind_1.MatchKind.None;
+    }
+    /**
+     * Indicates whether the pattern may match descendants of the specified path
+     */
+    partialMatch(itemPath) {
+        // Normalize slashes and trim unnecessary trailing slash
+        itemPath = pathHelper.safeTrimTrailingSeparator(itemPath);
+        // matchOne does not handle root path correctly
+        if (pathHelper.dirname(itemPath) === itemPath) {
+            return this.rootRegExp.test(itemPath);
+        }
+        return this.minimatch.matchOne(itemPath.split(IS_WINDOWS ? /\\+/ : /\/+/), this.minimatch.set[0], true);
+    }
+    /**
+     * Escapes glob patterns within a path
+     */
+    static globEscape(s) {
+        return (IS_WINDOWS ? s : s.replace(/\\/g, '\\\\')) // escape '\' on Linux/macOS
+            .replace(/(\[)(?=[^/]+\])/g, '[[]') // escape '[' when ']' follows within the path segment
+            .replace(/\?/g, '[?]') // escape '?'
+            .replace(/\*/g, '[*]'); // escape '*'
+    }
+    /**
+     * Normalizes slashes and ensures absolute root
+     */
+    static fixupPattern(pattern) {
+        // Empty
+        assert(pattern, 'pattern cannot be empty');
+        // Must not contain `.` segment, unless first segment
+        // Must not contain `..` segment
+        const literalSegments = new internal_path_1.Path(pattern).segments.map(x => Pattern.getLiteral(x));
+        assert(literalSegments.every((x, i) => (x !== '.' || i === 0) && x !== '..'), `Invalid pattern '${pattern}'. Relative pathing '.' and '..' is not allowed.`);
+        // Must not contain globs in root, e.g. Windows UNC path \\foo\b*r
+        assert(!pathHelper.hasRoot(pattern) || literalSegments[0], `Invalid pattern '${pattern}'. Root segment must not contain globs.`);
+        // Normalize slashes
+        pattern = pathHelper.normalizeSeparators(pattern);
+        // Replace leading `.` segment
+        if (pattern === '.' || pattern.startsWith(`.${path.sep}`)) {
+            pattern = Pattern.globEscape(process.cwd()) + pattern.substr(1);
+        }
+        // Replace leading `~` segment
+        else if (pattern === '~' || pattern.startsWith(`~${path.sep}`)) {
+            const homedir = os.homedir();
+            assert(homedir, 'Unable to determine HOME directory');
+            assert(pathHelper.hasAbsoluteRoot(homedir), `Expected HOME directory to be a rooted path. Actual '${homedir}'`);
+            pattern = Pattern.globEscape(homedir) + pattern.substr(1);
+        }
+        // Replace relative drive root, e.g. pattern is C: or C:foo
+        else if (IS_WINDOWS &&
+            (pattern.match(/^[A-Z]:$/i) || pattern.match(/^[A-Z]:[^\\]/i))) {
+            let root = pathHelper.ensureAbsoluteRoot('C:\\dummy-root', pattern.substr(0, 2));
+            if (pattern.length > 2 && !root.endsWith('\\')) {
+                root += '\\';
+            }
+            pattern = Pattern.globEscape(root) + pattern.substr(2);
+        }
+        // Replace relative root, e.g. pattern is \ or \foo
+        else if (IS_WINDOWS && (pattern === '\\' || pattern.match(/^\\[^\\]/))) {
+            let root = pathHelper.ensureAbsoluteRoot('C:\\dummy-root', '\\');
+            if (!root.endsWith('\\')) {
+                root += '\\';
+            }
+            pattern = Pattern.globEscape(root) + pattern.substr(1);
+        }
+        // Otherwise ensure absolute root
+        else {
+            pattern = pathHelper.ensureAbsoluteRoot(Pattern.globEscape(process.cwd()), pattern);
+        }
+        return pathHelper.normalizeSeparators(pattern);
+    }
+    /**
+     * Attempts to unescape a pattern segment to create a literal path segment.
+     * Otherwise returns empty string.
+     */
+    static getLiteral(segment) {
+        let literal = '';
+        for (let i = 0; i < segment.length; i++) {
+            const c = segment[i];
+            // Escape
+            if (c === '\\' && !IS_WINDOWS && i + 1 < segment.length) {
+                literal += segment[++i];
+                continue;
+            }
+            // Wildcard
+            else if (c === '*' || c === '?') {
+                return '';
+            }
+            // Character set
+            else if (c === '[' && i + 1 < segment.length) {
+                let set = '';
+                let closed = -1;
+                for (let i2 = i + 1; i2 < segment.length; i2++) {
+                    const c2 = segment[i2];
+                    // Escape
+                    if (c2 === '\\' && !IS_WINDOWS && i2 + 1 < segment.length) {
+                        set += segment[++i2];
+                        continue;
+                    }
+                    // Closed
+                    else if (c2 === ']') {
+                        closed = i2;
+                        break;
+                    }
+                    // Otherwise
+                    else {
+                        set += c2;
+                    }
+                }
+                // Closed?
+                if (closed >= 0) {
+                    // Cannot convert
+                    if (set.length > 1) {
+                        return '';
+                    }
+                    // Convert to literal
+                    if (set) {
+                        literal += set;
+                        i = closed;
+                        continue;
+                    }
+                }
+                // Otherwise fall thru
+            }
+            // Append
+            literal += c;
+        }
+        return literal;
+    }
+    /**
+     * Escapes regexp special characters
+     * https://javascript.info/regexp-escaping
+     */
+    static regExpEscape(s) {
+        return s.replace(/[[\\^$.|?*+()]/g, '\\$&');
+    }
+}
+exports.Pattern = Pattern;
+//# sourceMappingURL=internal-pattern.js.map
+
+/***/ }),
 /* 368 */,
 /* 369 */,
 /* 370 */
@@ -29796,7 +30342,7 @@ module.exports = function usage (yargs, y18n) {
     }, {}))
 
     const theWrap = getWrap()
-    const ui = __webpack_require__(905)({
+    const ui = __webpack_require__(729)({
       width: theWrap,
       wrap: !!theWrap
     })
@@ -37157,7 +37703,29 @@ module.exports = require("events");
 
 /***/ }),
 /* 615 */,
-/* 616 */,
+/* 616 */
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * Indicates whether a pattern matches a path
+ */
+var MatchKind;
+(function (MatchKind) {
+    /** Not matched */
+    MatchKind[MatchKind["None"] = 0] = "None";
+    /** Matched if the path is a directory */
+    MatchKind[MatchKind["Directory"] = 1] = "Directory";
+    /** Matched if the path is a regular file */
+    MatchKind[MatchKind["File"] = 2] = "File";
+    /** Matched */
+    MatchKind[MatchKind["All"] = 3] = "All";
+})(MatchKind = exports.MatchKind || (exports.MatchKind = {}));
+//# sourceMappingURL=internal-match-kind.js.map
+
+/***/ }),
 /* 617 */,
 /* 618 */,
 /* 619 */,
@@ -38581,7 +39149,86 @@ class ExecState extends events.EventEmitter {
 //# sourceMappingURL=toolrunner.js.map
 
 /***/ }),
-/* 643 */,
+/* 643 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const pathHelper = __webpack_require__(228);
+const internal_match_kind_1 = __webpack_require__(616);
+const IS_WINDOWS = process.platform === 'win32';
+/**
+ * Given an array of patterns, returns an array of paths to search.
+ * Duplicates and paths under other included paths are filtered out.
+ */
+function getSearchPaths(patterns) {
+    // Ignore negate patterns
+    patterns = patterns.filter(x => !x.negate);
+    // Create a map of all search paths
+    const searchPathMap = {};
+    for (const pattern of patterns) {
+        const key = IS_WINDOWS
+            ? pattern.searchPath.toUpperCase()
+            : pattern.searchPath;
+        searchPathMap[key] = 'candidate';
+    }
+    const result = [];
+    for (const pattern of patterns) {
+        // Check if already included
+        const key = IS_WINDOWS
+            ? pattern.searchPath.toUpperCase()
+            : pattern.searchPath;
+        if (searchPathMap[key] === 'included') {
+            continue;
+        }
+        // Check for an ancestor search path
+        let foundAncestor = false;
+        let tempKey = key;
+        let parent = pathHelper.dirname(tempKey);
+        while (parent !== tempKey) {
+            if (searchPathMap[parent]) {
+                foundAncestor = true;
+                break;
+            }
+            tempKey = parent;
+            parent = pathHelper.dirname(tempKey);
+        }
+        // Include the search pattern in the result
+        if (!foundAncestor) {
+            result.push(pattern.searchPath);
+            searchPathMap[key] = 'included';
+        }
+    }
+    return result;
+}
+exports.getSearchPaths = getSearchPaths;
+/**
+ * Matches the patterns against the path
+ */
+function match(patterns, itemPath) {
+    let result = internal_match_kind_1.MatchKind.None;
+    for (const pattern of patterns) {
+        if (pattern.negate) {
+            result &= ~pattern.match(itemPath);
+        }
+        else {
+            result |= pattern.match(itemPath);
+        }
+    }
+    return result;
+}
+exports.match = match;
+/**
+ * Checks whether to descend further into the directory
+ */
+function partialMatch(patterns, itemPath) {
+    return patterns.some(x => !x.negate && x.partialMatch(itemPath));
+}
+exports.partialMatch = partialMatch;
+//# sourceMappingURL=internal-pattern-helper.js.map
+
+/***/ }),
 /* 644 */,
 /* 645 */,
 /* 646 */
@@ -44618,7 +45265,7 @@ var fs = __webpack_require__(747)
 var rp = __webpack_require__(925)
 var minimatch = __webpack_require__(60)
 var Minimatch = minimatch.Minimatch
-var inherits = __webpack_require__(904)
+var inherits = __webpack_require__(973)
 var EE = __webpack_require__(614).EventEmitter
 var path = __webpack_require__(277)
 var assert = __webpack_require__(357)
@@ -47131,7 +47778,367 @@ formatters.j = function (v) {
 
 
 /***/ }),
-/* 729 */,
+/* 729 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+
+const stringWidth = __webpack_require__(690)
+const stripAnsi = __webpack_require__(21)
+const wrap = __webpack_require__(613)
+
+const align = {
+  right: alignRight,
+  center: alignCenter
+}
+const top = 0
+const right = 1
+const bottom = 2
+const left = 3
+
+class UI {
+  constructor (opts) {
+    this.width = opts.width
+    this.wrap = opts.wrap
+    this.rows = []
+  }
+
+  span (...args) {
+    const cols = this.div(...args)
+    cols.span = true
+  }
+
+  resetOutput () {
+    this.rows = []
+  }
+
+  div (...args) {
+    if (args.length === 0) {
+      this.div('')
+    }
+
+    if (this.wrap && this._shouldApplyLayoutDSL(...args)) {
+      return this._applyLayoutDSL(args[0])
+    }
+
+    const cols = args.map(arg => {
+      if (typeof arg === 'string') {
+        return this._colFromString(arg)
+      }
+
+      return arg
+    })
+
+    this.rows.push(cols)
+    return cols
+  }
+
+  _shouldApplyLayoutDSL (...args) {
+    return args.length === 1 && typeof args[0] === 'string' &&
+      /[\t\n]/.test(args[0])
+  }
+
+  _applyLayoutDSL (str) {
+    const rows = str.split('\n').map(row => row.split('\t'))
+    let leftColumnWidth = 0
+
+    // simple heuristic for layout, make sure the
+    // second column lines up along the left-hand.
+    // don't allow the first column to take up more
+    // than 50% of the screen.
+    rows.forEach(columns => {
+      if (columns.length > 1 && stringWidth(columns[0]) > leftColumnWidth) {
+        leftColumnWidth = Math.min(
+          Math.floor(this.width * 0.5),
+          stringWidth(columns[0])
+        )
+      }
+    })
+
+    // generate a table:
+    //  replacing ' ' with padding calculations.
+    //  using the algorithmically generated width.
+    rows.forEach(columns => {
+      this.div(...columns.map((r, i) => {
+        return {
+          text: r.trim(),
+          padding: this._measurePadding(r),
+          width: (i === 0 && columns.length > 1) ? leftColumnWidth : undefined
+        }
+      }))
+    })
+
+    return this.rows[this.rows.length - 1]
+  }
+
+  _colFromString (text) {
+    return {
+      text,
+      padding: this._measurePadding(text)
+    }
+  }
+
+  _measurePadding (str) {
+    // measure padding without ansi escape codes
+    const noAnsi = stripAnsi(str)
+    return [0, noAnsi.match(/\s*$/)[0].length, 0, noAnsi.match(/^\s*/)[0].length]
+  }
+
+  toString () {
+    const lines = []
+
+    this.rows.forEach(row => {
+      this.rowToString(row, lines)
+    })
+
+    // don't display any lines with the
+    // hidden flag set.
+    return lines
+      .filter(line => !line.hidden)
+      .map(line => line.text)
+      .join('\n')
+  }
+
+  rowToString (row, lines) {
+    this._rasterize(row).forEach((rrow, r) => {
+      let str = ''
+      rrow.forEach((col, c) => {
+        const { width } = row[c] // the width with padding.
+        const wrapWidth = this._negatePadding(row[c]) // the width without padding.
+
+        let ts = col // temporary string used during alignment/padding.
+
+        if (wrapWidth > stringWidth(col)) {
+          ts += ' '.repeat(wrapWidth - stringWidth(col))
+        }
+
+        // align the string within its column.
+        if (row[c].align && row[c].align !== 'left' && this.wrap) {
+          ts = align[row[c].align](ts, wrapWidth)
+          if (stringWidth(ts) < wrapWidth) {
+            ts += ' '.repeat(width - stringWidth(ts) - 1)
+          }
+        }
+
+        // apply border and padding to string.
+        const padding = row[c].padding || [0, 0, 0, 0]
+        if (padding[left]) {
+          str += ' '.repeat(padding[left])
+        }
+
+        str += addBorder(row[c], ts, '| ')
+        str += ts
+        str += addBorder(row[c], ts, ' |')
+        if (padding[right]) {
+          str += ' '.repeat(padding[right])
+        }
+
+        // if prior row is span, try to render the
+        // current row on the prior line.
+        if (r === 0 && lines.length > 0) {
+          str = this._renderInline(str, lines[lines.length - 1])
+        }
+      })
+
+      // remove trailing whitespace.
+      lines.push({
+        text: str.replace(/ +$/, ''),
+        span: row.span
+      })
+    })
+
+    return lines
+  }
+
+  // if the full 'source' can render in
+  // the target line, do so.
+  _renderInline (source, previousLine) {
+    const leadingWhitespace = source.match(/^ */)[0].length
+    const target = previousLine.text
+    const targetTextWidth = stringWidth(target.trimRight())
+
+    if (!previousLine.span) {
+      return source
+    }
+
+    // if we're not applying wrapping logic,
+    // just always append to the span.
+    if (!this.wrap) {
+      previousLine.hidden = true
+      return target + source
+    }
+
+    if (leadingWhitespace < targetTextWidth) {
+      return source
+    }
+
+    previousLine.hidden = true
+
+    return target.trimRight() + ' '.repeat(leadingWhitespace - targetTextWidth) + source.trimLeft()
+  }
+
+  _rasterize (row) {
+    const rrows = []
+    const widths = this._columnWidths(row)
+    let wrapped
+
+    // word wrap all columns, and create
+    // a data-structure that is easy to rasterize.
+    row.forEach((col, c) => {
+      // leave room for left and right padding.
+      col.width = widths[c]
+      if (this.wrap) {
+        wrapped = wrap(col.text, this._negatePadding(col), { hard: true }).split('\n')
+      } else {
+        wrapped = col.text.split('\n')
+      }
+
+      if (col.border) {
+        wrapped.unshift('.' + '-'.repeat(this._negatePadding(col) + 2) + '.')
+        wrapped.push("'" + '-'.repeat(this._negatePadding(col) + 2) + "'")
+      }
+
+      // add top and bottom padding.
+      if (col.padding) {
+        wrapped.unshift(...new Array(col.padding[top] || 0).fill(''))
+        wrapped.push(...new Array(col.padding[bottom] || 0).fill(''))
+      }
+
+      wrapped.forEach((str, r) => {
+        if (!rrows[r]) {
+          rrows.push([])
+        }
+
+        const rrow = rrows[r]
+
+        for (let i = 0; i < c; i++) {
+          if (rrow[i] === undefined) {
+            rrow.push('')
+          }
+        }
+
+        rrow.push(str)
+      })
+    })
+
+    return rrows
+  }
+
+  _negatePadding (col) {
+    let wrapWidth = col.width
+    if (col.padding) {
+      wrapWidth -= (col.padding[left] || 0) + (col.padding[right] || 0)
+    }
+
+    if (col.border) {
+      wrapWidth -= 4
+    }
+
+    return wrapWidth
+  }
+
+  _columnWidths (row) {
+    if (!this.wrap) {
+      return row.map(col => {
+        return col.width || stringWidth(col.text)
+      })
+    }
+
+    let unset = row.length
+    let remainingWidth = this.width
+
+    // column widths can be set in config.
+    const widths = row.map(col => {
+      if (col.width) {
+        unset--
+        remainingWidth -= col.width
+        return col.width
+      }
+
+      return undefined
+    })
+
+    // any unset widths should be calculated.
+    const unsetWidth = unset ? Math.floor(remainingWidth / unset) : 0
+
+    return widths.map((w, i) => {
+      if (w === undefined) {
+        return Math.max(unsetWidth, _minWidth(row[i]))
+      }
+
+      return w
+    })
+  }
+}
+
+function addBorder (col, ts, style) {
+  if (col.border) {
+    if (/[.']-+[.']/.test(ts)) {
+      return ''
+    }
+
+    if (ts.trim().length !== 0) {
+      return style
+    }
+
+    return '  '
+  }
+
+  return ''
+}
+
+// calculates the minimum width of
+// a column, based on padding preferences.
+function _minWidth (col) {
+  const padding = col.padding || []
+  const minWidth = 1 + (padding[left] || 0) + (padding[right] || 0)
+  if (col.border) {
+    return minWidth + 4
+  }
+
+  return minWidth
+}
+
+function getWindowWidth () {
+  /* istanbul ignore next: depends on terminal */
+  if (typeof process === 'object' && process.stdout && process.stdout.columns) {
+    return process.stdout.columns
+  }
+}
+
+function alignRight (str, width) {
+  str = str.trim()
+  const strWidth = stringWidth(str)
+
+  if (strWidth < width) {
+    return ' '.repeat(width - strWidth) + str
+  }
+
+  return str
+}
+
+function alignCenter (str, width) {
+  str = str.trim()
+  const strWidth = stringWidth(str)
+
+  /* istanbul ignore next */
+  if (strWidth >= width) {
+    return str
+  }
+
+  return ' '.repeat((width - strWidth) >> 1) + str
+}
+
+module.exports = function (opts = {}) {
+  return new UI({
+    width: opts.width || getWindowWidth() || /* istanbul ignore next */ 80,
+    wrap: opts.wrap !== false
+  })
+}
+
+
+/***/ }),
 /* 730 */,
 /* 731 */,
 /* 732 */
@@ -54168,7 +55175,37 @@ compdef _{{app_name}}_yargs_completions {{app_name}}
 
 /***/ }),
 /* 891 */,
-/* 892 */,
+/* 892 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const internal_globber_1 = __webpack_require__(905);
+/**
+ * Constructs a globber
+ *
+ * @param patterns  Patterns separated by newlines
+ * @param options   Glob options
+ */
+function create(patterns, options) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return yield internal_globber_1.DefaultGlobber.create(patterns, options);
+    });
+}
+exports.create = create;
+//# sourceMappingURL=glob.js.map
+
+/***/ }),
 /* 893 */,
 /* 894 */,
 /* 895 */
@@ -54202,380 +55239,226 @@ function registerDefaultDecorators(instance) {
 /* 901 */,
 /* 902 */,
 /* 903 */,
-/* 904 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-try {
-  var util = __webpack_require__(669);
-  /* istanbul ignore next */
-  if (typeof util.inherits !== 'function') throw '';
-  module.exports = util.inherits;
-} catch (e) {
-  /* istanbul ignore next */
-  module.exports = __webpack_require__(612);
-}
-
-
-/***/ }),
+/* 904 */,
 /* 905 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
-
-const stringWidth = __webpack_require__(690)
-const stripAnsi = __webpack_require__(21)
-const wrap = __webpack_require__(613)
-
-const align = {
-  right: alignRight,
-  center: alignCenter
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __asyncValues = (this && this.__asyncValues) || function (o) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var m = o[Symbol.asyncIterator], i;
+    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
+    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
+    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
+};
+var __await = (this && this.__await) || function (v) { return this instanceof __await ? (this.v = v, this) : new __await(v); }
+var __asyncGenerator = (this && this.__asyncGenerator) || function (thisArg, _arguments, generator) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var g = generator.apply(thisArg, _arguments || []), i, q = [];
+    return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i;
+    function verb(n) { if (g[n]) i[n] = function (v) { return new Promise(function (a, b) { q.push([n, v, a, b]) > 1 || resume(n, v); }); }; }
+    function resume(n, v) { try { step(g[n](v)); } catch (e) { settle(q[0][3], e); } }
+    function step(r) { r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r); }
+    function fulfill(value) { resume("next", value); }
+    function reject(value) { resume("throw", value); }
+    function settle(f, v) { if (f(v), q.shift(), q.length) resume(q[0][0], q[0][1]); }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const core = __webpack_require__(412);
+const fs = __webpack_require__(747);
+const globOptionsHelper = __webpack_require__(9);
+const path = __webpack_require__(277);
+const patternHelper = __webpack_require__(643);
+const internal_match_kind_1 = __webpack_require__(616);
+const internal_pattern_1 = __webpack_require__(367);
+const internal_search_state_1 = __webpack_require__(941);
+const IS_WINDOWS = process.platform === 'win32';
+class DefaultGlobber {
+    constructor(options) {
+        this.patterns = [];
+        this.searchPaths = [];
+        this.options = globOptionsHelper.getOptions(options);
+    }
+    getSearchPaths() {
+        // Return a copy
+        return this.searchPaths.slice();
+    }
+    glob() {
+        var e_1, _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = [];
+            try {
+                for (var _b = __asyncValues(this.globGenerator()), _c; _c = yield _b.next(), !_c.done;) {
+                    const itemPath = _c.value;
+                    result.push(itemPath);
+                }
+            }
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (_c && !_c.done && (_a = _b.return)) yield _a.call(_b);
+                }
+                finally { if (e_1) throw e_1.error; }
+            }
+            return result;
+        });
+    }
+    globGenerator() {
+        return __asyncGenerator(this, arguments, function* globGenerator_1() {
+            // Fill in defaults options
+            const options = globOptionsHelper.getOptions(this.options);
+            // Implicit descendants?
+            const patterns = [];
+            for (const pattern of this.patterns) {
+                patterns.push(pattern);
+                if (options.implicitDescendants &&
+                    (pattern.trailingSeparator ||
+                        pattern.segments[pattern.segments.length - 1] !== '**')) {
+                    patterns.push(new internal_pattern_1.Pattern(pattern.negate, pattern.segments.concat('**')));
+                }
+            }
+            // Push the search paths
+            const stack = [];
+            for (const searchPath of patternHelper.getSearchPaths(patterns)) {
+                core.debug(`Search path '${searchPath}'`);
+                // Exists?
+                try {
+                    // Intentionally using lstat. Detection for broken symlink
+                    // will be performed later (if following symlinks).
+                    yield __await(fs.promises.lstat(searchPath));
+                }
+                catch (err) {
+                    if (err.code === 'ENOENT') {
+                        continue;
+                    }
+                    throw err;
+                }
+                stack.unshift(new internal_search_state_1.SearchState(searchPath, 1));
+            }
+            // Search
+            const traversalChain = []; // used to detect cycles
+            while (stack.length) {
+                // Pop
+                const item = stack.pop();
+                // Match?
+                const match = patternHelper.match(patterns, item.path);
+                const partialMatch = !!match || patternHelper.partialMatch(patterns, item.path);
+                if (!match && !partialMatch) {
+                    continue;
+                }
+                // Stat
+                const stats = yield __await(DefaultGlobber.stat(item, options, traversalChain)
+                // Broken symlink, or symlink cycle detected, or no longer exists
+                );
+                // Broken symlink, or symlink cycle detected, or no longer exists
+                if (!stats) {
+                    continue;
+                }
+                // Directory
+                if (stats.isDirectory()) {
+                    // Matched
+                    if (match & internal_match_kind_1.MatchKind.Directory) {
+                        yield yield __await(item.path);
+                    }
+                    // Descend?
+                    else if (!partialMatch) {
+                        continue;
+                    }
+                    // Push the child items in reverse
+                    const childLevel = item.level + 1;
+                    const childItems = (yield __await(fs.promises.readdir(item.path))).map(x => new internal_search_state_1.SearchState(path.join(item.path, x), childLevel));
+                    stack.push(...childItems.reverse());
+                }
+                // File
+                else if (match & internal_match_kind_1.MatchKind.File) {
+                    yield yield __await(item.path);
+                }
+            }
+        });
+    }
+    /**
+     * Constructs a DefaultGlobber
+     */
+    static create(patterns, options) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = new DefaultGlobber(options);
+            if (IS_WINDOWS) {
+                patterns = patterns.replace(/\r\n/g, '\n');
+                patterns = patterns.replace(/\r/g, '\n');
+            }
+            const lines = patterns.split('\n').map(x => x.trim());
+            for (const line of lines) {
+                // Empty or comment
+                if (!line || line.startsWith('#')) {
+                    continue;
+                }
+                // Pattern
+                else {
+                    result.patterns.push(new internal_pattern_1.Pattern(line));
+                }
+            }
+            result.searchPaths.push(...patternHelper.getSearchPaths(result.patterns));
+            return result;
+        });
+    }
+    static stat(item, options, traversalChain) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // Note:
+            // `stat` returns info about the target of a symlink (or symlink chain)
+            // `lstat` returns info about a symlink itself
+            let stats;
+            if (options.followSymbolicLinks) {
+                try {
+                    // Use `stat` (following symlinks)
+                    stats = yield fs.promises.stat(item.path);
+                }
+                catch (err) {
+                    if (err.code === 'ENOENT') {
+                        if (options.omitBrokenSymbolicLinks) {
+                            core.debug(`Broken symlink '${item.path}'`);
+                            return undefined;
+                        }
+                        throw new Error(`No information found for the path '${item.path}'. This may indicate a broken symbolic link.`);
+                    }
+                    throw err;
+                }
+            }
+            else {
+                // Use `lstat` (not following symlinks)
+                stats = yield fs.promises.lstat(item.path);
+            }
+            // Note, isDirectory() returns false for the lstat of a symlink
+            if (stats.isDirectory() && options.followSymbolicLinks) {
+                // Get the realpath
+                const realPath = yield fs.promises.realpath(item.path);
+                // Fixup the traversal chain to match the item level
+                while (traversalChain.length >= item.level) {
+                    traversalChain.pop();
+                }
+                // Test for a cycle
+                if (traversalChain.some((x) => x === realPath)) {
+                    core.debug(`Symlink cycle detected for path '${item.path}' and realpath '${realPath}'`);
+                    return undefined;
+                }
+                // Update the traversal chain
+                traversalChain.push(realPath);
+            }
+            return stats;
+        });
+    }
 }
-const top = 0
-const right = 1
-const bottom = 2
-const left = 3
-
-class UI {
-  constructor (opts) {
-    this.width = opts.width
-    this.wrap = opts.wrap
-    this.rows = []
-  }
-
-  span (...args) {
-    const cols = this.div(...args)
-    cols.span = true
-  }
-
-  resetOutput () {
-    this.rows = []
-  }
-
-  div (...args) {
-    if (args.length === 0) {
-      this.div('')
-    }
-
-    if (this.wrap && this._shouldApplyLayoutDSL(...args)) {
-      return this._applyLayoutDSL(args[0])
-    }
-
-    const cols = args.map(arg => {
-      if (typeof arg === 'string') {
-        return this._colFromString(arg)
-      }
-
-      return arg
-    })
-
-    this.rows.push(cols)
-    return cols
-  }
-
-  _shouldApplyLayoutDSL (...args) {
-    return args.length === 1 && typeof args[0] === 'string' &&
-      /[\t\n]/.test(args[0])
-  }
-
-  _applyLayoutDSL (str) {
-    const rows = str.split('\n').map(row => row.split('\t'))
-    let leftColumnWidth = 0
-
-    // simple heuristic for layout, make sure the
-    // second column lines up along the left-hand.
-    // don't allow the first column to take up more
-    // than 50% of the screen.
-    rows.forEach(columns => {
-      if (columns.length > 1 && stringWidth(columns[0]) > leftColumnWidth) {
-        leftColumnWidth = Math.min(
-          Math.floor(this.width * 0.5),
-          stringWidth(columns[0])
-        )
-      }
-    })
-
-    // generate a table:
-    //  replacing ' ' with padding calculations.
-    //  using the algorithmically generated width.
-    rows.forEach(columns => {
-      this.div(...columns.map((r, i) => {
-        return {
-          text: r.trim(),
-          padding: this._measurePadding(r),
-          width: (i === 0 && columns.length > 1) ? leftColumnWidth : undefined
-        }
-      }))
-    })
-
-    return this.rows[this.rows.length - 1]
-  }
-
-  _colFromString (text) {
-    return {
-      text,
-      padding: this._measurePadding(text)
-    }
-  }
-
-  _measurePadding (str) {
-    // measure padding without ansi escape codes
-    const noAnsi = stripAnsi(str)
-    return [0, noAnsi.match(/\s*$/)[0].length, 0, noAnsi.match(/^\s*/)[0].length]
-  }
-
-  toString () {
-    const lines = []
-
-    this.rows.forEach(row => {
-      this.rowToString(row, lines)
-    })
-
-    // don't display any lines with the
-    // hidden flag set.
-    return lines
-      .filter(line => !line.hidden)
-      .map(line => line.text)
-      .join('\n')
-  }
-
-  rowToString (row, lines) {
-    this._rasterize(row).forEach((rrow, r) => {
-      let str = ''
-      rrow.forEach((col, c) => {
-        const { width } = row[c] // the width with padding.
-        const wrapWidth = this._negatePadding(row[c]) // the width without padding.
-
-        let ts = col // temporary string used during alignment/padding.
-
-        if (wrapWidth > stringWidth(col)) {
-          ts += ' '.repeat(wrapWidth - stringWidth(col))
-        }
-
-        // align the string within its column.
-        if (row[c].align && row[c].align !== 'left' && this.wrap) {
-          ts = align[row[c].align](ts, wrapWidth)
-          if (stringWidth(ts) < wrapWidth) {
-            ts += ' '.repeat(width - stringWidth(ts) - 1)
-          }
-        }
-
-        // apply border and padding to string.
-        const padding = row[c].padding || [0, 0, 0, 0]
-        if (padding[left]) {
-          str += ' '.repeat(padding[left])
-        }
-
-        str += addBorder(row[c], ts, '| ')
-        str += ts
-        str += addBorder(row[c], ts, ' |')
-        if (padding[right]) {
-          str += ' '.repeat(padding[right])
-        }
-
-        // if prior row is span, try to render the
-        // current row on the prior line.
-        if (r === 0 && lines.length > 0) {
-          str = this._renderInline(str, lines[lines.length - 1])
-        }
-      })
-
-      // remove trailing whitespace.
-      lines.push({
-        text: str.replace(/ +$/, ''),
-        span: row.span
-      })
-    })
-
-    return lines
-  }
-
-  // if the full 'source' can render in
-  // the target line, do so.
-  _renderInline (source, previousLine) {
-    const leadingWhitespace = source.match(/^ */)[0].length
-    const target = previousLine.text
-    const targetTextWidth = stringWidth(target.trimRight())
-
-    if (!previousLine.span) {
-      return source
-    }
-
-    // if we're not applying wrapping logic,
-    // just always append to the span.
-    if (!this.wrap) {
-      previousLine.hidden = true
-      return target + source
-    }
-
-    if (leadingWhitespace < targetTextWidth) {
-      return source
-    }
-
-    previousLine.hidden = true
-
-    return target.trimRight() + ' '.repeat(leadingWhitespace - targetTextWidth) + source.trimLeft()
-  }
-
-  _rasterize (row) {
-    const rrows = []
-    const widths = this._columnWidths(row)
-    let wrapped
-
-    // word wrap all columns, and create
-    // a data-structure that is easy to rasterize.
-    row.forEach((col, c) => {
-      // leave room for left and right padding.
-      col.width = widths[c]
-      if (this.wrap) {
-        wrapped = wrap(col.text, this._negatePadding(col), { hard: true }).split('\n')
-      } else {
-        wrapped = col.text.split('\n')
-      }
-
-      if (col.border) {
-        wrapped.unshift('.' + '-'.repeat(this._negatePadding(col) + 2) + '.')
-        wrapped.push("'" + '-'.repeat(this._negatePadding(col) + 2) + "'")
-      }
-
-      // add top and bottom padding.
-      if (col.padding) {
-        wrapped.unshift(...new Array(col.padding[top] || 0).fill(''))
-        wrapped.push(...new Array(col.padding[bottom] || 0).fill(''))
-      }
-
-      wrapped.forEach((str, r) => {
-        if (!rrows[r]) {
-          rrows.push([])
-        }
-
-        const rrow = rrows[r]
-
-        for (let i = 0; i < c; i++) {
-          if (rrow[i] === undefined) {
-            rrow.push('')
-          }
-        }
-
-        rrow.push(str)
-      })
-    })
-
-    return rrows
-  }
-
-  _negatePadding (col) {
-    let wrapWidth = col.width
-    if (col.padding) {
-      wrapWidth -= (col.padding[left] || 0) + (col.padding[right] || 0)
-    }
-
-    if (col.border) {
-      wrapWidth -= 4
-    }
-
-    return wrapWidth
-  }
-
-  _columnWidths (row) {
-    if (!this.wrap) {
-      return row.map(col => {
-        return col.width || stringWidth(col.text)
-      })
-    }
-
-    let unset = row.length
-    let remainingWidth = this.width
-
-    // column widths can be set in config.
-    const widths = row.map(col => {
-      if (col.width) {
-        unset--
-        remainingWidth -= col.width
-        return col.width
-      }
-
-      return undefined
-    })
-
-    // any unset widths should be calculated.
-    const unsetWidth = unset ? Math.floor(remainingWidth / unset) : 0
-
-    return widths.map((w, i) => {
-      if (w === undefined) {
-        return Math.max(unsetWidth, _minWidth(row[i]))
-      }
-
-      return w
-    })
-  }
-}
-
-function addBorder (col, ts, style) {
-  if (col.border) {
-    if (/[.']-+[.']/.test(ts)) {
-      return ''
-    }
-
-    if (ts.trim().length !== 0) {
-      return style
-    }
-
-    return '  '
-  }
-
-  return ''
-}
-
-// calculates the minimum width of
-// a column, based on padding preferences.
-function _minWidth (col) {
-  const padding = col.padding || []
-  const minWidth = 1 + (padding[left] || 0) + (padding[right] || 0)
-  if (col.border) {
-    return minWidth + 4
-  }
-
-  return minWidth
-}
-
-function getWindowWidth () {
-  /* istanbul ignore next: depends on terminal */
-  if (typeof process === 'object' && process.stdout && process.stdout.columns) {
-    return process.stdout.columns
-  }
-}
-
-function alignRight (str, width) {
-  str = str.trim()
-  const strWidth = stringWidth(str)
-
-  if (strWidth < width) {
-    return ' '.repeat(width - strWidth) + str
-  }
-
-  return str
-}
-
-function alignCenter (str, width) {
-  str = str.trim()
-  const strWidth = stringWidth(str)
-
-  /* istanbul ignore next */
-  if (strWidth >= width) {
-    return str
-  }
-
-  return ' '.repeat((width - strWidth) >> 1) + str
-}
-
-module.exports = function (opts = {}) {
-  return new UI({
-    width: opts.width || getWindowWidth() || /* istanbul ignore next */ 80,
-    wrap: opts.wrap !== false
-  })
-}
-
+exports.DefaultGlobber = DefaultGlobber;
+//# sourceMappingURL=internal-globber.js.map
 
 /***/ }),
 /* 906 */,
@@ -57019,7 +57902,22 @@ convert.rgb.gray = function (rgb) {
 
 /***/ }),
 /* 940 */,
-/* 941 */,
+/* 941 */
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+class SearchState {
+    constructor(path, level) {
+        this.path = path;
+        this.level = level;
+    }
+}
+exports.SearchState = SearchState;
+//# sourceMappingURL=internal-search-state.js.map
+
+/***/ }),
 /* 942 */,
 /* 943 */,
 /* 944 */,
@@ -57473,9 +58371,17 @@ module.exports.sync = path => {
 /***/ }),
 /* 972 */,
 /* 973 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
-module.exports = eval("require")("@actions/glob");
+try {
+  var util = __webpack_require__(669);
+  /* istanbul ignore next */
+  if (typeof util.inherits !== 'function') throw '';
+  module.exports = util.inherits;
+} catch (e) {
+  /* istanbul ignore next */
+  module.exports = __webpack_require__(612);
+}
 
 
 /***/ }),
@@ -58315,7 +59221,7 @@ function moveHelperToHooks(instance, helperName, keepHelper) {
 
 const exec = __webpack_require__(221);
 const  core  = __webpack_require__(412);
-const glob = __webpack_require__(973);
+const {glob} = __webpack_require__(892);
 const path = __webpack_require__(277);
 const fs = __webpack_require__(747);
 const process = __webpack_require__(765);
@@ -58377,8 +59283,7 @@ async function globDirectoryRecursive(dir) {
   return files;
 }
 
-module.exports = {mkdirP, run, capture, handleErrors, rmRf, rmRfIgnoreError, unlinkIgnoreError,
-globDirectory, globDirectoryRecursive}
+module.exports = {mkdirP, run, capture, handleErrors, rmRf, rmRfIgnoreError, unlinkIgnoreError, globDirectory, globDirectoryRecursive}
 
 
 /***/ }),
