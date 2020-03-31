@@ -49481,12 +49481,13 @@ async function run() {
 
     await buildRuntimes(action_paths);
     await installRuntimes(action_paths);
+    await a1;
 
-    let a2 = core.startGroup('upload-installation', async () => {
-      return uploadArtifactDir('install', action_paths.install);
+    await core.startGroup('upload-installation', async () => {
+      let a2 = await uploadArtifactDir('install', action_paths.install);
+      return a2;
     });
 
-    await Promise.all([a1, a2]);
   } catch (error) {
     core.setFailed(error.message);
     return;
