@@ -49465,7 +49465,7 @@ async function run() {
       let files = await globDirectory(action_paths.build);
       console.log(files);
       return artifactClient.uploadArtifact(
-          `runtimes-${config_name}-config`, [ './CMakeCache.txt' ],
+          `runtimes-${config_name}-config`, [ path.join(actions.build, 'CMakeCache.txt') ],
           action_paths.build);
     });
 
