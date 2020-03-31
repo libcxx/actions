@@ -11700,8 +11700,6 @@ const { mkdirP, run, capture } = __webpack_require__(983);
 
 
 function getActionPathsForConfigUnchecked(config_name, root_path) {
-  console.log('root_path = ' + root_path);
-  console.log('config_name = ' + config_name);
   const output_path = path.join(root_path, 'output', config_name);
   return {
     source: path.join(root_path, 'llvm-project'),
@@ -11766,17 +11764,29 @@ const artifactName = "my-artifact";
 
 
 async function checkoutRuntimes() {
-  var out_path = core.getInput('path');
-  const action_paths = await createActionPaths(core.getInput('name'), out_path);
-  console.log(action_paths);
-  await checkoutRepoShallow(core.getInput('repository'),
-                            core.getInput('ref'), action_paths.source);
-  let sha = await getRevisionAtHead(action_paths.source);
-  core.setOutput('sha', sha);
-  core.setOutput('artifacts', action_paths.artifacts);
-  core.setOutput('install', action_paths.install);
-  core.setOutput('build', action_paths.build);
-  core.setOutput('source', action_paths.source);
+  let action_paths = await core.group('setup paths', async() => {
+    const out_path = core.getInput('path');
+    const action_paths = await createActionPaths(core.getInput('name'), out_path);
+    core.setOutput('artifacts', action_paths.artifacts);
+    core.setOutput('install', action_paths.install);
+    core.setOutput('build', action_paths.build);
+    core.setOutput('source', action_paths.source);
+    return action_paths;
+  });
+
+  let sha = await core.group('checkout', async () => {
+    const repo_url = ''.concat('https://github.com/', core.getInput('repository'));
+    const ref = core.getInput('ref');
+    const options = {cwd: action_paths.source };
+    await run('git', ['init'], options);
+    await run('git', ['remote', 'add', 'origin', repo_url], options);
+    await run('git', ['fetch', '--depth=1', 'origin', ref], options);
+    await run('git', ['reset', '--hard', 'FETCH_HEAD'], options);
+    let sha = await capture('git' ['rev-parse', 'HEAD'], options);
+    core.setOutput('sha', sha);
+    return sha;
+  });
+
   return action_paths;
 }
 
@@ -11790,43 +11800,42 @@ function getRuntimeList() {
 }
 
 async function configureRuntimes(action_paths) {
-  core.startGroup('configure');
-  if (fs.existsSync(action_paths.build)) {
-    await io.rmRF(action_paths.build);
-    mkdirP(action_paths.build);
-  }
-  let args = ['-GNinja',
-    `-DCMAKE_INSTALL_PREFIX=${action_paths.install}`,
-    `-DCMAKE_C_COMPILER=${core.getInput('cc')}`,
-    `-DCMAKE_CXX_COMPILER=${core.getInput('cxx')}`,
-    `"-DLLVM_ENABLE_PROJECTS=${getRuntimeList().join(';')}"`,
-    `-DLIBCXX_CXX_ABI=${core.getInput('cxxabi')}`,
-  ];
-  const extra_cmake_args = core.getInput('cmake_args');
-  if (extra_cmake_args)
-    args.push(extra_cmake_args);
+  let exitCode = await core.group('configure', async () => {
+    if (fs.existsSync(action_paths.build)) {
+      await io.rmRF(action_paths.build);
+      mkdirP(action_paths.build);
+    }
+    let args = ['-GNinja',
+      `-DCMAKE_INSTALL_PREFIX=${action_paths.install}`,
+      `-DCMAKE_C_COMPILER=${core.getInput('cc')}`,
+      `-DCMAKE_CXX_COMPILER=${core.getInput('cxx')}`,
+      `-DLLVM_ENABLE_PROJECTS=${getRuntimeList().join(';')}`,
+      `-DLIBCXX_CXX_ABI=${core.getInput('cxxabi')}`,
+    ];
+    const extra_cmake_args = core.getInput('cmake_args');
+    if (extra_cmake_args)
+      args.push(extra_cmake_args);
 
-  const sanitizer = core.getInput('sanitizer');
-  if (sanitizer)
-    args.push(`"-DLLVM_ENABLE_SANITIZER=${sanitizer}"`)
+    const sanitizer = core.getInput('sanitizer');
+    if (sanitizer)
+      args.push(`"-DLLVM_ENABLE_SANITIZER=${sanitizer}"`)
 
-  args.push(path.join(action_paths.source, 'llvm'));
-
-  const options = {};
-  options.cwd = action_paths.build;
-  let exitCode = await run('cmake', args, options);
-  core.endGroup();
+    args.push(path.join(action_paths.source, 'llvm'));
+    let exitCode = await run('cmake', args, {cwd: action_paths.build});
+    return exitCode;
+  });
   return exitCode;
 }
 
 async function buildRuntimes(action_paths) {
-  core.startGroup('building-runtimes');
-  let args = ['-v'];
-  await getRuntimeList().map(rt => { return path.join('projects', rt, 'all')}).forEach(rt => { args.push(rt); });
-  const options = {};
-  options.cwd = action_paths.build;
-  let exitCode = await run('ninja', args, options);
-  core.endGroup();
+  let exitCode = await core.group('Building runtimes', async () => {
+    let args = ['-v'];
+    getRuntimeList().forEach(rt => {
+      args.push(path.join('projects', rt, 'all'));
+    });
+    const result = await run('ninja', args, {cwd: action_paths.build});
+    return result;
+  });
   return exitCode;
 }
 
