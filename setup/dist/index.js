@@ -2764,13 +2764,14 @@ async function testRuntime(action_paths, runtime, name, options) {
     const xunit_output = path.join(action_paths.artifacts, `${config_name}.xml`)
 
     if (fs.existsSync(xunit_output)) {
-      return core.setFailed(`Duplicate test suite entry for ${config_name}`);
+      core.setFailed(`Duplicate test suite entry for ${config_name}`);
+      return xunit_output;
     }
     core.setOutput('results', xunit_output)
     const llvm_lit = path.join(action_paths.build, 'bin', 'llvm-lit');
     const test_path = path.join(action_paths.source, runtime, 'test');
     const options = [llvm_lit,
-      '--no-progress-bar', '--show-xfail', '--show-unsupported', '-v', '--xunit-output', xunit_output, test_path]
+      '--no-progress-bar', '--show-xfail', '--show-unsupported', '-v', '--xunit-xml-output', xunit_output, test_path]
     const user_options = core.getInput('options');
     if (user_options) {
       options.push(user_options);
