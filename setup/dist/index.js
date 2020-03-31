@@ -11748,7 +11748,7 @@ async function checkoutRuntimes(action_paths) {
     return sha;
   });
 
-  return action_paths;
+  return sha;
 }
 
 function getRuntimeList() {
@@ -44481,7 +44481,7 @@ async function run() {
   try {
     const config_name = core.getInput('name');
     const action_paths = await createActionPaths(config_name);
-    await checkoutRuntimes(action_paths.source)
+    await checkoutRuntimes(action_paths)
     await configureRuntimes(action_paths);
     await buildRuntimes(action_paths);
   } catch (error) {

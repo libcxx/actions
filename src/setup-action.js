@@ -59,7 +59,7 @@ async function checkoutRuntimes(action_paths) {
     return sha;
   });
 
-  return action_paths;
+  return sha;
 }
 
 function getRuntimeList() {
