@@ -66,7 +66,7 @@ async function cleanup() {
       if (fs.existsSync(action_paths.output)) {
         rmRfIgnoreError(action_paths.output);
       }
-    } catch (error) { core.setFailed(error.message); }
+    } catch (error) { core.setFailed(error); }
   });
   return result;
 }

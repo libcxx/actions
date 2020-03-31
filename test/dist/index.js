@@ -12523,7 +12523,8 @@ async function testRuntime(action_paths, runtime, name, options) {
     });
     return result;
   } catch (error) {
-    core.setFailed(error.message);
+    core.setFailed(error);
+    throw error;
   }
 }
 

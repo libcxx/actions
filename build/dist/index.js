@@ -3727,7 +3727,8 @@ async function testRuntime(action_paths, runtime, name, options) {
     });
     return result;
   } catch (error) {
-    core.setFailed(error.message);
+    core.setFailed(error);
+    throw error;
   }
 }
 
@@ -7639,7 +7640,7 @@ async function cleanup() {
       if (fs.existsSync(action_paths.output)) {
         rmRfIgnoreError(action_paths.output);
       }
-    } catch (error) { core.setFailed(error.message); }
+    } catch (error) { core.setFailed(error); }
   });
   return result;
 }
