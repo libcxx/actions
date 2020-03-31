@@ -20,10 +20,10 @@ const xunitViewer = require('xunit-viewer');
 // most @actions toolkit packages have async methods
 async function run() {
   try {
-    const test_config  = core.getInput('name');
-    const build_config = core.getInput('build');
+    const config_name  = core.getInput('name');
+    const test_config = core.getInput('build');
     const options = core.getInput('options');
-    const action_paths = await getActionPaths(build_config);
+    const action_paths = await getActionPaths(config_name);
     const runtimes = getRuntimeList();
     for (const runtime of runtimes) {
       let xunit_path = await testRuntime(action_paths, runtime, test_config, options);
