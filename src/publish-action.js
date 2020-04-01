@@ -75,9 +75,9 @@ async function publishTestSuiteHTMLResults(results_file, destination, token) {
     if (fs.existsSync(index)) {
       await unlink(index);
     }
-    fs.symlinkSync(index, `./${output_file}`);
+    await fs.symlinkSync(index, `./${output_file}`);
 
-    await commitAndPushChanges(destination);
+    await commitAndPushChanges(repo_path, destination);
   } finally {
     rmRfIgnoreError(repo_path);
   }
