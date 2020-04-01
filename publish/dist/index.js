@@ -4422,12 +4422,12 @@ const { getActionConfig } = __webpack_require__(826);
 // most @actions toolkit packages have async methods
 async function run() {
   try {
-    const action_paths = getActionConfig();
+    const action_paths = await getActionConfig();
     const token = core.getInput('publisher_key');
     const test_config_name = core.getInput('config_name');
     await createAndPublishTestSuiteResults(action_paths, test_config_name, token);
   } catch (error) {
-    core.setFailed(error);
+    core.setFailed(error.message);
   }
 }
 
@@ -23225,8 +23225,8 @@ async function checkoutLibcxxIOToken(out_path, token, branch = 'master') {
     const repo_url = `https://${agent}:${token}@github.com/libcxx/libcxx.github.io.git`;
     let l = await run('git', ['clone', '--depth=1', '-b', branch, repo_url, out_path]);
     const opts = {cwd: out_path};
-    await run('git', ['config', '--local', 'user.name', `libc++ Actions ${agent}`], opts);
-    await run('git', ['config', '--local', 'user.email', 'agent@efcs.ca'], opts);
+    await run('git', ['config', '--local', 'user.name', `"libc++ Actions ${agent}"`], opts);
+    await run('git', ['config', '--local', 'user.email', '"agent@efcs.ca"'], opts);
     return l;
   });
   return result;
