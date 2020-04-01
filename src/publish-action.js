@@ -10,7 +10,7 @@ const temp = require('temp');
 
 async function withSSHKey(token, then) {
   let tempFile = await utils.createTempFile('id_rsa', token);
-  //process.env.GIT_SSH_COMMAND = `ssh -i ${tempFile} -o "StrictHostKeyChecking=no"`;
+  process.env.GIT_SSH_COMMAND = `ssh -i ${tempFile} -o "StrictHostKeyChecking=no"`;
   try {
 
     let result = await then();
@@ -24,16 +24,15 @@ async function withSSHKey(token, then) {
 async function checkoutLibcxxIO(out_path, branch = 'master') {
   let result = await core.group('checkout', async () => {
     const agent = 'publisher'
-    const repo_url = `https://github.com/libcxx/libcxx.github.io.git`;
+    const repo_url = `git@github.com:libcxx/libcxx.github.io.git`;
 
     let l = await utils.run(
         'git', [ 'clone', '--depth=1', '-b', branch, repo_url, out_path ], {env: process.env});
     const opts = {cwd : out_path};
     await utils.run(
-        'git', [ 'config', '--local', 'user.name', `"libcpp actions publisher` ],
-        opts);
+        'git config --local user.name "libcpp actions publisher"', [], opts);
     await utils.run(
-        'git', [ 'config', '--local', 'user.email', 'eric@efcs.ca' ], opts);
+        'git config --local user.email eric@efcs.ca', [], opts);
     return l;
   });
   return result;
@@ -86,7 +85,7 @@ async function publishTestSuiteHTMLResults(results_file, destination, token) {
 
 async function createTestSuiteHTMLResults(title, xml_file_path,
                                           html_output_path) {
-  await Promise.all([ xunitViewer({
+  await Promise.all([ await xunitViewer({
     server : false,
     results : xml_file_path,
     title : title,
@@ -109,7 +108,7 @@ async function publishArtifacts(artifacts_dir) {
 async function createAndPublishTestSuiteResults(action_paths, config_name,
                                                 token) {
   const result_name = await `test-results-${await new Date().toISOString()}.html`;
-  let html_results = path.join(action_paths.artifacts, config_name);
+  let html_results = path.join(action_paths.artifacts, result_name);
   await createTestSuiteHTMLResults(`${config_name} Test Suite Results`,
                                    action_paths.artifacts, html_results);
   let promise = await publishArtifacts(action_paths.artifacts);
