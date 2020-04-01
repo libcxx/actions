@@ -23221,7 +23221,7 @@ async function checkoutLibcxxIO(out_path, token, branch = 'master') {
 
 async function checkoutLibcxxIOToken(out_path, token, branch = 'master') {
   let result = await core.group('checkout', async () => {
-    const agent = 'publisher'
+    const agent = 'publisher';
     const repo_url = `https://${agent}:${token}@github.com/libcxx/libcxx.github.io.git`;
     let l = await run('git', ['clone', '--depth=1', '-b', branch, repo_url, out_path]);
     const opts = {cwd: out_path};
@@ -23247,22 +23247,22 @@ async function commitAndPushChanges(repo_path, destination_name) {
 async function publishTestSuiteHTMLResults(results_file, destination, token) {
   repo_path = 'libcxx.github.io';
   try {
-    core.saveState('libcxx-io', repo_path)
+    core.saveState('libcxx-io', repo_path);
     await checkoutLibcxxIOToken(repo_path, token);
 
     const timestamp = Date.now().toISOString();
     output_path = os.path.join(repo_path, 'results', destination);
 
     if (!fs.existsSync(output_path)) {
-      mkdirP(output_path);
+      await mkdirP(output_path);
     }
 
-    output_file = `results-${timestamp}.html`;
+    const output_file = `results-${timestamp}.html`;
     await io.cp(results_file, path.join(output_path, output_file));
 
     index = path.join(output_path, 'index.html');
     if (fs.existsSync(index)) {
-      unlink(index);
+      await unlink(index);
     }
     fs.symlinkSync(index, `./${output_file}`);
 
@@ -23277,7 +23277,7 @@ async function createTestSuiteHTMLResults(title, xml_file_path, html_output_path
       server: false,
       results: xml_file_path,
       title: title,
-      output: html_output_path,
+      output: html_output_path
     })]
     );
   return 0;
