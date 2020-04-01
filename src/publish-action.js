@@ -59,7 +59,7 @@ async function publishTestSuiteHTMLResults(results_file, destination, token) {
   repo_path = 'libcxx.github.io';
   try {
     core.saveState('libcxx-io', repo_path);
-    await checkoutLibcxxIONoAuth(repo_path, token);
+    await checkoutLibcxxIONoAuth(repo_path);
 
     const timestamp = new Date().toISOString();
     output_path = path.join(repo_path, 'results', destination);
