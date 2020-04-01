@@ -5,13 +5,9 @@ const io = require('@actions/io');
 const assert = require('assert');
 const { mkdirP, run, capture } = require('./utils');
 
+const all_runtimes = ['libcxx', 'libcxxabi', 'libunwind'];
 
-function _getRuntimeList() {
-  const all = ['libcxx', 'libcxxabi', 'libunwind']
-  const raw_input = core.getInput('runtimes');
-  if (!raw_input) {
-    return all;
-  }
+function processRuntimeInput(raw_input) {
   const parts = raw_input.split(' ').map(p => { return p.trim(); });
   parts.forEach(runtime => {
     if (runtime != 'libcxx' && runtime != 'libcxxabi' && runtime != 'libunwind')
@@ -20,6 +16,14 @@ function _getRuntimeList() {
   if (parts.length == 0)
     throw Error("non-empty string consists entirely of whitespace");
   return parts;
+}
+
+function _getRuntimeList() {
+  const raw_input = core.getInput('runtimes');
+  if (!raw_input) {
+    return all_runtimes;
+  }
+  return processRuntimeInput(raw_input);
 }
 
 async function createActionConfig(config_name) {
@@ -169,4 +173,4 @@ async function testRuntime(action_paths, runtime, name, options) {
 
 
 module.exports = {checkoutRuntimes, configureRuntimes, buildRuntimes, getActionConfig,
-  createActionConfig, installRuntimes, testRuntime};
+  createActionConfig, installRuntimes, testRuntime, processRuntimeInput};

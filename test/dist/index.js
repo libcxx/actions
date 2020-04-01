@@ -6107,7 +6107,16 @@ async function run() {
     const test_config = core.getInput('build');
     const options = core.getInput('options');
     const action_paths = await getActionConfig();
-    for (const runtime of action_paths.runtimes) {
+
+    const runtimes_str = core.getInput('runtimes');
+    var runtimes = null;
+    if (runtimes_str) {
+      runtimes = runtimes_str.split(' ').map((rt) => { return rt.trim(); })
+    } else {
+      runtimes = action_paths.runtimes;
+    }
+
+    for (const runtime of runtimes) {
       let xunit_path = await testRuntime(action_paths, runtime, test_config, options);
       await createTestSuiteAnnotations(xunit_path);
     }
@@ -54890,13 +54899,9 @@ const io = __webpack_require__(712);
 const assert = __webpack_require__(357);
 const { mkdirP, run, capture } = __webpack_require__(112);
 
+const all_runtimes = ['libcxx', 'libcxxabi', 'libunwind'];
 
-function _getRuntimeList() {
-  const all = ['libcxx', 'libcxxabi', 'libunwind']
-  const raw_input = core.getInput('runtimes');
-  if (!raw_input) {
-    return all;
-  }
+function processRuntimeInput(raw_input) {
   const parts = raw_input.split(' ').map(p => { return p.trim(); });
   parts.forEach(runtime => {
     if (runtime != 'libcxx' && runtime != 'libcxxabi' && runtime != 'libunwind')
@@ -54905,6 +54910,14 @@ function _getRuntimeList() {
   if (parts.length == 0)
     throw Error("non-empty string consists entirely of whitespace");
   return parts;
+}
+
+function _getRuntimeList() {
+  const raw_input = core.getInput('runtimes');
+  if (!raw_input) {
+    return all_runtimes;
+  }
+  return processRuntimeInput(raw_input);
 }
 
 async function createActionConfig(config_name) {
@@ -55054,7 +55067,7 @@ async function testRuntime(action_paths, runtime, name, options) {
 
 
 module.exports = {checkoutRuntimes, configureRuntimes, buildRuntimes, getActionConfig,
-  createActionConfig, installRuntimes, testRuntime};
+  createActionConfig, installRuntimes, testRuntime, processRuntimeInput};
 
 
 /***/ }),

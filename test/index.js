@@ -21,7 +21,16 @@ async function run() {
     const test_config = core.getInput('build');
     const options = core.getInput('options');
     const action_paths = await getActionConfig();
-    for (const runtime of action_paths.runtimes) {
+
+    const runtimes_str = core.getInput('runtimes');
+    var runtimes = null;
+    if (runtimes_str) {
+      runtimes = runtimes_str.split(' ').map((rt) => { return rt.trim(); })
+    } else {
+      runtimes = action_paths.runtimes;
+    }
+
+    for (const runtime of runtimes) {
       let xunit_path = await testRuntime(action_paths, runtime, test_config, options);
       await createTestSuiteAnnotations(xunit_path);
     }
