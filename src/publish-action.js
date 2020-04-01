@@ -32,12 +32,12 @@ async function checkoutLibcxxIO(out_path, token, branch = 'master') {
 
 async function checkoutLibcxxIOToken(out_path, token, branch = 'master') {
   let result = await core.group('checkout', async () => {
-    const agent = 'publisher';
+    const agent = 'ericwf';
     const repo_url = `https://${agent}:${token}@github.com/libcxx/libcxx.github.io.git`;
     let l = await run('git', ['clone', '--depth=1', '-b', branch, repo_url, out_path]);
     const opts = {cwd: out_path};
-   // await run('git', ['config', '--local', 'user.name', `"libc++ Actions ${agent}"`], opts);
-   // await run('git', ['config', '--local', 'user.email', '"eric@efcs.ca"'], opts);
+    await run('git', ['config', '--local', 'user.name', `"libc++ Actions ${agent}"`], opts);
+    await run('git', ['config', '--local', 'user.email', '"eric@efcs.ca"'], opts);
     return l;
   });
   return result;
