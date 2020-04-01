@@ -23224,7 +23224,7 @@ async function checkoutLibcxxIONoAuth(out_path, branch = 'master') {
     const repo_url = `https://github.com/libcxx/libcxx.github.io.git`;
     let l = await run('git', ['clone', '--depth=1', '-b', branch, repo_url, out_path]);
     const opts = {cwd: out_path};
-    await run('git', ['config', '--local', 'user.name', `"libc++ Actions ${agent}"`], opts);
+    await run('git', ['config', '--local', 'user.name', `"libc++ Actions Agent"`], opts);
     await run('git', ['config', '--local', 'user.email', '"agent@efcs.ca"'], opts);
     return l;
   });
