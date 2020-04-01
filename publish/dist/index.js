@@ -4427,7 +4427,7 @@ async function run() {
     const test_config_name = core.getInput('config_name');
     await createAndPublishTestSuiteResults(action_paths, test_config_name, token);
   } catch (error) {
-    core.setFailed(error.message);
+    core.setFailed(error);
   }
 }
 

@@ -1,9 +1,9 @@
 
 .PHONY : all
 all:
-	cd test/ && npm run package
-	cd build/ && npm run package
-	cd publish/ && npm run package
+	cd test/ && rm -rf dist/ && mkdir dist/ && npm run package
+	cd build/ && rm -rf dist/ && mkdir dist/ && npm run package
+	cd publish/ && rm -rf dist/ && mkdir dist/ && npm run package
 
 .PHONY : clean
 clean:

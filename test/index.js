@@ -35,7 +35,7 @@ async function run() {
       await createTestSuiteAnnotations(xunit_path);
     }
   } catch (error) {
-    core.setFailed(error.message);
+    core.setFailed(error);
   }
 }
 
