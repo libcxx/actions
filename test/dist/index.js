@@ -2742,7 +2742,7 @@ const fs = __webpack_require__(747);
 const process = __webpack_require__(765);
 const child_process = __webpack_require__(129);
 const rimraf = __webpack_require__(395);
-var temp = __webpack_require__(559);
+const temp = __webpack_require__(559);
 
 
 function mkdirP(dir_path) {
@@ -2845,7 +2845,7 @@ async function bash(commands, options = {}) {
   } catch (error) {
     throw processError(error, commands);
   } finally {
-    await temp.cleanupSync();
+    await unlinkIgnoreError(script);
   }
 }
 

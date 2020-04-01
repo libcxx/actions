@@ -8,7 +8,7 @@ const fs = require('fs');
 const process = require('process');
 const child_process = require('child_process');
 const rimraf = require('rimraf');
-var temp = require("temp");
+const temp = require("temp");
 
 
 function mkdirP(dir_path) {
@@ -111,7 +111,7 @@ async function bash(commands, options = {}) {
   } catch (error) {
     throw processError(error, commands);
   } finally {
-    await temp.cleanupSync();
+    await unlinkIgnoreError(script);
   }
 }
 

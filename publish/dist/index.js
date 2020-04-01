@@ -58,7 +58,7 @@ const fs = __webpack_require__(747);
 const process = __webpack_require__(765);
 const child_process = __webpack_require__(129);
 const rimraf = __webpack_require__(395);
-var temp = __webpack_require__(559);
+const temp = __webpack_require__(559);
 
 
 function mkdirP(dir_path) {
@@ -161,7 +161,7 @@ async function bash(commands, options = {}) {
   } catch (error) {
     throw processError(error, commands);
   } finally {
-    await temp.cleanupSync();
+    await unlinkIgnoreError(script);
   }
 }
 
@@ -25290,11 +25290,11 @@ const io = __webpack_require__(712);
 const assert = __webpack_require__(357);
 const utils = __webpack_require__(1);
 const xunitViewer = __webpack_require__(721);
-const temp = __webpack_require__(559).track();
+const temp = __webpack_require__(559);
 
 async function withSSHKey(token, then) {
   let tempFile = await utils.createTempFile('id_rsa', token);
-  process.env['GIT_SSH_COMMAND'] = `ssh -i ${tempFile}`;
+  process.env['GIT_SSH_COMMAND'] = `ssh -i ${tempFile} -o "StrictHostKeyChecking=no"`;
   var result;
   try {
     result = await then();
@@ -25317,7 +25317,7 @@ async function checkoutLibcxxIO(out_path, branch = 'master') {
         'git', [ 'config', '--local', 'user.name', `libc++ Actions ${agent}` ],
         opts);
     await utils.run(
-        'git', [ 'config', '--local', 'user.email', 'agent@efcs.ca' ], opts);
+        'git', [ 'config', '--local', 'user.email', 'eric@efcs.ca' ], opts);
     return l;
   });
   return result;

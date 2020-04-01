@@ -6,11 +6,11 @@ const io = require('@actions/io');
 const assert = require('assert');
 const utils = require('./utils');
 const xunitViewer = require('xunit-viewer');
-const temp = require('temp').track();
+const temp = require('temp');
 
 async function withSSHKey(token, then) {
   let tempFile = await utils.createTempFile('id_rsa', token);
-  process.env['GIT_SSH_COMMAND'] = `ssh -i ${tempFile}`;
+  process.env['GIT_SSH_COMMAND'] = `ssh -i ${tempFile} -o "StrictHostKeyChecking=no"`;
   var result;
   try {
     result = await then();
@@ -33,7 +33,7 @@ async function checkoutLibcxxIO(out_path, branch = 'master') {
         'git', [ 'config', '--local', 'user.name', `libc++ Actions ${agent}` ],
         opts);
     await utils.run(
-        'git', [ 'config', '--local', 'user.email', 'agent@efcs.ca' ], opts);
+        'git', [ 'config', '--local', 'user.email', 'eric@efcs.ca' ], opts);
     return l;
   });
   return result;
