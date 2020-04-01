@@ -25382,7 +25382,7 @@ async function publishArtifacts(artifacts_dir) {
 
 async function createAndPublishTestSuiteResults(action_paths, config_name, token) {
   const result_name = `test-results-${new Date().toISOString()}.html`;
-  let html_results = path.join(action_paths.artifacts, results_name);
+  let html_results = path.join(action_paths.artifacts, config_name);
   await createTestSuiteHTMLResults(`${config_name} Test Suite Results`,
     action_paths.artifacts, html_results);
   let promise = publishArtifacts(action_paths.artifacts);
