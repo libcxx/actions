@@ -1,5 +1,6 @@
 const core = require('@actions/core');
 const {createAndPublishTestSuiteResults} = require('../src/publish-action');
+const { getActionConfig } = require('../src/setup-action');
 
 // most @actions toolkit packages have async methods
 async function run() {

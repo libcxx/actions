@@ -1,5 +1,5 @@
-name: 'Build LLVM Runtimes'
-description: 'Configure and build the LLVM runtime libraries from source.'
+name: 'Publish Testsuite Results'
+description: 'Publish libcxx test suite results to libcxx.github.io'
 author: 'eric@efcs.ca'
 inputs:
   config_name:
