@@ -7650,7 +7650,6 @@ async function createAPI(token) {
   return octokit;
 }
 
-
 function getRawActionInputs() {
   return {
     repository: core.getInput('repository'),
