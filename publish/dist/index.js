@@ -25312,7 +25312,7 @@ async function withSSHKey(token, then) {
     let out = await utils.capture('git', ['config', '--list', '--show-origin']);
     core.warning(out);
     let result = await then();
-    let R2 = awaitresult;
+    let R2 = await result;
     return R2;
   } finally {
     await utils.unlinkIgnoreError(tempFile);
