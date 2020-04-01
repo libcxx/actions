@@ -111,7 +111,7 @@ async function publishArtifacts(artifacts_dir) {
 
 async function createAndPublishTestSuiteResults(action_paths, config_name,
                                                 token) {
-  const result_name = await `test-results-${await new Date().toISOString()}.html`;
+  const result_name = await `test-results-${await new Date().toISOString()}.html`.replace(':', '-');
   let html_results = path.join(action_paths.artifacts, result_name);
   await createTestSuiteHTMLResults(`${config_name} Test Suite Results`,
                                    action_paths.artifacts, html_results);
