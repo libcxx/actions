@@ -42,7 +42,7 @@ function get_corrected_names(test_case) {
   assert(file_path_and_suite.startsWith(ts_name));
   const test_case_name = path.join(file_path_and_suite.substring(ts_name.length), file_name);
 
-  return {test_suite: ts_name, test_case: test_case_name};
+  return {test_suite_name: ts_name, test_case_name: test_case_name};
 }
 
 function visit_all_failures(xml_doc) {
