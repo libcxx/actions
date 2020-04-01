@@ -12,7 +12,7 @@ jobs:
       - uses: ./actions/dispatch-event
         with:
           repository: libcxx/actions
-          token: ${{ github.token }}
+          token: ${{ secrets.personal_token }}
           event_type: 'test_event'
           client_payload: |
             {
