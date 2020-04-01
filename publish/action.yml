@@ -8,8 +8,7 @@ inputs:
     default: 'dummy'
   publisher_key:
     description: 'The SSH key used to publish the results'
-    required: False
-    default: ${{ secrets.publisher_key }}
+    required: True
 runs:
   using: 'node12'
   main: 'dist/index.js'
