@@ -1,5 +1,5 @@
 const core = require('@actions/core');
-const octokit = require('@')
+
 const path = require('path');
 const fs = require('fs');
 const io = require('@actions/io');
@@ -9,8 +9,6 @@ const utils = require('./utils');
 
 const { Octokit } = require("@octokit/rest");
 const github = require('@actions/github');
-
-
 
 function splitIntoOwnerAndRepo(repo_uri) {
   const i = repo_uri.indexOf('/');
@@ -23,14 +21,20 @@ function splitIntoOwnerAndRepo(repo_uri) {
 async function createAPI(token) {
   const octokit = new Octokit({
     auth: token,
-    userAgent: 'libc++ github actions',
-    previews: ['everest'],
+    userAgent: 'ericwf',
+    previews: ['everest-preview'],
+    baseUrl: 'https://api.github.com',
     log: {
-      debug: () => {},
-      info: core.info,
-      warn: core.warning,
-      error: core.error,
-    }
+        debug: core.info,
+        info: core.info,
+        warn: core.warning,
+        error: core.error
+      },
+      request: {
+        agent: undefined,
+        fetch: undefined,
+        timeout: 0
+      }
   });
   return octokit;
 }
@@ -56,22 +60,32 @@ async function validatePayloadString(str) {
 }
 
 async function getAPIInputsFromActionInputs(action_inputs) {
-  const {O, R} = splitIntoOwnerAndRepo(action_inputs.repository);
+  const {owner, repo} = await splitIntoOwnerAndRepo(action_inputs.repository);
+  const json_obj = await validatePayloadString(action_inputs.client_payload);
   return {
-    owner: O,
-    repo: R,
+    owner: owner,
+    repo: repo,
     event_type: action_inputs.event_type,
-    client_payload: validatePayloadString(action_inputs.client_payload),
+    client_payload: json_obj,
   }
 }
 
 async function runAction(raw_inputs = getRawActionInputs()) {
-  const api_inputs = await getAPIInputsFromActionInputs(raw_inputs);
-  const octokit = await createAPI(raw_input.token);
-  let l = await octokit.repos.dispatchEvent(api_inputs);
+  try {
+    const api_inputs = await getAPIInputsFromActionInputs(raw_inputs);
+    const octokit = await createAPI(raw_inputs.token);
+    let r = await octokit.repos.createDispatchEvent(api_inputs);
+    if (r.status === 204)
+      return r;
+    await console.log(r);
+    return r;
+  } catch (error) {
+    await console.log(error.stack);
+    core.setFailed(error.message);
+  }
 }
 
 
 
 
-module.exports = {}
+module.exports = { runAction }
