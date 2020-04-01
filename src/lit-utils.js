@@ -1,20 +1,12 @@
-const { Octokit } = require("@octokit/rest");
-const { createTokenAuth } = require("@octokit/auth-token");
-const { exec } = require("@actions/exec");
 const  core  = require("@actions/core");
 const assert = require('assert');
 var DOMParser = require('xmldom').DOMParser;
-
-const { execSync } = require('child_process');
-const { spawn, spawnSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
-const process = require('process');
-const xunitViewer = require('xunit-viewer');
 
 
 
-function read_xml_from_file(xml_file) {
+function readXMLFile(xml_file) {
   const xml_string = fs.readFileSync(xml_file, 'utf8');
   function handle_error(err) {
     core.error(err);
@@ -32,7 +24,7 @@ function read_xml_from_file(xml_file) {
   return doc;
 }
 
-function get_corrected_names(test_case) {
+function correctTestNames(test_case) {
   const ts = test_case.parentNode;
   assert(ts && ts.nodeName == "testsuite");
   const ts_name = ts.getAttribute("name");
@@ -56,7 +48,7 @@ function visit_all_failures(xml_doc) {
 
     const tc = failure.parentNode;
     assert(tc && tc.nodeName == "testcase");
-    const {test_suite_name, test_case_name} = get_corrected_names(tc);
+    const {test_suite_name, test_case_name} = correctTestNames(tc);
 
     const failure_message =  `TEST '${test_suite_name} :: ${test_case_name} FAILED\n${failure_text}`
 
@@ -66,7 +58,7 @@ function visit_all_failures(xml_doc) {
 }
 
 function getTestSuiteAnnotations(xml_file_path) {
-  const xml_dom = read_xml_from_file(xml_file_path);
+  const xml_dom = readXMLFile(xml_file_path);
   const failures = visit_all_failures(xml_dom);
   return failures;
 }
@@ -82,4 +74,5 @@ function createTestSuiteAnnotations(xml_file_path) {
 
 module.exports = {
   getTestSuiteAnnotations,
-  createTestSuiteAnnotations};
+  createTestSuiteAnnotations
+};
