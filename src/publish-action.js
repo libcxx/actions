@@ -12,9 +12,10 @@ async function withSSHKey(token, then) {
   let tempFile = await utils.createTempFile('id_rsa', token);
   process.env.GIT_SSH_COMMAND = `ssh -i ${tempFile} -o "StrictHostKeyChecking=no"`;
   try {
-    await utils.run('git', ['config', '--list', '--show-origin']);
+    let out = await utils.capture('git', ['config', '--list', '--show-origin']);
+    core.warning(out);
     let result = await then();
-    let R2 = awaitresult;
+    let R2 = await result;
     return R2;
   } finally {
     await utils.unlinkIgnoreError(tempFile);
