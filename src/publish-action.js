@@ -77,6 +77,7 @@ async function createTestSuiteHTMLResults(title, xml_file_path, html_output_path
       output: html_output_path,
     })]
     );
+  return 0;
 }
 
 async function createAndPublishTestSuiteResults(action_paths, config_name, token) {
