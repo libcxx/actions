@@ -23218,6 +23218,20 @@ async function checkoutLibcxxIO(out_path, token, branch = 'master') {
   return result;
 }
 
+
+async function checkoutLibcxxIOToken(out_path, token, branch = 'master') {
+  let result = await core.group('checkout', async () => {
+    const agent = 'publisher'
+    const repo_url = `https://${agent}:${token}@github.com/libcxx/libcxx.github.io.git`;
+    let l = await run('git', ['clone', '--depth=1', '-b', branch, repo_url, out_path]);
+    const opts = {cwd: out_path};
+    await run('git', ['config', '--local', 'user.name', `libc++ Actions ${agent}`], opts);
+    await run('git', ['config', '--local', 'user.email', 'agent@efcs.ca'], opts);
+    return l;
+  });
+  return result;
+}
+
 async function commitChanges(repo_path, destination_name) {
   const opts = {cwd: repo_path};
   await run('git', ['add', '-A', ':/'], opts);
@@ -23234,7 +23248,7 @@ async function publishTestSuiteHTMLResults(results_file, destination, token) {
   repo_path = 'libcxx.github.io';
   try {
     core.saveState('libcxx-io', repo_path)
-    await checkoutLibcxxIO(repo_path, token);
+    await checkoutLibcxxIOToken(repo_path, token);
 
     const timestamp = Date().now().toISOString();
     output_path = os.path.join(repo_path, 'results', destination);
