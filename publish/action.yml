@@ -2,14 +2,14 @@ name: 'Build LLVM Runtimes'
 description: 'Configure and build the LLVM runtime libraries from source.'
 author: 'eric@efcs.ca'
 inputs:
-  name:
-    description: 'The name used to identify the build configuration'
+  config_name:
+    description: 'The name used to identify the run'
     required: False
-    default: 'default'
-  options:
-    description: 'A list of LIT options to pass when running the tests'
+    default: 'dummy'
+  publisher_token:
+    description: 'The SSH key used to publish the results'
     required: False
-    default: ''
+    default: "${{ secrets.publisher_key }}"
 outputs:
   results:
     description: 'The path containing the xunit results'
