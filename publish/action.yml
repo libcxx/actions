@@ -6,13 +6,10 @@ inputs:
     description: 'The name used to identify the run'
     required: False
     default: 'dummy'
-  publisher_token:
+  publisher_key:
     description: 'The SSH key used to publish the results'
     required: False
-    default: "${{ secrets.publisher_key }}"
-outputs:
-  results:
-    description: 'The path containing the xunit results'
+    default: ${{ secrets.publisher_key }}
 runs:
   using: 'node12'
   main: 'dist/index.js'

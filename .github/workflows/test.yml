@@ -14,5 +14,7 @@ jobs:
       with:
         runtimes: 'libcxxabi libunwind'
     - uses: ./actions/publish
+      with:
+        publisher_key: ${{ secrets.publisher_key }}
 
 
