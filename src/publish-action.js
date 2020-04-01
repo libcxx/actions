@@ -30,14 +30,13 @@ async function checkoutLibcxxIO(out_path, token, branch = 'master') {
 }
 
 
-async function checkoutLibcxxIOToken(out_path, token, branch = 'master') {
+async function checkoutLibcxxIONoAuth(out_path, branch = 'master') {
   let result = await core.group('checkout', async () => {
-    const agent = 'ericwf';
-    const repo_url = `https://${agent}:${token}@github.com/libcxx/libcxx.github.io.git`;
+    const repo_url = `https://github.com/libcxx/libcxx.github.io.git`;
     let l = await run('git', ['clone', '--depth=1', '-b', branch, repo_url, out_path]);
     const opts = {cwd: out_path};
     await run('git', ['config', '--local', 'user.name', `"libc++ Actions ${agent}"`], opts);
-    await run('git', ['config', '--local', 'user.email', '"eric@efcs.ca"'], opts);
+    await run('git', ['config', '--local', 'user.email', '"agent@efcs.ca"'], opts);
     return l;
   });
   return result;
@@ -49,9 +48,10 @@ async function commitChanges(repo_path, destination_name) {
   await run('git', ['commit', '-am', `Publish testsuite results for ${destination_name}`], opts);
 }
 
-async function commitAndPushChanges(repo_path, destination_name) {
+async function commitAndPushChanges(repo_path, destination_name, token) {
   await commitChanges(repo_path, destination_name);
-  let result = await run('git', ['push'], {cwd: repo_path});
+  const repo_url = `https://${token}@github.com/libcxx/libcxx.github.io.git`;
+  let result = await run('git', ['push', repo_url], {cwd: repo_path});
   return result;
 }
 
@@ -59,7 +59,7 @@ async function publishTestSuiteHTMLResults(results_file, destination, token) {
   repo_path = 'libcxx.github.io';
   try {
     core.saveState('libcxx-io', repo_path);
-    await checkoutLibcxxIOToken(repo_path, token);
+    await checkoutLibcxxIONoAuth(repo_path, token);
 
     const timestamp = new Date().toISOString();
     output_path = path.join(repo_path, 'results', destination);
@@ -77,7 +77,7 @@ async function publishTestSuiteHTMLResults(results_file, destination, token) {
     }
     await fs.symlinkSync(index, `./${output_file}`);
 
-    await commitAndPushChanges(repo_path, destination);
+    await commitAndPushChanges(repo_path, destination, token);
   } finally {
     rmRfIgnoreError(repo_path);
   }
