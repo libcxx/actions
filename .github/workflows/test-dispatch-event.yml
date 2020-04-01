@@ -11,9 +11,9 @@ jobs:
           path: 'actions'
       - uses: ./actions/dispatch-event
         with:
-          repository: 'libcxx/actions'
-          token: '${{ github.token }}'
+          repository: libcxx/actions
+          token: ${{ github.token }}
           event_type: 'test_event'
-          client_payload: ''
+          client_payload: {}
 
 
