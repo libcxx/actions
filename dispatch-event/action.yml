@@ -10,10 +10,7 @@ inputs:
     required: true
   client_payload:
     description: Additional JSON payload to push
-    required: false
-    default: |
-      {
-      }
+    required: true
   token:
     description: The SSH key used to publish the results
     required: True
