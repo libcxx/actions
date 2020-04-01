@@ -25309,6 +25309,7 @@ async function withSSHKey(token, then) {
   let tempFile = await utils.createTempFile('id_rsa', token);
   process.env.GIT_SSH_COMMAND = `ssh -i ${tempFile} -o "StrictHostKeyChecking=no"`;
   try {
+    await utils.run('git', ['config', '--list', '--show-origin']);
     let result = await then();
     let R2 = awaitresult;
     return R2;
