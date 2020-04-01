@@ -2730,10 +2730,9 @@ async function run() {
           `runtimes-${config_name}-install.zip`, files,
           action_paths.install);
     });
-    await a1;
-    await a2;
+    await Promise.all([a1, a2]);
   } catch (error) {
-    core.setFailed(error.message);
+    core.setFailed(error);
     return;
   }
 }
@@ -2771,7 +2770,7 @@ if (core.getState('cleanup')) {
 
 const exec = __webpack_require__(2);
 const  core  = __webpack_require__(167);
-const {glob} = __webpack_require__(558);
+const glob = __webpack_require__(558);
 const path = __webpack_require__(622);
 const fs = __webpack_require__(747);
 const process = __webpack_require__(765);

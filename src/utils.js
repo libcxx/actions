@@ -1,6 +1,6 @@
 const exec = require('@actions/exec');
 const  core  = require("@actions/core");
-const {glob} = require('@actions/glob');
+const glob = require('@actions/glob');
 const path = require('path');
 const fs = require('fs');
 const process = require('process');

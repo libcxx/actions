@@ -6585,7 +6585,7 @@ run()
 
 const exec = __webpack_require__(2);
 const  core  = __webpack_require__(167);
-const {glob} = __webpack_require__(558);
+const glob = __webpack_require__(558);
 const path = __webpack_require__(622);
 const fs = __webpack_require__(747);
 const process = __webpack_require__(765);

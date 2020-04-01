@@ -45,10 +45,9 @@ async function run() {
           `runtimes-${config_name}-install.zip`, files,
           action_paths.install);
     });
-    await a1;
-    await a2;
+    await Promise.all([a1, a2]);
   } catch (error) {
-    core.setFailed(error.message);
+    core.setFailed(error);
     return;
   }
 }
