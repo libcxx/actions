@@ -23251,7 +23251,7 @@ async function publishTestSuiteHTMLResults(results_file, destination, token) {
     await checkoutLibcxxIOToken(repo_path, token);
 
     const timestamp = new Date().toISOString();
-    output_path = os.path.join(repo_path, 'results', destination);
+    output_path = path.join(repo_path, 'results', destination);
 
     if (!fs.existsSync(output_path)) {
       await mkdirP(output_path);
