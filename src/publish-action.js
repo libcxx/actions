@@ -30,7 +30,7 @@ async function checkoutLibcxxIO(out_path, branch = 'master') {
         'git', [ 'clone', '--depth=1', '-b', branch, repo_url, out_path ], {env: process.env});
     const opts = {cwd : out_path};
     await utils.run(
-        'git', [ 'config', '--local', 'user.name', `libc++ Actions ${agent}` ],
+        'git', [ 'config', '--local', 'user.name', `"libcpp actions publisher` ],
         opts);
     await utils.run(
         'git', [ 'config', '--local', 'user.email', 'eric@efcs.ca' ], opts);

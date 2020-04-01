@@ -8,8 +8,12 @@ jobs:
     steps:
     - uses: actions/checkout@master
       with:
-        path: 'actions'
         token: ${{ secrets.personal_token }}
+    - name: "move actions"
+      run: |
+        mkdir actions/
+        ls | grep -v actions | grep -v gitconfig | xargs mv -t actions/
+        git init
     - uses: ./actions/build
     - uses: ./actions/test
       with:
