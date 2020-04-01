@@ -12,7 +12,7 @@ jest.setTimeout(100000);
 test('checkout test', async () => {
     const out_path = path.join('/', 'tmp', 'libcxx-io');
     await rmRfIgnoreError(out_path);
-    let l = await checkoutLibcxxIO(out_path, process.env['GITHUB_TOKEN']);
+    let l = await checkoutLibcxxIO(out_path);
     let sha = await getGitSha(out_path);
     expect(fs.existsSync(out_path)).toBe(true);
     await run('touch', ['test.txt'], {cwd: out_path});
@@ -25,7 +25,7 @@ test('checkout test', async () => {
 test('push test', async () => {
     const out_path = path.join('/', 'tmp', 'libcxx-io-2');
     await rmRfIgnoreError(out_path);
-    let l = await checkoutLibcxxIO(out_path, process.env['GITHUB_TOKEN'], 'ci-testing-branch');
+    let l = await checkoutLibcxxIO(out_path,'ci-testing-branch');
     let sha = await getGitSha(out_path);
     await expect(fs.existsSync(out_path)).toBe(true);
     const test_file = path.join(out_path, 'test.txt');
@@ -34,7 +34,7 @@ test('push test', async () => {
     } else {
         await run('touch', [test_file]);
     }
-    await commitAndPushChanges(out_path, 'pushing from test case');
+    await commitAndPushChanges(out_path, 'pushing from test case', process.env['GITHUB_TOKEN']);
     let sha2 = await getGitSha(out_path);
     await expect(sha2).not.toBe(sha);
     await rmRfIgnoreError(out_path);

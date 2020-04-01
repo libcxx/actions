@@ -62,5 +62,5 @@ test('full test', async () => {
 
     let xunit_path = await testRuntime(action_paths, 'libcxxabi', test_config, options);
     await expect(fs.existsSync(xunit_path)).toBe(true);
-    await expect(createTestSuiteAnnotations(xunit_path)).resolves();
+    await expect(createTestSuiteAnnotations(xunit_path)).resolves.toBe(0);
 })

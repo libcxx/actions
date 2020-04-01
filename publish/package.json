@@ -4,7 +4,7 @@
   "description": "Publish test suite results",
   "main": "index.js",
   "scripts": {
-    "lint": "eslint index.js",
+    "lint": "eslint index.js ",
     "package": "ncc build index.js -o dist",
     "test": "eslint index.js && jest --detectOpenHandles"
   },
@@ -33,6 +33,7 @@
     "@octokit/rest": "^17.1.4",
     "minimist": ">=1.2.2",
     "rimraf": "^3.0.2",
+    "temp": "^0.9.1",
     "xmldom": "^0.3.0",
     "xunit-viewer": "^6.2.1"
   },

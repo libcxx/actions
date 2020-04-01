@@ -26,6 +26,13 @@ reinstall:
 	cd publish/ && rm -rf node_modules/ package-lock.json && npm install --save
 	cd build/ && rm -rf node_modules/ package-lock.json && npm install --save
 
+.PHONY : add-package
+add-package:
+	@echo "Which package?: "; \
+	read package; \
+	npm install --prefix build/ $$package; \
+	npm install --prefix test/ $$package; \
+	npm install --prefix publish/ $$package
 
 .PHONY : commit
 push: all

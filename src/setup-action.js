@@ -3,7 +3,8 @@ const path = require('path');
 const fs = require('fs');
 const io = require('@actions/io');
 const assert = require('assert');
-const { mkdirP, run, capture } = require('./utils');
+const process = require('process');
+const utils = require('./utils');
 
 const all_runtimes = ['libcxx', 'libcxxabi', 'libunwind'];
 
@@ -39,15 +40,16 @@ async function createActionConfig(config_name) {
     build: path.join(output_path, 'build'),
     artifacts: path.join(output_path, 'artifacts')
   };
+  var key;
   for (key of ['output', 'source']) {
     const p = action_config[key];
     if (fs.existsSync(p)) {
-      await rmRf(p);
+      await utils.rmRf(p);
     }
   }
   for (key of ['output', 'source', 'build', 'install', 'artifacts']) {
     const p = action_config[key];
-    await mkdirP(p);
+    await utils.mkdirP(p);
     core.setOutput(key, p);
   }
   fs.writeFileSync(path.join(root_path, 'config.json'), JSON.stringify(action_config));
@@ -57,9 +59,9 @@ async function createActionConfig(config_name) {
 
 
 function getActionConfig() {
-  root_path = process.env['GITHUB_WORKSPACE'];
+  let root_path = process.env['GITHUB_WORKSPACE'];
   const config_file = path.join(root_path, 'config.json');
-  config_str = fs.readFileSync(config_file);
+  let config_str = fs.readFileSync(config_file);
   return JSON.parse(config_str);
 }
 
@@ -69,11 +71,11 @@ async function checkoutRuntimes(action_paths) {
     const repo_url = ''.concat('https://github.com/', core.getInput('repository'));
     const ref = core.getInput('ref');
     const options = { cwd: action_paths.source };
-    await run('git', ['init'], options);
-    await run('git', ['remote', 'add', 'origin', repo_url], options);
-    await run('git', ['fetch', '--depth=1', 'origin', ref], options);
-    await run('git', ['reset', '--hard', 'FETCH_HEAD'], options);
-    let sha = await capture('git', ['rev-parse', 'HEAD'], options);
+    await utils.run('git', ['init'], options);
+    await utils.run('git', ['remote', 'add', 'origin', repo_url], options);
+    await utils.run('git', ['fetch', '--depth=1', 'origin', ref], options);
+    await utils.run('git', ['reset', '--hard', 'FETCH_HEAD'], options);
+    let sha = await utils.capture('git', ['rev-parse', 'HEAD'], options);
     core.setOutput('sha', sha);
     return sha;
   });
@@ -100,7 +102,7 @@ async function configureRuntimes(action_paths) {
       args.push(`"-DLLVM_ENABLE_SANITIZER=${sanitizer}"`)
 
     args.push(path.join(action_paths.source, 'llvm'));
-    let exitCode = await run('cmake', args, {cwd: action_paths.build});
+    let exitCode = await utils.run('cmake', args, {cwd: action_paths.build});
     return exitCode;
   });
   return exitCode;
@@ -112,7 +114,7 @@ async function buildRuntimes(action_paths) {
     action_paths.runtimes.forEach(rt => {
       args.push(path.join('projects', rt, 'all'));
     });
-    const result = await run('ninja', args, {cwd: action_paths.build});
+    const result = await utils.run('ninja', args, {cwd: action_paths.build});
     return result;
   });
   return exitCode;
@@ -124,7 +126,7 @@ async function installRuntimes(action_paths) {
     action_paths.runtimes.forEach(rt => {
       args.push(path.join('projects', rt, 'install'));
     });
-    const result = await run('ninja', args, {cwd: action_paths.build});
+    const result = await utils.run('ninja', args, {cwd: action_paths.build});
     return result;
   });
   return exitCode;
@@ -144,7 +146,7 @@ async function testRuntime(action_paths, runtime, name, options) {
       }
       core.setOutput('results', xunit_output)
       const llvm_lit = path.join(action_paths.build, 'bin', 'llvm-lit');
-      let result = await run(llvm_lit, ['--version'], {}); // Breathing test
+      let result = await utils.run(llvm_lit, ['--version'], {}); // Breathing test
       assert(result === 0);
 
       assert(llvm_lit !== undefined);
@@ -156,7 +158,7 @@ async function testRuntime(action_paths, runtime, name, options) {
         options.push(user_options);
       }
       try {
-        let result = await run(llvm_lit, options, {});
+        let result = await utils.run(llvm_lit, options, {});
       } catch (error) {
         console.log(error);
       }

@@ -1,57 +1,47 @@
 const core = require('@actions/core');
+const artifact = require('@actions/artifact');
 const path = require('path');
 const fs = require('fs');
 const io = require('@actions/io');
 const assert = require('assert');
-const { mkdirP, run, capture, unlink, rmRfIgnoreError} = require('./utils');
+const utils = require('./utils');
 const xunitViewer = require('xunit-viewer');
+const temp = require('temp').track();
 
 
-async function createSSHAgent(token) {
-  core.setSecret(token);
-  await run('ssh-agent -t 5m')
-  await fs.writeFileSync('/tmp/id_rsa', token, {mode: 0o600});
-  await run('ssh-add /tmp/id_rsa', [], { })
-  await unlink('/tmp/id_rsa');
-}
 
-async function checkoutLibcxxIO(out_path, token, branch = 'master') {
+async function checkoutLibcxxIO(out_path, branch = 'master') {
   let result = await core.group('checkout', async () => {
-    await createSSHAgent(token);
     const agent = 'publisher'
     const repo_url = `git@github.com:libcxx/libcxx.github.io.git`;
-    let l = await run('git', ['clone', '--depth=1', '-b', branch, repo_url, out_path]);
+    let l = await utils.run('git', ['clone', '--depth=1', '-b', branch, repo_url, out_path]);
     const opts = {cwd: out_path};
-    await run('git', ['config', '--local', 'user.name', `libc++ Actions ${agent}`], opts);
-    await run('git', ['config', '--local', 'user.email', 'agent@efcs.ca'], opts);
+    await utils.run('git', ['config', '--local', 'user.name', `libc++ Actions ${agent}`], opts);
+    await utils.run('git', ['config', '--local', 'user.email', 'agent@efcs.ca'], opts);
     return l;
   });
   return result;
 }
 
-
-async function checkoutLibcxxIONoAuth(out_path, branch = 'master') {
-  let result = await core.group('checkout', async () => {
-    const repo_url = `https://github.com/libcxx/libcxx.github.io.git`;
-    let l = await run('git', ['clone', '--depth=1', '-b', branch, repo_url, out_path]);
-    const opts = {cwd: out_path};
-    await run('git', ['config', '--local', 'user.name', `"libc++ Actions Agent"`], opts);
-    await run('git', ['config', '--local', 'user.email', '"agent@efcs.ca"'], opts);
-    return l;
-  });
-  return result;
-}
 
 async function commitChanges(repo_path, destination_name) {
   const opts = {cwd: repo_path};
-  await run('git', ['add', '-A', ':/'], opts);
-  await run('git', ['commit', '-am', `Publish testsuite results for ${destination_name}`], opts);
+  await utils.run('git', ['add', '-A', ':/'], opts);
+  await utils.run('git', ['commit', '-am', `Publish testsuite results for ${destination_name}`], opts);
 }
+
 
 async function commitAndPushChanges(repo_path, destination_name, token) {
   await commitChanges(repo_path, destination_name);
-  const repo_url = `https://${token}@github.com/libcxx/libcxx.github.io.git`;
-  let result = await run('git', ['push', repo_url], {cwd: repo_path});
+  let tempFile = await utils.createTempFile('id_rsa', token);
+  var result;
+  try {
+    let env = process.env;
+    env['GIT_SSH_COMMAND'] = `ssh -i ${tempFile}`;
+    result = await utils.run(`git -C ${repo_path} push`, [], {env});
+  } finally {
+    await temp.cleanupSync();
+  }
   return result;
 }
 
@@ -59,13 +49,13 @@ async function publishTestSuiteHTMLResults(results_file, destination, token) {
   repo_path = 'libcxx.github.io';
   try {
     core.saveState('libcxx-io', repo_path);
-    await checkoutLibcxxIONoAuth(repo_path);
+    await checkoutLibcxxIO(repo_path);
 
     const timestamp = new Date().toISOString();
     output_path = path.join(repo_path, 'results', destination);
 
     if (!fs.existsSync(output_path)) {
-      await mkdirP(output_path);
+      await utils.mkdirP(output_path);
     }
 
     const output_file = `results-${timestamp}.html`;
@@ -73,13 +63,13 @@ async function publishTestSuiteHTMLResults(results_file, destination, token) {
 
     index = path.join(output_path, 'index.html');
     if (fs.existsSync(index)) {
-      await unlink(index);
+      await utils.unlink(index);
     }
     await fs.symlinkSync(index, `./${output_file}`);
 
     await commitAndPushChanges(repo_path, destination, token);
   } finally {
-    rmRfIgnoreError(repo_path);
+    utils.rmRfIgnoreError(repo_path);
   }
 }
 
@@ -94,11 +84,26 @@ async function createTestSuiteHTMLResults(title, xml_file_path, html_output_path
   return 0;
 }
 
+async function publishArtifacts(artifacts_dir) {
+  let p = await core.group("upload-artifacts",  async () => {
+    const artifactClient = artifact.create();
+    let files = await utils.globDirectoryRecursive(artifacts_dir);
+    return artifactClient.uploadArtifact(
+          `test-suite-results`, files,
+          artifacts_dir);
+  });
+  return p;
+}
+
+
 async function createAndPublishTestSuiteResults(action_paths, config_name, token) {
-  let html_results = path.join(action_paths.artifacts, 'result.html');
+  const result_name = `test-results-${new Date().toISOString()}.html`;
+  let html_results = path.join(action_paths.artifacts, results_name);
   await createTestSuiteHTMLResults(`${config_name} Test Suite Results`,
     action_paths.artifacts, html_results);
+  let promise = publishArtifacts(action_paths.artifacts);
   await publishTestSuiteHTMLResults(html_results, config_name, token);
+  await promise;
 }
 
 module.exports = {checkoutLibcxxIO, commitChanges, commitAndPushChanges, publishTestSuiteHTMLResults, createTestSuiteHTMLResults, createAndPublishTestSuiteResults};

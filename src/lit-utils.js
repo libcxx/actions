@@ -73,11 +73,13 @@ function getTestSuiteAnnotations(xml_file_path) {
 
 function createTestSuiteAnnotations(xml_file_path) {
   const failures = getTestSuiteAnnotations(xml_file_path);
-  count = 0;
+  let count = 0;
   failures.forEach(failure => { count += 1; core.error(failure); });
   return count;
 }
 
 
 
-module.exports = {getTestSuiteAnnotations, createTestSuiteAnnotations}
+module.exports = {
+  getTestSuiteAnnotations,
+  createTestSuiteAnnotations};

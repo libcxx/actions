@@ -16,14 +16,3 @@ test('process failed xunit file', () => {
     const failures = getTestSuiteAnnotations(path.join('.', 'Inputs', 'libcxx_failed_run.xml'));
     expect(failures.length).toBe(4);
 })
-
-test('build html sites', async () => {
-    const inputs = path.join('.', 'Inputs', 'multi_testsuite_results');
-    const output = path.join('/', 'tmp', 'results.html');
-    console.log(output);
-    unlinkIgnoreError(output);
-    await createTestSuiteHTMLResults("results", inputs, output);
-    expect(fs.existsSync(output)).toBe(true);
-    fs.unlinkSync(output);
-
-})
