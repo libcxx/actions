@@ -27,14 +27,14 @@ function readXMLFile(xml_file) {
 function correctTestNames(test_case) {
   const ts = test_case.parentNode;
   assert(ts && ts.nodeName == "testsuite");
-  const ts_name = ts.getAttribute("name");
+  const testsuite_name = ts.getAttribute("name");
 
   const file_name = test_case.getAttribute('name');
   const file_path_and_suite = test_case.getAttribute('classname');
-  assert(file_path_and_suite.startsWith(ts_name));
-  const test_case_name = path.join(file_path_and_suite.substring(ts_name.length), file_name);
+  assert(file_path_and_suite.startsWith(testsuite_name));
+  const testcase_name = path.join(file_path_and_suite.substring(testsuite_name.length), file_name);
 
-  return {test_suite_name: ts_name, test_case_name: test_case_name};
+  return {testsuite_name, testcase_name};
 }
 
 function visit_all_failures(xml_doc) {
@@ -48,9 +48,9 @@ function visit_all_failures(xml_doc) {
 
     const tc = failure.parentNode;
     assert(tc && tc.nodeName == "testcase");
-    const {test_suite_name, test_case_name} = correctTestNames(tc);
+    const {testsuite_name, testcase_name} = correctTestNames(tc);
 
-    const failure_message =  `TEST '${test_suite_name} :: ${test_case_name} FAILED\n${failure_text}`
+    const failure_message =  `TEST '${testsuite_name} :: ${testcase_name} FAILED\n${failure_text}`
 
     failure_messages.push(failure_message);
   }
@@ -69,8 +69,6 @@ function createTestSuiteAnnotations(xml_file_path) {
   failures.forEach(failure => { count += 1; core.error(failure); });
   return count;
 }
-
-
 
 module.exports = {
   getTestSuiteAnnotations,
