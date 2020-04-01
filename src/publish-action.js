@@ -10,10 +10,9 @@ const temp = require('temp');
 
 async function withSSHKey(token, then) {
   let tempFile = await utils.createTempFile('id_rsa', token);
-  process.env.GIT_SSH_COMMAND = `ssh -i ${tempFile} -o "StrictHostKeyChecking=no"`;
+  //process.env.GIT_SSH_COMMAND = `ssh -i ${tempFile} -o "StrictHostKeyChecking=no"`;
   try {
-    let out = await utils.capture('git', ['config', '--list', '--show-origin']);
-    core.warning(out);
+
     let result = await then();
     let R2 = await result;
     return R2;
@@ -25,7 +24,7 @@ async function withSSHKey(token, then) {
 async function checkoutLibcxxIO(out_path, branch = 'master') {
   let result = await core.group('checkout', async () => {
     const agent = 'publisher'
-    const repo_url = `git@github.com:libcxx/libcxx.github.io.git`;
+    const repo_url = `https://github.com/libcxx/libcxx.github.io.git`;
 
     let l = await utils.run(
         'git', [ 'clone', '--depth=1', '-b', branch, repo_url, out_path ], {env: process.env});
