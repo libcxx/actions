@@ -23250,7 +23250,7 @@ async function publishTestSuiteHTMLResults(results_file, destination, token) {
     core.saveState('libcxx-io', repo_path)
     await checkoutLibcxxIOToken(repo_path, token);
 
-    const timestamp = Date().now().toISOString();
+    const timestamp = Date.now().toISOString();
     output_path = os.path.join(repo_path, 'results', destination);
 
     if (!fs.existsSync(output_path)) {
