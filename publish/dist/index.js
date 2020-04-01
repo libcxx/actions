@@ -61,8 +61,8 @@ const rimraf = __webpack_require__(395);
 const temp = __webpack_require__(559);
 
 
-function mkdirP(dir_path) {
-   fs.mkdirSync(dir_path, {recursive: true});
+async function mkdirP(dir_path) {
+   await fs.mkdirSync(dir_path, {recursive: true});
 }
 
 function handleErrors(err) {
@@ -70,15 +70,16 @@ function handleErrors(err) {
 }
 
 function run(cmd, args,  options = {}) {
+  options.env = process.env;
   return exec.exec(cmd, args, options);
 }
 
-function rmRf(dir_path) {
-  rimraf.sync(dir_path, {}, (err) => { if (err) core.setFailed(err); });
+async function rmRf(dir_path) {
+  await rimraf.sync(dir_path, {}, (err) => { if (err) core.setFailed(err); });
 }
 
 async function rmRfIgnoreError(dir_path) {
-  rimraf.sync(dir_path, {}, (err) => {});
+  await rimraf.sync(dir_path, {}, (err) => {});
 }
 
 async function unlinkIgnoreError(file_path) {
@@ -136,12 +137,12 @@ async function processError(commands, err) {
   return err;
 }
 
-function createTempFile(prefix, data = null) {
-  var tempFile = temp.openSync();
+async function createTempFile(prefix, data = null) {
+  var tempFile = await temp.openSync({prefix});
   if (data != null) {
-    fs.writeSync(tempFile.fd, data);
+    await fs.writeSync(tempFile.fd, data);
   }
-  fs.closeSync(tempFile.fd);
+  await fs.closeSync(tempFile.fd);
   return tempFile.path;
 }
 
@@ -25294,15 +25295,13 @@ const temp = __webpack_require__(559);
 
 async function withSSHKey(token, then) {
   let tempFile = await utils.createTempFile('id_rsa', token);
-  process.env['GIT_SSH_COMMAND'] = `ssh -i ${tempFile} -o "StrictHostKeyChecking=no"`;
-  var result;
+  process.env.GIT_SSH_COMMAND = `ssh -i ${tempFile} -o "StrictHostKeyChecking=no"`;
   try {
-    result = await then();
+    let result = await then();
+    return result;
   } finally {
     await utils.unlinkIgnoreError(tempFile);
-    delete process.env['GIT_SSH_COMMAND'];
   }
-  return result;
 }
 
 async function checkoutLibcxxIO(out_path, branch = 'master') {
@@ -25311,7 +25310,7 @@ async function checkoutLibcxxIO(out_path, branch = 'master') {
     const repo_url = `git@github.com:libcxx/libcxx.github.io.git`;
 
     let l = await utils.run(
-        'git', [ 'clone', '--depth=1', '-b', branch, repo_url, out_path ]);
+        'git', [ 'clone', '--depth=1', '-b', branch, repo_url, out_path ], {env: process.env});
     const opts = {cwd : out_path};
     await utils.run(
         'git', [ 'config', '--local', 'user.name', `libc++ Actions ${agent}` ],
@@ -25340,12 +25339,11 @@ async function commitAndPushChanges(repo_path, destination_name) {
 
 async function publishTestSuiteHTMLResults(results_file, destination, token) {
   repo_path = 'libcxx.github.io';
-  await withSSHKey(token, async () => {
+  let l = await withSSHKey(token, async () => {
     try {
-      core.saveState('libcxx-io', repo_path);
+      await core.saveState('libcxx-io', repo_path);
       await checkoutLibcxxIO(repo_path);
 
-      const timestamp = new Date().toISOString();
       output_path = path.join(repo_path, 'results', destination);
 
       if (!fs.existsSync(output_path)) {
@@ -25366,6 +25364,7 @@ async function publishTestSuiteHTMLResults(results_file, destination, token) {
       await utils.rmRfIgnoreError(repo_path);
     }
   });
+  return await l;
 }
 
 async function createTestSuiteHTMLResults(title, xml_file_path,
@@ -25381,23 +25380,23 @@ async function createTestSuiteHTMLResults(title, xml_file_path,
 
 async function publishArtifacts(artifacts_dir) {
   let p = await core.group("upload-artifacts", async () => {
-    const artifactClient = artifact.create();
+    const artifactClient = await artifact.create();
     let files = await utils.globDirectoryRecursive(artifacts_dir);
-    return artifactClient.uploadArtifact(`test-suite-results`, files,
+    let l = await artifactClient.uploadArtifact(`test-suite-results`, files,
                                          artifacts_dir);
+    return l;
   });
   return p;
 }
 
 async function createAndPublishTestSuiteResults(action_paths, config_name,
                                                 token) {
-  const result_name = `test-results-${new Date().toISOString()}.html`;
+  const result_name = await `test-results-${await new Date().toISOString()}.html`;
   let html_results = path.join(action_paths.artifacts, config_name);
   await createTestSuiteHTMLResults(`${config_name} Test Suite Results`,
                                    action_paths.artifacts, html_results);
-  let promise = publishArtifacts(action_paths.artifacts);
+  let promise = await publishArtifacts(action_paths.artifacts);
   await publishTestSuiteHTMLResults(html_results, config_name, token);
-  await promise;
 }
 
 module.exports = {

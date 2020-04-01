@@ -11,8 +11,8 @@ const rimraf = require('rimraf');
 const temp = require("temp");
 
 
-function mkdirP(dir_path) {
-   fs.mkdirSync(dir_path, {recursive: true});
+async function mkdirP(dir_path) {
+   await fs.mkdirSync(dir_path, {recursive: true});
 }
 
 function handleErrors(err) {
@@ -20,15 +20,16 @@ function handleErrors(err) {
 }
 
 function run(cmd, args,  options = {}) {
+  options.env = process.env;
   return exec.exec(cmd, args, options);
 }
 
-function rmRf(dir_path) {
-  rimraf.sync(dir_path, {}, (err) => { if (err) core.setFailed(err); });
+async function rmRf(dir_path) {
+  await rimraf.sync(dir_path, {}, (err) => { if (err) core.setFailed(err); });
 }
 
 async function rmRfIgnoreError(dir_path) {
-  rimraf.sync(dir_path, {}, (err) => {});
+  await rimraf.sync(dir_path, {}, (err) => {});
 }
 
 async function unlinkIgnoreError(file_path) {
@@ -86,12 +87,12 @@ async function processError(commands, err) {
   return err;
 }
 
-function createTempFile(prefix, data = null) {
-  var tempFile = temp.openSync();
+async function createTempFile(prefix, data = null) {
+  var tempFile = await temp.openSync({prefix});
   if (data != null) {
-    fs.writeSync(tempFile.fd, data);
+    await fs.writeSync(tempFile.fd, data);
   }
-  fs.closeSync(tempFile.fd);
+  await fs.closeSync(tempFile.fd);
   return tempFile.path;
 }
 

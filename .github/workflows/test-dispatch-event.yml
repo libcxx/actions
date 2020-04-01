@@ -15,8 +15,12 @@ jobs:
           token: ${{ github.token }}
           event_type: 'test_event'
           client_payload: |
-            echo hello
-            echo bar
+            {
+              foo: "bar"
+            }
+      - name: "other"
+        run: |
+          echo "HERE WE GO"
 
 
 
