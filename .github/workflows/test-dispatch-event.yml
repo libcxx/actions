@@ -16,7 +16,7 @@ jobs:
           event_type: 'test_event'
           client_payload: |
             {
-              foo: "bar"
+              "foo": "bar"
             }
       - name: "other"
         run: |
