@@ -9,9 +9,9 @@ const {
   checkoutRuntimes,
   configureRuntimes,
   buildRuntimes,
-  createActionPaths,
+  createActionConfig,
   installRuntimes,
-  getActionPaths
+  getActionConfig
 } = require('../src/setup-action');
 const {
   rmRfIgnoreError,
@@ -25,7 +25,7 @@ async function run() {
 
     const config_name = core.getInput('name');
     core.saveState('config_name', config_name);
-    const action_paths = await createActionPaths(config_name);
+    const action_paths = await createActionConfig(config_name);
 
     let sha = await checkoutRuntimes(action_paths);
     await configureRuntimes(action_paths);
@@ -55,7 +55,7 @@ async function run() {
 async function cleanup() {
   let result = await core.group('cleanup', async () => {
     try {
-      const action_paths = getActionPaths(core.getState('config_name'));
+      const action_paths = getActionConfig();
       assert(action_paths);
       assert(action_paths.source);
       assert(action_paths.output);

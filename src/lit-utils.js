@@ -78,14 +78,6 @@ function createTestSuiteAnnotations(xml_file_path) {
   return count;
 }
 
-async function createTestSuiteHTMLResults(title, xml_file_path, html_output_path) {
-  await Promise.all([xunitViewer({
-      server: false,
-      results: xml_file_path,
-      title: title,
-      output: html_output_path,
-    })]
-    );
-}
 
-module.exports = {getTestSuiteAnnotations, createTestSuiteAnnotations, createTestSuiteHTMLResults}
+
+module.exports = {getTestSuiteAnnotations, createTestSuiteAnnotations}

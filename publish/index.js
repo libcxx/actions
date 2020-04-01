@@ -11,7 +11,7 @@ const {
   buildRuntimes,
   createActionPaths,
   installRuntimes,
-  getActionPaths,
+  getActionConfig,
   testRuntime
 } = require('../src/setup-action');
 const {createTestSuiteAnnotations} = require('../src/lit_utils');
@@ -20,9 +20,8 @@ const xunitViewer = require('xunit-viewer');
 // most @actions toolkit packages have async methods
 async function run() {
   try {
-    const config_name  = core.getInput('name');
-    const action_paths = await getActionPaths(config_name);
-
+    const action_paths = getActionConfig();
+    
 
     return;
 /*

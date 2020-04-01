@@ -16,7 +16,7 @@ function handleErrors(err) {
   core.setFailed(err.message);
 }
 
-function run(cmd, args,  options = new exec.ExecOptions) {
+function run(cmd, args,  options = {}) {
   return exec.exec(cmd, args, options);
 }
 
@@ -24,7 +24,7 @@ function rmRf(dir_path) {
   rimraf.sync(dir_path, {}, (err) => { if (err) core.setFailed(err); });
 }
 
-function rmRfIgnoreError(dir_path) {
+async function rmRfIgnoreError(dir_path) {
   rimraf.sync(dir_path, {}, (err) => {});
 }
 
@@ -32,6 +32,9 @@ async function unlinkIgnoreError(file_path) {
   await fs.unlink(file_path, (err) => {});
 }
 
+async function unlink(file_path) {
+  await fs.unlink(file_path, (err) => { core.setFailed(err); });
+}
 
 async function capture(cmd, args, options = {}) {
   let myOutput = '';
@@ -62,4 +65,9 @@ async function globDirectoryRecursive(dir) {
   return files;
 }
 
-module.exports = {mkdirP, run, capture, handleErrors, rmRf, rmRfIgnoreError, unlinkIgnoreError, globDirectory, globDirectoryRecursive}
+async function getGitSha(repo_path) {
+  let l = await capture('git', ['rev-parse', 'HEAD'], {cwd: repo_path});
+  return l;
+}
+
+module.exports = {mkdirP, run, getGitSha, capture, unlink, handleErrors, rmRf, rmRfIgnoreError, unlinkIgnoreError, globDirectory, globDirectoryRecursive}

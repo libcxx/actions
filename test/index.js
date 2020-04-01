@@ -9,9 +9,8 @@ const {
   checkoutRuntimes,
   configureRuntimes,
   buildRuntimes,
-  createActionPaths,
   installRuntimes,
-  getActionPaths,
+  getActionConfig,
   testRuntime
 } = require('../src/setup-action');
 const {createTestSuiteAnnotations} = require('../src/lit-utils');
@@ -19,32 +18,13 @@ const {createTestSuiteAnnotations} = require('../src/lit-utils');
 // most @actions toolkit packages have async methods
 async function run() {
   try {
-    const config_name  = core.getInput('name');
     const test_config = core.getInput('build');
     const options = core.getInput('options');
-    const action_paths = await getActionPaths(config_name);
-    const runtimes = getRuntimeList();
-    for (const runtime of runtimes) {
-      console.log(`RUNTIME IS: '${runtime}'`)
+    const action_paths = await getActionConfig();
+    for (const runtime of action_paths.runtimes) {
       let xunit_path = await testRuntime(action_paths, runtime, test_config, options);
       await createTestSuiteAnnotations(xunit_path);
     }
-
-
-
-    return;
-/*
-    await xunitViewer({
-      server: false,
-      results: input,
-      ignore: ['_thingy', 'invalid'],
-      title: 'Xunit View Sample Tests',
-      output: 'output.html'
-    });
-    const files = ['output.html'];
-    const uploadResponse = await artifactClient.uploadArtifact(artifactName,
-        files, rootDirectory, artifactOptions);
-    */
   } catch (error) {
     core.setFailed(error.message);
   }

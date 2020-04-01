@@ -6,46 +6,59 @@ const assert = require('assert');
 const { mkdirP, run, capture } = require('./utils');
 
 
-function getActionPaths(config_name, root_path = '') {
-  if (!root_path)
-    root_path = process.env['GITHUB_WORKSPACE'];
+function _getRuntimeList() {
+  const all = ['libcxx', 'libcxxabi', 'libunwind']
+  const raw_input = core.getInput('runtimes');
+  if (!raw_input) {
+    return all;
+  }
+  const parts = raw_input.split(' ').map(p => { return p.trim(); });
+  parts.forEach(runtime => {
+    if (runtime != 'libcxx' && runtime != 'libcxxabi' && runtime != 'libunwind')
+      throw Error("Invalid runtime name: " + runtime);
+  });
+  if (parts.length == 0)
+    throw Error("non-empty string consists entirely of whitespace");
+  return parts;
+}
+
+async function createActionConfig(config_name) {
+  const root_path = process.env['GITHUB_WORKSPACE'];
+  assert(fs.existsSync(root_path));
   const output_path = path.join(root_path, 'output', config_name);
-  return {
+  const action_config = {
+    name: config_name,
+    runtimes: _getRuntimeList(),
     source: path.join(root_path, 'llvm-project'),
     output: output_path,
     install: path.join(output_path, 'install'),
     build: path.join(output_path, 'build'),
     artifacts: path.join(output_path, 'artifacts')
   };
+  for (key of ['output', 'source']) {
+    const p = action_config[key];
+    if (fs.existsSync(p)) {
+      await rmRf(p);
+    }
+  }
+  for (key of ['output', 'source', 'build', 'install', 'artifacts']) {
+    const p = action_config[key];
+    await mkdirP(p);
+    core.setOutput(key, p);
+  }
+  fs.writeFileSync(path.join(root_path, 'config.json'), JSON.stringify(action_config));
+  let config = getActionConfig();
+  return config;
 }
 
-async function createActionPaths(config_name, root_path = '') {
-  let action_paths = await core.group('setup paths', async() => {
-    const action_paths = getActionPaths(config_name, root_path);
-    if (fs.existsSync(action_paths.source)) {
-      await io.rmRF(action_paths.source);
-    }
-    if (fs.existsSync(action_paths.output)) {
-      await io.rmRF(action_paths.output);
-    }
-    Object.entries(action_paths).forEach((entry) => {
-      let key = entry[0];
-      let val = entry[1];
-      if (fs.existsSync(val) && key != 'source' && key != 'output') {
-        var basename = path.basename(val);
-        var path_for = path.basename(path.dirname(val));
-        //core.setFailed(`${path_for} path for config ${basename} already exist!`);
-        //throw Error('The patch already exists');
-      } else if (!fs.existsSync(val)) {
-        core.info(`Creating directory ${val}`);
-        mkdirP(val);
-      }
-      core.setOutput(key, val);
-    });
-    return action_paths;
-  });
-  return action_paths;
+
+function getActionConfig() {
+  root_path = process.env['GITHUB_WORKSPACE'];
+  const config_file = path.join(root_path, 'config.json');
+  config_str = fs.readFileSync(config_file);
+  return JSON.parse(config_str);
 }
+
 
 async function checkoutRuntimes(action_paths) {
   let sha = await core.group('checkout', async () => {
@@ -64,21 +77,6 @@ async function checkoutRuntimes(action_paths) {
   return sha;
 }
 
-function getRuntimeList() {
-  const all = ['libcxx', 'libcxxabi', 'libunwind']
-  const raw_input = core.getInput('runtimes');
-  if (!raw_input) {
-    return all;
-  }
-  const parts = raw_input.split(' ').map(p => { return p.trim(); });
-  parts.forEach(runtime => {
-    if (runtime != 'libcxx' && runtime != 'libcxxabi' && runtime != 'libunwind')
-      throw Error("Invalid runtime name: " + runtime);
-  });
-  if (parts.length == 0)
-    throw Error("non-empty string consists entirely of whitespace");
-  return parts;
-}
 
 async function configureRuntimes(action_paths) {
   let exitCode = await core.group('configure', async () => {
@@ -86,7 +84,7 @@ async function configureRuntimes(action_paths) {
       `-DCMAKE_INSTALL_PREFIX=${action_paths.install}`,
       `-DCMAKE_C_COMPILER=${core.getInput('cc')}`,
       `-DCMAKE_CXX_COMPILER=${core.getInput('cxx')}`,
-      `-DLLVM_ENABLE_PROJECTS=${getRuntimeList().join(';')}`,
+      `-DLLVM_ENABLE_PROJECTS=${action_paths.runtimes.join(';')}`,
       `-DLIBCXX_CXX_ABI=${core.getInput('cxxabi')}`,
     ];
     const extra_cmake_args = core.getInput('cmake_args');
@@ -107,7 +105,7 @@ async function configureRuntimes(action_paths) {
 async function buildRuntimes(action_paths) {
   let exitCode = await core.group('building runtimes', async () => {
     let args = ['-v'];
-    getRuntimeList().forEach(rt => {
+    action_paths.runtimes.forEach(rt => {
       args.push(path.join('projects', rt, 'all'));
     });
     const result = await run('ninja', args, {cwd: action_paths.build});
@@ -119,7 +117,7 @@ async function buildRuntimes(action_paths) {
 async function installRuntimes(action_paths) {
   let exitCode = await core.group('installing runtimes', async () => {
     let args = ['-v'];
-    getRuntimeList().forEach(rt => {
+    action_paths.runtimes.forEach(rt => {
       args.push(path.join('projects', rt, 'install'));
     });
     const result = await run('ninja', args, {cwd: action_paths.build});
@@ -168,5 +166,7 @@ async function testRuntime(action_paths, runtime, name, options) {
 }
 
 
-module.exports = {checkoutRuntimes, configureRuntimes, buildRuntimes, getActionPaths,
-  createActionPaths, installRuntimes, testRuntime, getRuntimeList};
+
+
+module.exports = {checkoutRuntimes, configureRuntimes, buildRuntimes, getActionConfig,
+  createActionConfig, installRuntimes, testRuntime};

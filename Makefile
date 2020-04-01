@@ -7,9 +7,10 @@ all:
 
 .PHONY : clean
 clean:
-	cd test/ && rm -rf dist/ && mkdir dist
-	cd build/ && rm -rf dist/ && mkdir dist
-	cd package/ && rm -rf dist/ && mkdir dist
+	cd test/ && rm -rf dist/ && mkdir dist && rm -rf node_modules/
+	cd build/ && rm -rf dist/ && mkdir dist && rm -rf node_modules/
+	cd publish/ && rm -rf dist/ && mkdir dist && rm -rf node_modules/
+	rm -rf node_modules/
 
 
 .PHONY : test
