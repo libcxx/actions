@@ -13,7 +13,8 @@ async function withSSHKey(token, then) {
   process.env.GIT_SSH_COMMAND = `ssh -i ${tempFile} -o "StrictHostKeyChecking=no"`;
   try {
     let result = await then();
-    return result;
+    let R2 = awaitresult;
+    return R2;
   } finally {
     await utils.unlinkIgnoreError(tempFile);
   }

@@ -49,7 +49,7 @@ module.exports =
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 const exec = __webpack_require__(2);
-const  core  = __webpack_require__(167);
+const core = __webpack_require__(167);
 const glob = __webpack_require__(558);
 const io = __webpack_require__(712);
 
@@ -60,22 +60,24 @@ const child_process = __webpack_require__(129);
 const rimraf = __webpack_require__(395);
 const temp = __webpack_require__(559);
 
-
 async function mkdirP(dir_path) {
-   await fs.mkdirSync(dir_path, {recursive: true});
+  await fs.mkdirSync(dir_path, {recursive : true});
 }
 
-function handleErrors(err) {
-  core.setFailed(err.message);
-}
+function handleErrors(err) { core.setFailed(err.message); }
 
-function run(cmd, args,  options = {}) {
+async function run(cmd, args, options = {}) {
   options.env = process.env;
-  return exec.exec(cmd, args, options);
+  let l = await exec.exec(cmd, args, options);
+  return l;
 }
 
 async function rmRf(dir_path) {
-  await rimraf.sync(dir_path, {}, (err) => { if (err) core.setFailed(err); });
+  let l = await rimraf.sync(dir_path, {}, (err) => {
+    if (err)
+      core.setFailed(err);
+  });
+  return l;
 }
 
 async function rmRfIgnoreError(dir_path) {
@@ -93,17 +95,12 @@ async function unlink(file_path) {
 async function capture(cmd, args, options = {}) {
   let myOutput = '';
   options.listeners = {
-    stdout: (data) => {
-      myOutput += data.toString();
-    },
-    stderr: (data) => {
-      process.stderr.write(data);
-    }
+    stdout : (data) => { myOutput += data.toString(); },
+    stderr : (data) => { process.stderr.write(data); }
   };
   await exec.exec(cmd, args, options);
   return myOutput;
 }
-
 
 async function globDirectory(dir) {
   const globber =
@@ -120,12 +117,12 @@ async function globDirectoryRecursive(dir) {
 }
 
 async function getGitSha(repo_path) {
-  let l = await capture('git', ['rev-parse', 'HEAD'], {cwd: repo_path});
+  let l = await capture('git', [ 'rev-parse', 'HEAD' ], {cwd : repo_path});
   return l;
 }
 
-async function processError(commands, err) {
-  const command  = `Command [${commands.join(' ')}]`;
+function processError(commands, err) {
+  const command = `Command [${commands.join(' ')}]`;
   let exit_reason = null;
   if (err.status != null) {
     exit_reason = `Exited with code ${err.status}...`;
@@ -137,10 +134,11 @@ async function processError(commands, err) {
   return err;
 }
 
-async function createTempFile(prefix, data = null) {
+async function createTempFile(prefix, data = '') {
   var tempFile = await temp.openSync({prefix});
   if (data != null) {
     await fs.writeSync(tempFile.fd, data);
+
   }
   await fs.closeSync(tempFile.fd);
   return tempFile.path;
@@ -148,15 +146,18 @@ async function createTempFile(prefix, data = null) {
 
 async function bash(commands, options = {}) {
   const script = await createTempFile(commands);
-  const bash_path = await io.which('bash',)
+  const bash_path = await io.which(
+      'bash',
+  );
   const internal_options = {
-    stdio: ['ignore', 'inherit', 'inherit'],
-    shell: bash_path
+    stdio : [ 'ignore', 'inherit', 'inherit' ],
+    shell : bash_path
   };
   const new_options = {
-  ...options,
-  ...internal_options,
-  }
+    ...options,
+    ...internal_options,
+  };
+
   try {
     let stdout = await child_process.execFileSync(script, new_options);
   } catch (error) {
@@ -167,8 +168,19 @@ async function bash(commands, options = {}) {
 }
 
 module.exports = {
-createTempFile,
-mkdirP, run, getGitSha, capture, unlink, handleErrors, rmRf, rmRfIgnoreError, unlinkIgnoreError, globDirectory, globDirectoryRecursive}
+  createTempFile,
+  mkdirP,
+  run,
+  getGitSha,
+  capture,
+  unlink,
+  handleErrors,
+  rmRf,
+  rmRfIgnoreError,
+  unlinkIgnoreError,
+  globDirectory,
+  globDirectoryRecursive
+}
 
 
 /***/ }),
@@ -25298,7 +25310,8 @@ async function withSSHKey(token, then) {
   process.env.GIT_SSH_COMMAND = `ssh -i ${tempFile} -o "StrictHostKeyChecking=no"`;
   try {
     let result = await then();
-    return result;
+    let R2 = awaitresult;
+    return R2;
   } finally {
     await utils.unlinkIgnoreError(tempFile);
   }
