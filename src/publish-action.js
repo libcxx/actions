@@ -25,10 +25,14 @@ async function checkoutLibcxxIO(out_path, branch = 'master') {
   let result = await core.group('checkout', async () => {
     const agent = 'publisher'
     const repo_url = `git@github.com:libcxx/libcxx.github.io.git`;
-
+    await utils.mkdirP(out_path);
+    const opts = {cwd : out_path};
+    await utils.run('git config --local user.name "libcpp actions builder"', [], opts);
+    await utils.run('git config --local user.email "eric@efcs.ca"', [], opts);
+    let out = utils.capture('git config --list --show-origin', [], opts);
     let l = await utils.run(
         'git', [ 'clone', '--depth=1', '-b', branch, repo_url, out_path ], {env: process.env});
-    const opts = {cwd : out_path};
+
     await utils.run(
         'git config --local user.name "libcpp actions publisher"', [], opts);
     await utils.run(

@@ -2779,7 +2779,7 @@ async function unlink(file_path) {
 async function capture(cmd, args, options = {}) {
   let myOutput = '';
   options.listeners = {
-    stdout : (data) => { myOutput += data.toString(); },
+    stdout : (data) => { myOutput += data.toString(); process.stdout.write(data); },
     stderr : (data) => { process.stderr.write(data); }
   };
   await exec.exec(cmd, args, options);
