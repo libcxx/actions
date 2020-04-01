@@ -6,8 +6,8 @@ async function run() {
   try {
     const action_paths = getActionConfig();
     const token = core.getInput('publisher_key');
-    const config_name = core.getInput('config_name');
-    await createAndPublishTestSuiteResults(action_paths, config_name, token);
+    const test_config_name = core.getInput('name');
+    await createAndPublishTestSuiteResults(action_paths, test_config_name, token);
   } catch (error) {
     core.setFailed(error.message);
   }
