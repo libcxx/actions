@@ -1,0 +1,21 @@
+name: 'dispatch-event'
+description: 'Create a repository-dispatch event'
+author: 'eric@efcs.ca'
+inputs:
+  repository:
+    description: 'The repository to push the event to'
+    required: True
+  event_type:
+    description: 'The type of event to send'
+    required: True
+  client_payload:
+    description: 'Additional JSON payload to push'
+    required: False
+    default: {}
+  token:
+    description: 'The SSH key used to publish the results'
+    required: True
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
+

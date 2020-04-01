@@ -1,0 +1,23 @@
+name: Test Dispatch Event
+
+on: push
+
+jobs:
+  debug:
+    runs-on: [libcxx-builder]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          path: 'actions'
+      - uses: ./actions/dispatch-event
+        with:
+          repository: 'libcxx/actions'
+          token: ${{ github.token }}
+          event_type: 'test_event'
+          client_payload: |
+            {
+              repository: 'llvm/llvm-project',
+              ref: 'master',
+            }
+
+

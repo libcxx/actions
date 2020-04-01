@@ -1,0 +1,15 @@
+name: Get Dispatch Event
+
+on: repository_dispatch
+
+jobs:
+  debug:
+    runs-on: [libcxx-builder]
+    steps:
+      - name: 'Print Context'
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: |
+          echo "$GITHUB_CONTEXT"
+
+
