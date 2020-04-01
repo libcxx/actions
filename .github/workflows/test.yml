@@ -9,6 +9,7 @@ jobs:
     - uses: actions/checkout@v2
       with:
         path: 'actions'
+        token: ${{ secrets.personal_token }}
     - uses: ./actions/build
     - uses: ./actions/test
       with:
