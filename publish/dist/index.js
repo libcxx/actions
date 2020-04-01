@@ -25364,7 +25364,7 @@ async function publishTestSuiteHTMLResults(results_file, destination, token) {
         await utils.mkdirP(output_path);
       }
 
-      const output_file = `results-${timestamp}.html`;
+      const output_file = path.basename(results_file);
       await io.cp(results_file, path.join(output_path, output_file));
 
       index = path.join(output_path, 'index.html');
