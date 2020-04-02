@@ -4,8 +4,6 @@ var DOMParser = require('xmldom').DOMParser;
 const path = require('path');
 const fs = require('fs');
 
-
-
 function readXMLFile(xml_file) {
   const xml_string = fs.readFileSync(xml_file, 'utf8');
   function handle_error(err) {
@@ -57,16 +55,19 @@ function visit_all_failures(xml_doc) {
   return failure_messages;
 }
 
-function getTestSuiteAnnotations(xml_file_path) {
-  const xml_dom = readXMLFile(xml_file_path);
-  const failures = visit_all_failures(xml_dom);
+async function getTestSuiteAnnotations(xml_file_path) {
+  const xml_dom = await readXMLFile(xml_file_path);
+  const failures = await visit_all_failures(xml_dom);
   return failures;
 }
 
-function createTestSuiteAnnotations(xml_file_path) {
-  const failures = getTestSuiteAnnotations(xml_file_path);
+async function createTestSuiteAnnotations(xml_file_path) {
+  const failures = await getTestSuiteAnnotations(xml_file_path);
   let count = 0;
-  failures.forEach(failure => { count += 1; core.error(failure); });
+  for (let f of failures) {
+    count += 1;
+    await core.error(failure);
+  }
   return count;
 }
 

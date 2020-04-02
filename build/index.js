@@ -5,18 +5,8 @@ const glob = require('@actions/glob');
 const path = require('path');
 const fs = require('fs');
 const assert = require('assert');
-const {
-  checkoutRuntimes,
-  configureRuntimes,
-  buildRuntimes,
-  createActionConfig,
-  installRuntimes,
-  getActionConfig
-} = require('../src/setup-action');
-const {
-  rmRfIgnoreError,
-  globDirectoryRecursive
-} = require('../src/utils');
+const setup = require('../src/setup-action');
+const utils = require('../src/utils');
 
 
 async function run() {
@@ -25,10 +15,10 @@ async function run() {
 
     const config_name = core.getInput('name');
     core.saveState('config_name', config_name);
-    const action_paths = await createActionConfig(config_name);
+    const action_paths = await setup.createActionConfig(config_name);
 
-    let sha = await checkoutRuntimes(action_paths);
-    await configureRuntimes(action_paths);
+    let sha = await setup.checkoutRuntimes(action_paths);
+    await setup.configureRuntimes(action_paths);
 
     let a1 = core.group('upload-cmake-cache', async () => {
       return artifactClient.uploadArtifact(
@@ -36,11 +26,11 @@ async function run() {
           action_paths.build);
     });
 
-    await buildRuntimes(action_paths);
-    await installRuntimes(action_paths);
+    await setup.buildRuntimes(action_paths);
+    await setup.installRuntimes(action_paths);
 
     let a2 = await core.group('upload-installation', async () => {
-      let files = await globDirectoryRecursive(action_paths.install);
+      let files = await utils.globDirectoryRecursive(action_paths.install);
       return artifactClient.uploadArtifact(
           `runtimes-${config_name}-install.zip`, files,
           action_paths.install);
@@ -55,15 +45,15 @@ async function run() {
 async function cleanup() {
   let result = await core.group('cleanup', async () => {
     try {
-      const action_paths = getActionConfig();
+      const action_paths = setup.getActionConfig();
       assert(action_paths);
       assert(action_paths.source);
       assert(action_paths.output);
       if (fs.existsSync(action_paths.source)) {
-        rmRfIgnoreError(action_paths.source);
+        utils.rmRfIgnoreError(action_paths.source);
       }
       if (fs.existsSync(action_paths.output)) {
-        rmRfIgnoreError(action_paths.output);
+        utils.rmRfIgnoreError(action_paths.output);
       }
     } catch (error) { core.setFailed(error); }
   });

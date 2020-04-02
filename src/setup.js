@@ -171,8 +171,5 @@ async function testRuntime(action_paths, runtime, name, options) {
   }
 }
 
-
-
-
 module.exports = {checkoutRuntimes, configureRuntimes, buildRuntimes, getActionConfig,
   createActionConfig, installRuntimes, testRuntime, processRuntimeInput};

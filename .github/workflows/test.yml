@@ -11,7 +11,7 @@ jobs:
         token: ${{ secrets.personal_token }}
     - name: "move actions"
       run: |
-        git config --list --show-origin
+        git config --list --show-origin 1>&2
         mkdir actions/
         ls | grep -v actions | grep -v gitconfig | xargs mv -t actions/
     - uses: ./actions/build
