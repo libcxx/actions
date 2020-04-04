@@ -7,7 +7,7 @@ import * as process from 'process'
 
 jest.setTimeout(100000)
 
-function setup(workspace): void {
+function setup(workspace: string): void {
   if (!fs.existsSync(workspace)) {
     utils.mkdirP(workspace)
   }
@@ -17,19 +17,35 @@ function setup(workspace): void {
   process.env['INPUT_RUNTIMES'] = 'libcxx libcxxabi'
   process.env['INPUT_TOKEN'] = process.env['GITHUB_TOKEN']
   process.env['INPUT_EVENT_TYPE'] = 'test_event'
-  process.env['INPUT_CLIENT_PAYLOAD'] = JSON.stringify({
-    repository: 'llvm/llvm-project',
-    ref: 'master'
-  })
+  process.env['INPUT_CLIENT_PAYLOAD'] =
   process.env['GITHUB_WORKSPACE'] = workspace
   process.env['GITHUB_REPOSITORY'] = 'libcxx/actions'
   process.env['GITHUB_EVENT_PATH'] = path.join(workspace, 'payload.json')
 }
 
-beforeAll(async () => {
+class ActionInputsTest implements dispatch.ActionInputsI {
+  repo: string = "actions"
+  owner: string = "libcxx"
+  event_type: string = "test_event"
+  client_payload: any = {
+    repository: 'llvm/llvm-project',
+    ref: 'master'
+  }
+  token: string = process.env['GITHUB_TOKEN'] as string;
+
+  constructor() {}
+}
+
+
+async function getTestInputs() : Promise<dispatch.ActionInputsI> {
+  return new ActionInputsTest()
+}
+
+beforeAll(() => {
   setup(fs.mkdtempSync(path.join(os.tmpdir(), '/', 'libcxx-actions-test')))
 })
 
 test('basic test', async () => {
-  await expect(dispatch.runAction()).resolves.toBeDefined()
+  let inputs = getTestInputs();
+  await expect(dispatch.runAction(inputs)).resolves.toBeDefined()
 })

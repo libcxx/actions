@@ -1,26 +1,25 @@
 import {ExecOptions} from '@actions/exec/lib/interfaces'
 import * as exec from '@actions/exec'
 import * as glob from '@actions/glob'
+import * as io from '@actions/io'
 import * as fs from 'fs'
 import * as path from 'path'
-import * as rimraf from 'rimraf'
 import * as temp from 'temp'
 
 export function mkdirP(dirPath: string): void {
   return fs.mkdirSync(dirPath, {recursive: true})
 }
 
-export function rmRF(dirPath: string): void {
-  return rimraf.sync(dirPath, {}, err => {
-    if (err)
-      throw new Error(`Failed to remove directory '${dirPath}': ${err.message}`)
-  })
+export async function rmRF(dirPath: string): Promise<void> {
+  await io.rmRF(dirPath);
 }
 
 export function rmRfIgnoreError(dirPath: string): void {
-  return rimraf.sync(dirPath, {}, () => {
+  try {
+    rmRF(dirPath)
+  } catch (error) {
     // continue regardless of error
-  })
+  }
 }
 
 export function unlinkIgnoreError(filePath: string): void {
@@ -78,10 +77,11 @@ export interface TempFileOptions {
 
 export class TempFile {
   tempFile: typeof temp
+  private toCleanup: string[]
 
   constructor() {
-    this.tempFile = new temp()
-    this.tempFile.track()
+    this.tempFile = temp.track()
+    this.toCleanup = []
   }
 
   async create(options?: TempFileOptions): Promise<string> {
@@ -90,6 +90,7 @@ export class TempFile {
       newOpts = {prefix: options.prefix}
     }
     const tmp = this.tempFile.openSync(newOpts)
+    this.toCleanup.push(tmp.path);
     if (options && options.data != null) {
       fs.writeSync(tmp.fd, options.data)
     }
@@ -98,6 +99,9 @@ export class TempFile {
   }
 
   async cleanup(): Promise<void> {
-    await this.tempFile.cleanupSync()
+    for (let p of this.toCleanup) {
+      unlinkIgnoreError(p);
+    }
+    this.toCleanup = []
   }
 }

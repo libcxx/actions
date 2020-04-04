@@ -27,7 +27,7 @@ export interface ActionInputsI {
   repo: string
   owner: string
   event_type: string
-  client_payload: string
+  client_payload: any
   token: string
 }
 
@@ -35,7 +35,7 @@ export class ActionInputs implements ActionInputsI {
   repo: string
   owner: string
   event_type: string
-  client_payload: string
+  client_payload: any
   token: string
 
   constructor(i: ActionInputsI) {
@@ -51,8 +51,9 @@ export class ActionInputs implements ActionInputsI {
     const i = repository.indexOf('/')
     assert(i !== -1)
 
+    var parsed: any
     try {
-      await JSON.parse(actions.getInput('client_payload'))
+      let parsed = await JSON.parse(actions.getInput('client_payload'))
     } catch (error) {
       error.message = `Bad JSON input: ${error.message}`
       throw error
@@ -61,7 +62,7 @@ export class ActionInputs implements ActionInputsI {
       owner: repository.substr(0, i),
       repo: repository.substr(i + 1),
       event_type: actions.getInput('event_type'),
-      client_payload: actions.getInput('client_payload'),
+      client_payload: parsed,
       token: actions.getInput('token')
     })
   }
@@ -73,12 +74,18 @@ export async function runAction(
   try {
     const inputs: ActionInputsI = await rawInputs
     const octokit = createAPI(inputs.token)
-    const r = await octokit.repos.createDispatchEvent(inputs)
+    const r = await octokit.repos.createDispatchEvent({
+      repo: inputs.repo,
+      owner: inputs.owner,
+      event_type: inputs.event_type,
+      client_payload: inputs.client_payload
+    })
     if (r.status === 204) return r
     console.log(r)
     return r
   } catch (error) {
     console.log(error.stack)
     actions.setFailed(error.message)
+    throw error;
   }
 }

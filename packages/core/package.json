@@ -35,14 +35,16 @@
     "url": "https://github.com/libcxx/actions/issues"
   },
   "devDependencies": {
-    "jest": "^25.1.0"
+    "@types/temp": "^0.8.34",
+    "jest": "^25.1.0",
+    "temp": "^0.9.1"
   },
   "dependencies": {
     "@actions/core": "^1.2.3",
+    "@actions/exec": "^1.0.3",
     "@actions/glob": "^0.1.0",
     "@actions/io": "^1.0.2",
-    "@actions/exec": "^1.0.3",
-    "rimraf": "^3.0.2",
-    "temp": "^0.9.1"
+    "@types/rimraf": "^3.0.0",
+    "rimraf": "^3.0.2"
   }
 }
