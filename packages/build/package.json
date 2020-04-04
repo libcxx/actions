@@ -1,7 +1,7 @@
 {
   "name": "@libcxx/build",
   "version": "1.0.0",
-  "description": "Github Actions for building LLVM Runtimes",
+  "description": "Github Actions for checkout out, configuring, and building LLVM Runtimes",
   "keywords": [
     "Github",
     "Actions",
@@ -35,5 +35,11 @@
   },
   "bugs": {
     "url": "https://github.com/libcxx/actions/issues"
+  },
+  "dependencies": {
+    "@actions/core": "^1.2.3",
+    "@actions/io": "^1.0.2",
+    "@libcxx/core": "file:../core",
+    "assert": "^2.0.0"
   }
 }

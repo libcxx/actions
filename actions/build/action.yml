@@ -56,14 +56,7 @@ inputs:
 outputs:
   sha:
     description: 'The git SHA of the specified ref'
-  artifacts:
-    description: 'The artifacts path for this configuration'
-  install:
-    description: 'The runtimes installation path'
-  build:
-    description: 'The build directory used by this configuration'
-  source:
-    description: 'The directory containing the llvm sources'
+
 runs:
   using: 'node12'
   main: 'dist/index.js'

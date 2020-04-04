@@ -1,4 +1,4 @@
-import * as dispatch from '../src/dispatch'
+import * as build from "../src/build"
 import * as core from '@libcxx/core'
 import * as os from 'os'
 import * as fs from 'fs'
@@ -22,22 +22,7 @@ afterAll(async (): Promise<void>  => {
   }
 })
 
-async function getTestInputs() : Promise<dispatch.ActionInputsI> {
-  let inputs = {
-    repo: "actions",
-    owner: "libcxx",
-    event_type: "test_event",
-    client_payload: {
-      repository: 'llvm/llvm-project',
-      ref: 'master'
-    },
-    token: process.env['GITHUB_TOKEN'] as string
-  } as dispatch.ActionInputsI;
-  return inputs;
-}
-
 
 test('basic test', async () => {
-  let inputs = getTestInputs();
-  await expect(dispatch.runAction(inputs)).resolves.toBeDefined()
+  await expect(build.GenericRuntimeAction.runAll()).resolves.toReturn()
 })
