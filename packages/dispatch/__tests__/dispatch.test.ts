@@ -5,39 +5,37 @@ import * as fs from 'fs'
 import * as path from 'path'
 import * as process from 'process'
 
+let workspace
 
-var workspace;
-
-beforeAll(async () : Promise<void> => {
+beforeAll(() => {
   workspace = fs.mkdtempSync(path.join(os.tmpdir(), '/', 'libcxx-actions-test'))
-  await process.chdir(workspace)
+  process.chdir(workspace)
   process.env['GITHUB_WORKSPACE'] = workspace
   process.env['GITHUB_REPOSITORY'] = 'libcxx/actions'
   process.env['GITHUB_EVENT_PATH'] = path.join(workspace, 'payload.json')
 })
 
-afterAll(async (): Promise<void>  => {
+afterAll(() => {
   if (workspace && fs.existsSync(workspace)) {
-    await core.rmRfIgnoreError(workspace)
+    core.rmRfIgnoreError(workspace)
   }
 })
 
-async function getTestInputs() : Promise<dispatch.ActionInputsI> {
-  let inputs = {
-    repo: "actions",
-    owner: "libcxx",
-    event_type: "test_event",
+async function getTestInputs(): Promise<dispatch.ActionInputsI> {
+  const inputs = {
+    repo: 'actions',
+    owner: 'libcxx',
+    event_type: 'test_event',
     client_payload: {
       repository: 'llvm/llvm-project',
       ref: 'master'
     },
     token: process.env['GITHUB_TOKEN'] as string
-  } as dispatch.ActionInputsI;
-  return inputs;
+  } as dispatch.ActionInputsI
+  return inputs
 }
 
-
 test('basic test', async () => {
-  let inputs = getTestInputs();
+  const inputs = getTestInputs()
   await expect(dispatch.runAction(inputs)).resolves.toBeDefined()
 })

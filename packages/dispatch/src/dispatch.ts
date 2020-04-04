@@ -51,9 +51,9 @@ export class ActionInputs implements ActionInputsI {
     const i = repository.indexOf('/')
     assert(i !== -1)
 
-    var parsed: any
+    let parsed: any
     try {
-      let parsed = await JSON.parse(actions.getInput('client_payload'))
+      parsed = await JSON.parse(actions.getInput('client_payload'))
     } catch (error) {
       error.message = `Bad JSON input: ${error.message}`
       throw error
@@ -86,6 +86,6 @@ export async function runAction(
   } catch (error) {
     console.log(error.stack)
     actions.setFailed(error.message)
-    throw error;
+    throw error
   }
 }
