@@ -1,4 +1,4 @@
-import * as build from '../src/build'
+import * as build from '@libcxx/build'
 import * as core from '@libcxx/core'
 import * as os from 'os'
 import * as fs from 'fs'

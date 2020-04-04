@@ -39,7 +39,6 @@
     "jest": "^25.1.0"
   },
   "dependencies": {
-    "@libcxx/core": "file:../core/",
     "@actions/core": "^1.2.3",
     "@octokit/rest": "^17.1.4",
     "assert": "^2.0.0"

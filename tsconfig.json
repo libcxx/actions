@@ -8,7 +8,11 @@
         "declaration": true,
         "sourceMap": true,
         "lib": ["es6"],
-        "strict": true
+        "strict": true,
+        "baseUrl": "./packages/",
+        "paths": {
+            "@libcxx/*": ["./*/src/"]
+        }
     },
     "exclude": [
         "node_modules",
