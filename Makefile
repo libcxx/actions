@@ -1,36 +1,68 @@
 
+actions = test build publish dispatch
+dirs = test build publish dispatch
+
+action_srcs := $(foreach action,$(actions),$(action)/index.js)
+action_objs := $(foreach action,$(actions),$(action)/dist/index.js)
+srcs := $(wildcard __package__/src/*)
+objs := $(file:__package__/lib/%.js=__package__/src/%.js)
+
 .PHONY : all
-all:
-	cd test/ && rm -rf dist/ && mkdir dist/ && npm run package
-	cd build/ && rm -rf dist/ && mkdir dist/ && npm run package
-	cd publish/ && rm -rf dist/ && mkdir dist/ && npm run package
-	cd dispatch-event/ && rm -rf dist/ && mkdir dist/ && npm run package
+all: build
+
+define CMD_clean
+cd $(1) && rm -rf dist/ && mkdir dist;
+
+endef
+
+define CMD_build
+ncc build $(1)/index.js --out $(1)/dist;
+
+endef
 
 
-.PHONY : clean
+define CMD_distclean
+cd $(1) && rm -rf node_modules/ package-lock.json;
+
+endef
+
+define CMD_reinstall
+cd $(1) && npm install;
+
+endef
+
+
+.PHONY : build
+build:
+	npm run build && npm run pack
+	$(foreach tool,$(dirs),$(call CMD_build,$(tool)))
+
+
+.phony : clean
 clean:
-	cd test/ && rm -rf dist/ && mkdir dist && rm -rf node_modules/
-	cd build/ && rm -rf dist/ && mkdir dist && rm -rf node_modules/
-	cd publish/ && rm -rf dist/ && mkdir dist && rm -rf node_modules/
-	cd dispatch-event/ && rm -rf dist/ && mkdir dist && rm -rf node_modules/
-	rm -rf node_modules/
 
+	$(foreach tool,$(dirs),$(call CMD_clean,$(tool)))
 
-.PHONY : test
+.phony : test
 test:
-	cd test/ && npm test
-	cd publish/ && npm test
-	cd dispatch-event && npm test
+	$(foreach tool,$(dirs),$(call CMD_test,$(tool)))
+
+.phony : reinstall
+reinstall: distclean
+	$(foreach tool,$(dirs),$(call CMD_reinstall,$(tool)))
+
+.phony : distclean
+distclean:
+	$(foreach tool,$(dirs),$(call CMD_distclean,$(tool)))
 
 
-.PHONY : reinstall
-reinstall:
-	rm -rf node_modules/ package-lock.json && npm install --save
-	cd test/ && rm -rf node_modules/ package-lock.json && npm install --save
-	cd publish/ && rm -rf node_modules/ package-lock.json && npm install --save
-	cd build/ && rm -rf node_modules/ package-lock.json && npm install --save
-	cd dispatch-event/ && rm -rf node_modules/ package-lock.json && npm install --save
 
+
+.PHONY : commit
+push: build
+	git add -A :/
+	git commit -am 'dummy commit'
+	git push
 
 .PHONY : add-package
 add-package:
@@ -40,11 +72,9 @@ add-package:
 	npm install --prefix build/ $$package --save; \
 	npm install --prefix test/ $$package --save; \
 	npm install --prefix publish/ $$package --save; \
-	npm install --prefix dispatch-event/ $$package --save
+	npm install --prefix dispatch/ $$package --save
 
 
-.PHONY : commit
-push: all
-	git add -A :/
-	git commit -am 'dummy commit'
-	git push
+
+
+

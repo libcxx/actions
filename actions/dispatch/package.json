@@ -1,0 +1,27 @@
+{
+  "name": "dispatch",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Send a repo dispatch event",
+  "main": "index.js",
+  "scripts": {
+    "package": "ncc build index.js -o dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/libcxx/actions.git"
+  },
+  "keywords": [
+    "actions",
+    "node",
+    "setup"
+  ],
+  "author": "YourNameOrOrganization",
+  "license": "MIT",
+  "dependencies": {
+
+  },
+  "devDependencies": {
+     "@zeit/ncc": "^0.20.5"
+  }
+}

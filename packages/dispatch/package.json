@@ -1,0 +1,47 @@
+{
+  "name": "@libcxx/dispatch",
+  "version": "1.0.0",
+  "description": "Create and Send a Repository Dispatch Event",
+  "keywords": [
+    "Github",
+    "Actions",
+    "LLVM"
+  ],
+  "author": "Eric Fiselier <eric@efcs.ca>",
+  "homepage": "http://libcxx.llvm.org",
+  "license": "Apache-2.0",
+  "main": "lib/dispatch.js",
+  "types": "lib/dispatch.d.ts",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/libcxx/actions.git",
+    "directory": "packages/dispatch"
+  },
+  "scripts": {
+    "audit-moderate": "npm install && npm audit --audit-level=moderate",
+    "test": "echo \"Error: run tests from root\" && exit 1",
+    "tsc": "tsc"
+  },
+  "bugs": {
+    "url": "https://github.com/libcxx/actions/issues"
+  },
+  "devDependencies": {
+    "jest": "^25.1.0"
+  },
+  "dependencies": {
+    "@libcxx/core": "^1.0.0",
+    "@actions/core": "^1.2.3",
+    "@octokit/rest": ">=17.1.4",
+    "assert": "^2.0.0"
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "name": "@libcxx/core",
+  "version": "1.0.0",
+  "description": "Utilities for writing Github Actions",
+  "keywords": [
+    "Github",
+    "Actions",
+    "LLVM"
+  ],
+  "author": "Eric Fiselier <eric@efcs.ca>",
+  "homepage": "http://libcxx.llvm.org",
+  "license": "Apache-2.0",
+  "main": "lib/core.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/libcxx/actions.git",
+    "directory": "packages/core"
+  },
+  "scripts": {
+    "audit-moderate": "npm install && npm audit --audit-level=moderate",
+    "test": "echo \"Error: run tests from root\" && exit 1",
+    "tsc": "tsc"
+  },
+  "bugs": {
+    "url": "https://github.com/libcxx/actions/issues"
+  },
+  "devDependencies": {
+    "jest": "^25.1.0"
+  },
+  "dependencies": {
+    "@actions/core": "^1.2.3",
+    "@actions/glob": "^0.1.0",
+    "@actions/io": "^1.0.2",
+    "@actions/exec": "^1.0.3",
+    "rimraf": "^3.0.2",
+    "temp": "^0.9.1"
+  }
+}

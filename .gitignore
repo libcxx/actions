@@ -57,3 +57,8 @@ typings/
 
 # next.js build output
 .next
+
+
+packages/*/node_modules/
+packages/*/lib/
+packages/*/__tests__/_temp/
