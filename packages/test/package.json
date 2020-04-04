@@ -36,5 +36,10 @@
   },
   "devDependencies": {
     "jest": "^25.1.0"
+  },
+  "dependencies": {
+    "@actions/core": "^1.2.3",
+    "@types/xmldom": "^0.1.29",
+    "xmldom": "^0.3.0"
   }
 }

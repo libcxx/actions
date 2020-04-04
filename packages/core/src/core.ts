@@ -7,6 +7,13 @@ import * as fs from 'fs'
 import * as path from 'path'
 import * as temp from 'temp'
 
+export enum Outcome {
+  Success,
+  Failure,
+  FatalError,
+  Unknown
+}
+
 export function mkdirP(dirPath: string): void {
   fs.mkdirSync(dirPath, {recursive: true})
 }
