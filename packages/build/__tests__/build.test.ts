@@ -6,6 +6,7 @@ import * as path from 'path'
 import * as process from 'process'
 
 let workspace: string
+jest.setTimeout(100000)
 
 beforeAll(() => {
   workspace = fs.mkdtempSync(path.join(os.tmpdir(), '/', 'libcxx-actions-test'))
@@ -22,5 +23,5 @@ afterAll(() => {
 })
 
 test('basic test', async () => {
-  await expect(build.GenericRuntimeAction.runAll()).resolves.toReturn()
+  await expect( build.GenericRuntimeAction.runAll()).resolves.toBe(0)
 })

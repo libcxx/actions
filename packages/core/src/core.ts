@@ -15,9 +15,9 @@ export async function rmRF(dirPath: string): Promise<void> {
   await io.rmRF(dirPath)
 }
 
-export function rmRfIgnoreError(dirPath: string): void {
+export async function rmRfIgnoreError(dirPath: string): Promise<void> {
   try {
-    rmRF(dirPath)
+    return await rmRF(dirPath)
   } catch (error) {
     // continue regardless of error
   }
@@ -43,16 +43,16 @@ export async function capture(
   let myOutput = ''
   options = options || {}
   options.listeners = {
-    stdout: data => {
+    stdout: async (data) => {
       myOutput += data.toString()
-      process.stdout.write(data)
+      await process.stdout.write(data)
     },
     stderr: data => {
       process.stderr.write(data)
     }
   }
-  await exec.exec(cmd, args, options)
-  return myOutput
+  let l = await exec.exec(cmd, args, options).then(() => { return myOutput; })
+  return l
 }
 
 export async function run(
@@ -60,7 +60,8 @@ export async function run(
   args?: string[],
   options?: ExecOptions
 ): Promise<number> {
-  return exec.exec(cmd, args, options)
+  let l = await exec.exec(cmd, args, options)
+  return l;
 }
 
 export async function globDirectory(dir: string): Promise<string[]> {
@@ -109,7 +110,7 @@ export class TempFile {
 
   async cleanup(): Promise<void> {
     for (const p of this.toCleanup) {
-      unlinkIgnoreError(p)
+      await unlinkIgnoreError(p)
     }
     this.toCleanup = []
   }
@@ -128,10 +129,11 @@ export function getInputList(
 ): string[] {
   if (!options) options = {}
   const raw_input = actions.getInput(key, {required: options.required})
-  if (raw_input === null) {
-    if (options.required)
+  if (raw_input === null || raw_input === '') {
+    if (!options.required && options.default !== null)
+      return <string[]> options.default
+    if (options.required && !options.allowEmpty)
       throw new Error(`Input '${key}' was required but not found`)
-    if (options.default !== null) return <string[]>options.default
     throw new Error(`Input '${key} was not defined and no default was provided`)
   }
   const values: string[] = raw_input.split('\n').filter(x => x !== '')
@@ -153,7 +155,7 @@ export function getInputList(
 export function getInput(key: string, options?: ValidationOptions): string {
   if (!options) options = {}
   const raw_input = actions.getInput(key, {required: options.required})
-  if (raw_input === null) {
+  if (raw_input === null || raw_input === '') {
     if (options.required)
       throw new Error(`Input '${key}' was required but not found`)
     if (options.default !== null) return <string>options.default

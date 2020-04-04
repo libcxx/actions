@@ -5,7 +5,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import * as process from 'process'
 
-let workspace
+let workspace : string = "";
 
 beforeAll(() => {
   workspace = fs.mkdtempSync(path.join(os.tmpdir(), '/', 'libcxx-actions-test'))

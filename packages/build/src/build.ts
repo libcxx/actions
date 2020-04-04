@@ -23,7 +23,8 @@ export interface ActionInputsI {
 export function getActionInputsWithDefaults(): ActionInputsI {
   const result: ActionInputsI = {
     path: core.getInput('path', {
-      default: process.env['GITHUB_WORKSPACE'] || process.cwd()
+      allowEmpty: false,
+      default: process.cwd()
     }),
     name: core.getInput('name', {default: 'debug'}),
     repository: core.getInput('repository', {default: 'llvm/llvm-project'}),
@@ -64,7 +65,7 @@ export class RuntimeConfig implements ActionInputsI {
     this.name = i.name
     this.repository = i.repository
     this.ref = i.ref
-    this.path = i.path
+    this.path = path.resolve(i.path)
     this.runtimes = i.runtimes
     this.cc = i.cc
     this.cxx = i.cxx
@@ -79,7 +80,7 @@ export class RuntimeConfig implements ActionInputsI {
     return this.repository.split('/')[0]
   }
   getRepositoryName(): string {
-    return this.repository.split('/', 1)[1]
+    return this.repository.split('/')[1]
   }
   getRepositoryURL(): string {
     return `https://github.com/${this.repository}.git`
@@ -117,7 +118,7 @@ export class RuntimeConfig implements ActionInputsI {
     return path.join(this.outputPath(), 'install')
   }
   sourcePath(): string {
-    return path.join(this.workspacePath())
+    return path.join(this.workspacePath(), this.getRepositoryName())
   }
 
   getWorkspacePaths(): string[] {
@@ -199,7 +200,7 @@ export class GenericRuntimeAction {
 
   async checkoutRuntimes(): Promise<string> {
     const config = this.config
-    return await actions.group('checkout', async () => {
+    return await actions.group('checkout', async (): Promise<string> => {
       const options = {cwd: config.sourcePath()}
       await core.run('git', ['init'], options)
       await core.run(
@@ -220,12 +221,12 @@ export class GenericRuntimeAction {
   }
 
   async setupRuntimeWorkspace(): Promise<void> {
-    await actions.group(
+    return await actions.group(
       'configuration',
       async (): Promise<void> => {
         const config = this.config
         await config.createPaths()
-        const config_file = config.saveConfig()
+        const config_file = await config.saveConfig()
         actions.setOutput('config_file', config_file)
         actions.saveState('config_file', config_file)
       }
@@ -262,17 +263,20 @@ export class GenericRuntimeAction {
     return exitCode
   }
 
-  static async runAll(): Promise<void> {
+  static async runAll(): Promise<number> {
     try {
       const config = new GenericRuntimeAction(getActionInputsWithDefaults())
       await config.setupRuntimeWorkspace()
       await config.checkoutRuntimes()
-      await config.checkoutRuntimes()
       await config.configureRuntimes()
       await config.buildRuntimes()
+      return 0
     } catch (error) {
-      actions.error(error.stack)
+      console.error(error.message)
+      console.error(error.stack)
+      console.error(error)
       actions.setFailed(error.message)
+      throw error
     }
   }
 }

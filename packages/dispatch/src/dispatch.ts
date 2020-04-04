@@ -82,7 +82,7 @@ export async function runAction(
     })
     if (r.status === 204) return r
     console.log(r)
-    return r
+    throw new Error(`Failed to create dispatch event: Got status ${r.status}`)
   } catch (error) {
     console.log(error.stack)
     actions.setFailed(error.message)
