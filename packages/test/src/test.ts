@@ -51,7 +51,7 @@ function correctTestNames(
   return {testsuite_name, testcase_name}
 }
 
-class RuntimesTester {
+export class TestSuiteRunner {
   private request: TestRunRequest
 
   constructor(request: TestRunRequest) {
@@ -78,7 +78,6 @@ class RuntimesTester {
       for (testcase of cases) {
         result.tests.push(this.actOnTestCase(testcase))
       }
-      
     }
     return result
   }
@@ -107,7 +106,7 @@ class RuntimesTester {
   }
 
 
-  async readTestRunResults() : Promise<TestRunResult> {
+  readTestRunResults() : TestRunResult {
     const xml_string = fs.readFileSync(this.request.xunit_path, 'utf8')
     const parser = new DOMParser()
     let doc = parser.parseFromString(xml_string, "application/xml");

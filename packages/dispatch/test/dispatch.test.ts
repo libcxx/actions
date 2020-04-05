@@ -4,20 +4,26 @@ import * as os from 'os'
 import * as fs from 'fs'
 import * as path from 'path'
 import * as process from 'process'
+import { strict as assert} from 'assert'
 
 let workspace = ''
 
 beforeAll(() => {
   workspace = fs.mkdtempSync(path.join(os.tmpdir(), '/', 'libcxx-actions-test'))
+  workspace = fs.realpathSync(workspace)
+  assert(path.isAbsolute(workspace))
   process.chdir(workspace)
   process.env['GITHUB_WORKSPACE'] = workspace
   process.env['GITHUB_REPOSITORY'] = 'libcxx/actions'
   process.env['GITHUB_EVENT_PATH'] = path.join(workspace, 'payload.json')
 })
 
-afterAll(() => {
+afterAll(async () => {
   if (workspace && fs.existsSync(workspace)) {
-    core.rmRfIgnoreError(workspace)
+    assert(path.isAbsolute(workspace))
+    process.chdir(__dirname)
+    if (fs.existsSync(workspace))
+      await core.rmRfIgnoreError(workspace)
   }
 })
 
