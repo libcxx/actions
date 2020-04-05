@@ -4,7 +4,7 @@ import * as os from 'os'
 import * as fs from 'fs'
 import * as path from 'path'
 import * as process from 'process'
-import { strict as assert} from 'assert'
+import {strict as assert} from 'assert'
 
 let workspace = ''
 
@@ -22,8 +22,7 @@ afterAll(async () => {
   if (workspace && fs.existsSync(workspace)) {
     assert(path.isAbsolute(workspace))
     process.chdir(__dirname)
-    if (fs.existsSync(workspace))
-      await core.rmRfIgnoreError(workspace)
+    if (fs.existsSync(workspace)) await core.rmRfIgnoreError(workspace)
   }
 })
 

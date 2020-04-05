@@ -1,6 +1,4 @@
-import * as actions from '@actions/core'
 import * as core from '@libcxx/core'
-import * as build from '@libcxx/build'
 import {strict as assert} from 'assert'
 import * as path from 'path'
 import * as fs from 'fs'
@@ -33,7 +31,6 @@ export interface TestRunResult {
   numFailures: number
 }
 
-
 function correctTestNames(
   test_case: Element
 ): {testsuite_name: string; testcase_name: string} {
@@ -58,23 +55,32 @@ export class TestSuiteRunner {
     this.request = request
   }
 
-  private actOnDocument(doc : XMLDocument) : TestRunResult {
-    let result = <TestRunResult>{request: this.request, outcome: core.Outcome.Success};
-    
-    let suites :  HTMLCollectionOf<Element> = doc.getElementsByTagName(
-    'testsuite')
+  private actOnDocument(doc: XMLDocument): TestRunResult {
+    const result: TestRunResult = {
+      request: this.request,
+      outcome: core.Outcome.Success,
+      tests: <TestResult[]>[],
+      numFailures: 0,
+      numSkipped: 0
+    }
 
-    let suite : Element
+    const suites: HTMLCollectionOf<Element> = doc.getElementsByTagName(
+      'testsuite'
+    )
+
+    let suite: Element
     for (suite of suites) {
-      let numFailed = parseInt(<string>suite.getAttribute('failures'))
-      let numSkipped = parseInt(<string>suite.getAttribute('skipped'))
+      const numFailed = parseInt(<string>suite.getAttribute('failures'))
+      const numSkipped = parseInt(<string>suite.getAttribute('skipped'))
       if (numFailed !== 0) {
         result.outcome = core.Outcome.Failure
       }
       result.numFailures += numFailed
       result.numSkipped += numSkipped
-      const cases : HTMLCollectionOf<Element> = suite.getElementsByTagName('testcase')
-      let testcase : Element
+      const cases: HTMLCollectionOf<Element> = suite.getElementsByTagName(
+        'testcase'
+      )
+      let testcase: Element
       for (testcase of cases) {
         result.tests.push(this.actOnTestCase(testcase))
       }
@@ -82,15 +88,20 @@ export class TestSuiteRunner {
     return result
   }
 
-  private actOnTestCase(testcase : Element) : TestResult {
+  private actOnTestCase(testcase: Element): TestResult {
     const {testsuite_name, testcase_name} = correctTestNames(testcase)
-    let result = <TestResult>{name: testcase_name, suite: testsuite_name, output: "", result: TestOutcome.Passed};
+    const result: TestResult = {
+      name: testcase_name,
+      suite: testsuite_name,
+      output: '',
+      result: TestOutcome.Passed
+    }
     if (!testcase.hasChildNodes()) {
       return result
     }
-    assert(testcase.childNodes.length === 1);
-    let child = <Element>testcase.childNodes[0]
-    let kind : string = child.tagName
+    assert(testcase.childNodes.length === 1)
+    const child = <Element>testcase.childNodes[0]
+    const kind: string = child.tagName
     switch (kind) {
       case 'skipped':
         result.result = TestOutcome.Skipped
@@ -98,18 +109,17 @@ export class TestSuiteRunner {
         return result
       case 'failure':
         result.result = TestOutcome.Failed
-        result.output = <string>child.childNodes[0].nodeValue;
+        result.output = <string>child.childNodes[0].nodeValue
         return result
       default:
         throw new Error(`Unexpected child node ${child.tagName}`)
     }
   }
 
-
-  readTestRunResults() : TestRunResult {
+  readTestRunResults(): TestRunResult {
     const xml_string = fs.readFileSync(this.request.xunit_path, 'utf8')
     const parser = new DOMParser()
-    let doc = parser.parseFromString(xml_string, "application/xml");
+    const doc = parser.parseFromString(xml_string, 'application/xml')
     return this.actOnDocument(doc)
   }
 }
