@@ -13,7 +13,7 @@
   "main": "lib/test.js",
   "directories": {
     "lib": "lib",
-    "test": "__tests__"
+    "test": "test"
   },
   "files": [
     "lib"
@@ -39,7 +39,9 @@
   },
   "dependencies": {
     "@actions/core": "^1.2.3",
-    "@types/xmldom": "^0.1.29",
-    "xmldom": "^0.3.0"
+    "@libcxx/build": "^1.0.0",
+    "@libcxx/core": "^1.0.0",
+    "assert": "^2.0.0",
+    "fs": "0.0.1-security"
   }
 }

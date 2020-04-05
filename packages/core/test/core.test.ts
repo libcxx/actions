@@ -11,7 +11,7 @@ describe('@libcxx/core', () => {
     const p2: string = await tmpFileTwo.create()
     expect(fs.existsSync(p2)).toBe(true)
 
-    await tmpFileTwo.cleanup()
+    tmpFileTwo.cleanup()
     expect(fs.existsSync(p1)).toBe(true)
     expect(fs.existsSync(p2)).toBe(false)
   })

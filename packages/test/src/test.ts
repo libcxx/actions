@@ -1,5 +1,7 @@
 import * as actions from '@actions/core'
-import {strict as assert} from "assert"
+import * as core from '@libcxx/core'
+import * as build from '@libcxx/build'
+import {strict as assert} from 'assert'
 import * as path from 'path'
 import * as fs from 'fs'
 
@@ -13,79 +15,102 @@ export interface TestRunRequest {
   id: string
   runtimes: string[]
   test_options: string[]
+  xunit_path: string
 }
 
 export interface TestResult {
-  name: string,
-  suite: string,
-  result: TestOutcome,
-  output: string,
+  name: string
+  suite: string
+  result: TestOutcome
+  output: string
 }
 
 export interface TestRunResult {
   request: TestRunRequest
-  outcome: TestOutcome,
-  exitCode: number
-  tests: TestResult[],
-  xunitFile: string
+  outcome: core.Outcome
+  tests: TestResult[]
+  numSkipped: number
+  numFailures: number
 }
 
 
-function readXMLFile(xml_file : string) {
-  const xml_string = fs.readFileSync(xml_file, 'utf8');
-  function handle_error(err : any) {
-    actions.error(err);
-    actions.setFailed(err.message);
+function correctTestNames(
+  test_case: Element
+): {testsuite_name: string; testcase_name: string} {
+  const ts = <Element>test_case.parentElement
+  const testsuite_name = <string>ts.getAttribute('name')
+
+  const file_name = <string>test_case.getAttribute('name')
+  const file_path_and_suite = <string>test_case.getAttribute('classname')
+  assert(file_path_and_suite.startsWith(testsuite_name))
+  const testcase_name = path.join(
+    file_path_and_suite.substring(testsuite_name.length),
+    file_name
+  )
+
+  return {testsuite_name, testcase_name}
+}
+
+class RuntimesTester {
+  private request: TestRunRequest
+
+  constructor(request: TestRunRequest) {
+    this.request = request
   }
 
-  var parser = new DOMParser();
-  var doc : XMLDocument = parser.parseFromString(xml_string, "application/xml");
-  return doc;
-}
+  private actOnDocument(doc : XMLDocument) : TestRunResult {
+    let result = <TestRunResult>{request: this.request, outcome: core.Outcome.Success};
+    
+    let suites :  HTMLCollectionOf<Element> = doc.getElementsByTagName(
+    'testsuite')
 
-function correctTestNames(test_case: HTMLElement) {
-  const ts = <HTMLElement> test_case.parentElement;
-  assert(ts && ts.nodeName == "testsuite");
-  const testsuite_name = <string> ts.getAttribute("name");
-
-  const file_name = <string> test_case.getAttribute('name');
-  const file_path_and_suite = <string> test_case.getAttribute('classname');
-  assert(file_path_and_suite.startsWith(testsuite_name));
-  const testcase_name = path.join(file_path_and_suite.substring(testsuite_name.length), file_name);
-
-  return {testsuite_name, testcase_name};
-}
-
-function visit_all_failures(xml_doc: XMLDocument ) {
-  let failure_messages = <string[]>[];
-  let elems: HTMLCollectionOf<Element> = xml_doc.getElementsByTagName("failure");
-  for (let i = 0; i < elems.length; ++i) {
-    const failure = elems[i];
-    assert(failure.hasChildNodes());
-    assert(failure.childNodes.length == 1);
-    const failure_text = failure.childNodes[0].nodeValue;
-
-    const tc = <HTMLElement> failure.parentNode;
-    const {testsuite_name, testcase_name} = correctTestNames(tc);
-
-    const failure_message =  `TEST '${testsuite_name} :: ${testcase_name} FAILED\n${failure_text}`
-
-    failure_messages.push(failure_message);
+    let suite : Element
+    for (suite of suites) {
+      let numFailed = parseInt(<string>suite.getAttribute('failures'))
+      let numSkipped = parseInt(<string>suite.getAttribute('skipped'))
+      if (numFailed !== 0) {
+        result.outcome = core.Outcome.Failure
+      }
+      result.numFailures += numFailed
+      result.numSkipped += numSkipped
+      const cases : HTMLCollectionOf<Element> = suite.getElementsByTagName('testcase')
+      let testcase : Element
+      for (testcase of cases) {
+        result.tests.push(this.actOnTestCase(testcase))
+      }
+      
+    }
+    return result
   }
-  return failure_messages;
-}
 
-export async function getTestSuiteAnnotations(xml_file_path: string) : Promise<string[]> {
-  const xml_dom = await readXMLFile(xml_file_path);
-  return visit_all_failures(xml_dom);
-}
-
-export async function createTestSuiteAnnotations(xml_file_path: string) : Promise<number> {
-  const failures = await getTestSuiteAnnotations(xml_file_path);
-  let count = 0;
-  for (let f of failures) {
-    count += 1;
-    await actions.error(f);
+  private actOnTestCase(testcase : Element) : TestResult {
+    const {testsuite_name, testcase_name} = correctTestNames(testcase)
+    let result = <TestResult>{name: testcase_name, suite: testsuite_name, output: "", result: TestOutcome.Passed};
+    if (!testcase.hasChildNodes()) {
+      return result
+    }
+    assert(testcase.childNodes.length === 1);
+    let child = <Element>testcase.childNodes[0]
+    let kind : string = child.tagName
+    switch (kind) {
+      case 'skipped':
+        result.result = TestOutcome.Skipped
+        result.output = <string>child.getAttribute('message')
+        return result
+      case 'failure':
+        result.result = TestOutcome.Failed
+        result.output = <string>child.childNodes[0].nodeValue;
+        return result
+      default:
+        throw new Error(`Unexpected child node ${child.tagName}`)
+    }
   }
-  return count;
+
+
+  async readTestRunResults() : Promise<TestRunResult> {
+    const xml_string = fs.readFileSync(this.request.xunit_path, 'utf8')
+    const parser = new DOMParser()
+    let doc = parser.parseFromString(xml_string, "application/xml");
+    return this.actOnDocument(doc)
+  }
 }

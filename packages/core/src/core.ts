@@ -50,15 +50,17 @@ export async function capture(
   let myOutput = ''
   options = options || {}
   options.listeners = {
-    stdout: async (data) => {
+    stdout: async data => {
       myOutput += data.toString()
-      await process.stdout.write(data)
+      process.stdout.write(data)
     },
     stderr: data => {
       process.stderr.write(data)
     }
   }
-  let l = await exec.exec(cmd, args, options).then(() => { return myOutput; })
+  const l = await exec.exec(cmd, args, options).then(() => {
+    return myOutput
+  })
   return l
 }
 
@@ -67,8 +69,8 @@ export async function run(
   args?: string[],
   options?: ExecOptions
 ): Promise<number> {
-  let l = await exec.exec(cmd, args, options)
-  return l;
+  const l = await exec.exec(cmd, args, options)
+  return l
 }
 
 export async function globDirectory(dir: string): Promise<string[]> {
@@ -115,9 +117,9 @@ export class TempFile {
     return tmp.path
   }
 
-  async cleanup(): Promise<void> {
+  cleanup(): void {
     for (const p of this.toCleanup) {
-      await unlinkIgnoreError(p)
+      unlinkIgnoreError(p)
     }
     this.toCleanup = []
   }
@@ -138,7 +140,7 @@ export function getInputList(
   const raw_input = actions.getInput(key, {required: options.required})
   if (raw_input === null || raw_input === '') {
     if (!options.required && options.default !== null)
-      return <string[]> options.default
+      return <string[]>options.default
     if (options.required && !options.allowEmpty)
       throw new Error(`Input '${key}' was required but not found`)
     throw new Error(`Input '${key} was not defined and no default was provided`)

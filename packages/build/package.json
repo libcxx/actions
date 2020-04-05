@@ -13,7 +13,7 @@
   "main": "lib/build.js",
   "directories": {
     "lib": "lib",
-    "test": "__tests__"
+    "test": "test"
   },
   "files": [
     "lib"
@@ -23,7 +23,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/libcxx/actions.git"
+    "url": "git+https://github.com/libcxx/actions.git",
+    "directory": "packages/build"
   },
   "scripts": {
     "audit-moderate": "npm install && npm audit --audit-level=moderate",

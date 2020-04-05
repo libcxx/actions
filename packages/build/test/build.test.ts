@@ -1,4 +1,4 @@
-import * as build from '@libcxx/build'
+import * as build from '../src/build'
 import * as core from '@libcxx/core'
 import * as os from 'os'
 import * as fs from 'fs'
@@ -23,5 +23,5 @@ afterAll(() => {
 })
 
 test('basic test', async () => {
-  await expect( build.GenericRuntimeAction.runAll()).resolves.toBe(0)
+  await expect(build.GenericRuntimeAction.runAll()).resolves.toBe(0)
 })

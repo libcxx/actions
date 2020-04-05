@@ -200,24 +200,27 @@ export class GenericRuntimeAction {
 
   async checkoutRuntimes(): Promise<string> {
     const config = this.config
-    return await actions.group('checkout', async (): Promise<string> => {
-      const options = {cwd: config.sourcePath()}
-      await core.run('git', ['init'], options)
-      await core.run(
-        'git',
-        ['remote', 'add', 'origin', config.getRepositoryURL()],
-        options
-      )
-      await core.run(
-        'git',
-        ['fetch', '--depth=1', 'origin', config.ref],
-        options
-      )
-      await core.run('git', ['reset', '--hard', 'FETCH_HEAD'], options)
-      const sha = await core.capture('git', ['rev-parse', 'HEAD'], options)
-      actions.saveState('sha', sha)
-      return sha
-    })
+    return await actions.group(
+      'checkout',
+      async (): Promise<string> => {
+        const options = {cwd: config.sourcePath()}
+        await core.run('git', ['init'], options)
+        await core.run(
+          'git',
+          ['remote', 'add', 'origin', config.getRepositoryURL()],
+          options
+        )
+        await core.run(
+          'git',
+          ['fetch', '--depth=1', 'origin', config.ref],
+          options
+        )
+        await core.run('git', ['reset', '--hard', 'FETCH_HEAD'], options)
+        const sha = await core.capture('git', ['rev-parse', 'HEAD'], options)
+        actions.saveState('sha', sha)
+        return sha
+      }
+    )
   }
 
   async setupRuntimeWorkspace(): Promise<void> {
@@ -226,7 +229,7 @@ export class GenericRuntimeAction {
       async (): Promise<void> => {
         const config = this.config
         await config.createPaths()
-        const config_file = await config.saveConfig()
+        const config_file = config.saveConfig()
         actions.setOutput('config_file', config_file)
         actions.saveState('config_file', config_file)
       }
