@@ -1,63 +1,64 @@
-'use strict'
-import * as test from '../../test'
+import * as mtest from '../'
 import * as path from 'path'
 import * as core from '@libcxx/core'
+import * as xml2js from 'xml2js'
+import * as convert from 'xml-js'
+import * as fs from 'fs'
+import * as util from 'util'
 
-const inputs_dir = path.join(__dirname, 'Inputs')
-
-const failedTestOutput: string = `
-Command: ['echo', 'This is contrived!', '&&', 'exit', '1']
+const failedTestOutput = `Command: ['echo', 'This is contrived!', '&&', 'exit', '1']
 Exit Code: 1
 Standard Error:
 --
 This is contrived!
 --
-Test failed unexpectedly!
-`.trim()
+Test failed unexpectedly!`
 
-const Expected: test.TestResult[] = [
-  <test.TestResult>{
+const Expected: mtest.TestResult[] = [
+  {
     name: 'sample/a/passing_test.pass.cpp',
     suite: 'libc++',
     output: '',
-    result: test.TestOutcome.Passed
+    result: mtest.TestOutcome.Passed
   },
-  <test.TestResult>{
+  {
     name: 'sample/a/b/failing_test.pass.cpp',
     suite: 'libc++',
     output: failedTestOutput,
-    result: test.TestOutcome.Failed
+    result: mtest.TestOutcome.Failed
   },
-  <test.TestResult>{
+  {
     name: 'sample/a/c/skipped.pass.cpp',
     suite: 'libc++',
     output: 'Skipping because of configuration.',
-    result: test.TestOutcome.Skipped
+    result: mtest.TestOutcome.Skipped
   },
-  <test.TestResult>{
+  {
     name: 'sample/a/nothing_to_do.pass.cpp',
     suite: 'libc++',
     output: '',
-    result: test.TestOutcome.Passed
+    result: mtest.TestOutcome.Passed
   }
 ]
 
-describe('@libcxx/test: read results', () => {
+test('@libcxx/test: read results', async () => {
   const sample_file = path.join(__dirname, 'Inputs', 'sample_xunit_output.xml')
-  const run_request = <test.TestRunRequest>{
+  const run_request = <mtest.TestRunRequest>{
     id: 'test',
     test_options: [],
     runtimes: [],
     xunit_path: sample_file
   }
-  const test_runner = new test.TestSuiteRunner(run_request)
-  const results: test.TestRunResult = test_runner.readTestRunResults()
+
+  const test_runner = new mtest.TestSuiteRunner(run_request)
+  const results: mtest.TestRunResult = test_runner.readTestRunResults()
 
   expect(results).toBeDefined()
   expect(results.request).toBe(run_request)
-  expect(results.outcome).toBe(test.TestOutcome.Failed)
+  expect(results.outcome).toBe(mtest.TestOutcome.Failed)
   expect(results.numFailures).toBe(1)
   expect(results.numSkipped).toBe(1)
   expect(results.tests.length).toBe(4)
-  expect(results.tests).toContainEqual(Expected)
+  // expect(results.tests).toEqual(Expected)
+  expect(results.tests).toEqual(expect.arrayContaining(Expected))
 })

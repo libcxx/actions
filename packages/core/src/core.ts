@@ -19,14 +19,17 @@ export function mkdirP(dirPath: string): void {
 }
 
 export async function rmRF(dirPath: string): Promise<void> {
-  await io.rmRF(dirPath)
+  return await io.rmRF(dirPath)
+  //return fs.rmdirSync(dirPath, {recursive: true})
 }
 
 export async function rmRfIgnoreError(dirPath: string): Promise<void> {
   try {
-    return await rmRF(dirPath)
+    // return  fs.rmdirSync(dirPath, {recursive: true})
+    return await io.rmRF(dirPath)
   } catch (error) {
     // continue regardless of error
+    throw error
   }
 }
 
@@ -35,6 +38,7 @@ export function unlinkIgnoreError(filePath: string): void {
     return fs.unlinkSync(filePath)
   } catch (error) {
     // continue regardless of error
+    throw error
   }
 }
 
