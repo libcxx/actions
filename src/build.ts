@@ -65,11 +65,14 @@ function getLLVMProjectInfo(name : string) : LLVMProjectInfo {
   }
 }
 
-const all_llvm_projects = ['clang', 'clang-tools-extra', 'compiler-rt', 'debuginfo-tests', 'libc', 'libclc', 'libcxx', 'libcxxabi', 'libunwind', 'lld', 'lldb', 'mlir', 'openmp', 'parallel-libs', 'polly', 'pstl']
+const all_llvm_projects = ['clang', 'clang-tools-extra', 'compiler-rt', 'debuginfo-tests', 'libc', 'libclc',
+  'libcxx', 'libcxxabi', 'libunwind', 'lld', 'lldb', 'mlir', 'openmp',
+  'parallel-libs', 'polly', 'pstl']
 const default_llvm_projects = ['libcxx', 'libcxxabi']
 
 function getProjectsList() : string[] {
-  let allowed_projects = all_llvm_projects
+  let allowed_projects : string[] = []
+  allowed_projects.concat(all_llvm_projects)
   allowed_projects.push('all')
 
   const projects : string[] = actions.getInputList('projects', {

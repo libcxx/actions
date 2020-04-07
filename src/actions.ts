@@ -58,6 +58,7 @@ export function getInputList(
   const input : string[] = actions.getInput(key, {required: options.required}).trim().split('\n').map(x => x.trim()).filter(x => x !== '')
   console.log('INPUT = ')
   console.log(input)
+  console.log(`${process.env['INPUT_PROJECTS']}`)
   if (input.length == 0) {
     if ((!options.required || !options.allowEmpty) && options.default !== null)
       return <string[]>options.default

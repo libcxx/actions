@@ -14066,10 +14066,13 @@ function getLLVMProjectInfo(name) {
             throw new Error(`Unknown LLVM project: '${name}'`);
     }
 }
-const all_llvm_projects = ['clang', 'clang-tools-extra', 'compiler-rt', 'debuginfo-tests', 'libc', 'libclc', 'libcxx', 'libcxxabi', 'libunwind', 'lld', 'lldb', 'mlir', 'openmp', 'parallel-libs', 'polly', 'pstl'];
+const all_llvm_projects = ['clang', 'clang-tools-extra', 'compiler-rt', 'debuginfo-tests', 'libc', 'libclc',
+    'libcxx', 'libcxxabi', 'libunwind', 'lld', 'lldb', 'mlir', 'openmp',
+    'parallel-libs', 'polly', 'pstl'];
 const default_llvm_projects = ['libcxx', 'libcxxabi'];
 function getProjectsList() {
-    let allowed_projects = all_llvm_projects;
+    let allowed_projects = [];
+    allowed_projects.concat(all_llvm_projects);
     allowed_projects.push('all');
     const projects = actions.getInputList('projects', {
         allowEmpty: false,
@@ -18817,6 +18820,7 @@ function getInputList(key, options) {
     const input = actions.getInput(key, { required: options.required }).trim().split('\n').map(x => x.trim()).filter(x => x !== '');
     console.log('INPUT = ');
     console.log(input);
+    console.log(`${process.env['INPUT_PROJECTS']}`);
     if (input.length == 0) {
         if ((!options.required || !options.allowEmpty) && options.default !== null)
             return options.default;
@@ -18826,7 +18830,8 @@ function getInputList(key, options) {
     }
     const values = input;
     if (options.allowedValues) {
-        for (const v of values) {
+        let v;
+        for (v of values) {
             if (!options.allowedValues.includes(v)) {
                 throw new Error(`Value '${v}' is not allowed. [${options.allowedValues.join(', ')}]`);
             }
