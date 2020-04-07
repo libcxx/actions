@@ -70,15 +70,13 @@ const all_llvm_projects = ['clang', 'clang-tools-extra', 'compiler-rt', 'debugin
   'parallel-libs', 'polly', 'pstl']
 const default_llvm_projects = ['libcxx', 'libcxxabi']
 
-function getProjectsList() : string[] {
-  let allowed_projects : string[] = []
-  allowed_projects = allowed_projects.concat(all_llvm_projects)
-  allowed_projects.push('all')
+function getProjectsList(default_projects: string[] = default_llvm_projects) : string[] {
+  let allowed_projects : string[] = all_llvm_projects.concat(['all'])
 
   const projects : string[] = actions.getInputList('projects', {
       allowEmpty: false,
       allowedValues: allowed_projects,
-      default: default_llvm_projects,
+      default: default_projects,
     })
   if (projects.includes('all')) {
     if (projects.length != 1)
@@ -119,7 +117,7 @@ export function getBuildActionInputsWithDefaults(): BuildActionInputs {
 export function getTestActionInputsWithDefaults(config: LLVMProjectConfig) : TestRunRequest {
   const result : TestRunRequest = {
     id: actions.getInput('id', {required: true}),
-    projects: actions.getInputList('projects', {required: false, allowEmpty: false, default: config.projects}),
+    projects: getProjectsList(config.projects),
     options: actions.getInputList('args', {required: false, allowEmpty: true, default: []}),
     xunit_path: ''
   }

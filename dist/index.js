@@ -14070,14 +14070,12 @@ const all_llvm_projects = ['clang', 'clang-tools-extra', 'compiler-rt', 'debugin
     'libcxx', 'libcxxabi', 'libunwind', 'lld', 'lldb', 'mlir', 'openmp',
     'parallel-libs', 'polly', 'pstl'];
 const default_llvm_projects = ['libcxx', 'libcxxabi'];
-function getProjectsList() {
-    let allowed_projects = [];
-    allowed_projects = allowed_projects.concat(all_llvm_projects);
-    allowed_projects.push('all');
+function getProjectsList(default_projects = default_llvm_projects) {
+    let allowed_projects = all_llvm_projects.concat(['all']);
     const projects = actions.getInputList('projects', {
         allowEmpty: false,
         allowedValues: allowed_projects,
-        default: default_llvm_projects,
+        default: default_projects,
     });
     if (projects.includes('all')) {
         if (projects.length != 1)
@@ -14106,7 +14104,7 @@ exports.getBuildActionInputsWithDefaults = getBuildActionInputsWithDefaults;
 function getTestActionInputsWithDefaults(config) {
     const result = {
         id: actions.getInput('id', { required: true }),
-        projects: actions.getInputList('projects', { required: false, allowEmpty: false, default: config.projects }),
+        projects: getProjectsList(config.projects),
         options: actions.getInputList('args', { required: false, allowEmpty: true, default: [] }),
         xunit_path: ''
     };
