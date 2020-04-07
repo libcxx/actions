@@ -3,6 +3,7 @@ import * as fs from 'fs'
 import * as gactions from '@actions/core'
 import * as actions from '@actions/core'
 import {Octokit} from '@octokit/rest'
+import * as path from 'path'
 
 export * from './interfaces'
 
@@ -11,7 +12,7 @@ export function createGithubAPI(token: string): Octokit {
   const octokit = new Octokit({
     auth: token,
     userAgent: 'ericwf',
-    previews: ['everest-preview'],
+    previews: ['everest-preview', 'antiope-preview'],
     baseUrl: 'https://api.github.com',
     log: {
       debug: actions.info,
@@ -37,7 +38,9 @@ export function readActionDescription(filename: string) : any {
 }
 
 
-
+export function addCppProblemMatcher() {
+   console.log(`##[add-matcher]${path.join(__dirname, '..', 'matchers', `cpp.json`)}`)
+}
 
 export class ValidationOptions {
   allowedValues?: string[] | null = null

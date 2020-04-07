@@ -350,6 +350,7 @@ export class LLVMAction {
         options = options.concat(request.options)
         options = options.concat(config.getTestsuitePaths(request))
 
+        actions.addCppProblemMatcher()
         exitCode = await util.run(llvm_lit, options, {ignoreReturnCode: true})
         const reader  = new TestResultReader(request)
         const results : TestRunResult = reader.readTestRunResults()

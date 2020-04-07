@@ -14309,6 +14309,7 @@ class LLVMAction {
                 ];
                 options = options.concat(request.options);
                 options = options.concat(config.getTestsuitePaths(request));
+                actions.addCppProblemMatcher();
                 exitCode = yield util.run(llvm_lit, options, { ignoreReturnCode: true });
                 const reader = new test_1.TestResultReader(request);
                 const results = reader.readTestRunResults();
@@ -18768,12 +18769,13 @@ const yaml = __importStar(__webpack_require__(354));
 const fs = __importStar(__webpack_require__(747));
 const actions = __importStar(__webpack_require__(310));
 const rest_1 = __webpack_require__(835);
+const path = __importStar(__webpack_require__(622));
 __export(__webpack_require__(481));
 function createGithubAPI(token) {
     const octokit = new rest_1.Octokit({
         auth: token,
         userAgent: 'ericwf',
-        previews: ['everest-preview'],
+        previews: ['everest-preview', 'antiope-preview'],
         baseUrl: 'https://api.github.com',
         log: {
             debug: actions.info,
@@ -18796,6 +18798,10 @@ function readActionDescription(filename) {
     return result;
 }
 exports.readActionDescription = readActionDescription;
+function addCppProblemMatcher() {
+    console.log(`##[add-matcher]${path.join(__dirname, '..', 'matchers', `cpp.json`)}`);
+}
+exports.addCppProblemMatcher = addCppProblemMatcher;
 class ValidationOptions {
     constructor() {
         this.allowedValues = null;
