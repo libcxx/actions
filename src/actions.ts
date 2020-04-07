@@ -91,7 +91,7 @@ export function getInput(key: string, options?: ValidationOptions): string {
   }
   const value: string = raw_input
   if (options.allowedValues) {
-    if (!options.allowedValues.include(value)) {
+    if (!options.allowedValues.includes(value)) {
       throw new Error(
         `Value '${value}' is not allowed. [${options.allowedValues.join(', ')}]`
       )

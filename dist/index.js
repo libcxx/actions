@@ -18814,18 +18814,20 @@ exports.ValidationOptions = ValidationOptions;
 function getInputList(key, options) {
     if (!options)
         options = {};
-    const raw_input = actions.getInput(key, { required: options.required }).trim();
-    if (raw_input === null || raw_input === '') {
+    const input = actions.getInput(key, { required: options.required }).trim().split('\n').map(x => x.trim()).filter(x => x !== '');
+    console.log('INPUT = ');
+    console.log(input);
+    if (input.length == 0) {
         if ((!options.required || !options.allowEmpty) && options.default !== null)
             return options.default;
         if (options.required && !options.allowEmpty)
             throw new Error(`Input '${key}' was required but not found`);
         throw new Error(`Input '${key} was not defined and no default was provided`);
     }
-    const values = raw_input.split('\n').filter(x => x !== '');
+    const values = input;
     if (options.allowedValues) {
         for (const v of values) {
-            if (!(v in options.allowedValues)) {
+            if (!options.allowedValues.includes(v)) {
                 throw new Error(`Value '${v}' is not allowed. [${options.allowedValues.join(', ')}]`);
             }
         }
@@ -18839,8 +18841,8 @@ exports.getInputList = getInputList;
 function getInput(key, options) {
     if (!options)
         options = {};
-    const raw_input = actions.getInput(key, { required: options.required });
-    if (raw_input === null || raw_input === '') {
+    const raw_input = actions.getInput(key, { required: options.required }).trim();
+    if (raw_input === '') {
         if (options.required)
             throw new Error(`Input '${key}' was required but not found`);
         if (options.default !== null)
@@ -18849,7 +18851,7 @@ function getInput(key, options) {
     }
     const value = raw_input;
     if (options.allowedValues) {
-        if (!(value in options.allowedValues)) {
+        if (!options.allowedValues.includes(value)) {
             throw new Error(`Value '${value}' is not allowed. [${options.allowedValues.join(', ')}]`);
         }
     }
