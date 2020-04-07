@@ -32,7 +32,6 @@ outputs:
       other actions.
   sha:
     description: 'The git SHA of the specified ref'
-
 runs:
   using: 'node12'
   main: 'dist/index.js'
