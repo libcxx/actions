@@ -55,6 +55,8 @@ export function getInputList(
 ): string[] {
   if (!options) options = {}
   const input : string[] = actions.getInput(key, {required: options.required}).trim().split('\n').map(x => x.trim()).filter(x => x !== '')
+  console.log('INPUT = ')
+  console.log(input)
   if (input.length == 0) {
     if ((!options.required || !options.allowEmpty) && options.default !== null)
       return <string[]>options.default
@@ -65,7 +67,7 @@ export function getInputList(
   const values: string[] = input
   if (options.allowedValues) {
     for (const v of values) {
-      if (!(v in options.allowedValues)) {
+      if (!options.allowedValues.includes(v)) {
         throw new Error(
           `Value '${v}' is not allowed. [${options.allowedValues.join(', ')}]`
         )
@@ -89,7 +91,7 @@ export function getInput(key: string, options?: ValidationOptions): string {
   }
   const value: string = raw_input
   if (options.allowedValues) {
-    if (!(value in options.allowedValues)) {
+    if (!options.allowedValues.include(value)) {
       throw new Error(
         `Value '${value}' is not allowed. [${options.allowedValues.join(', ')}]`
       )
