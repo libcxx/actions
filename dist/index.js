@@ -14072,7 +14072,6 @@ function getProjectsList(default_projects = ['libcxx', 'libcxxabi']) {
         'parallel-libs', 'polly', 'pstl'];
     const default_llvm_projects = ['libcxx', 'libcxxabi'];
     const allowed_projects = all_llvm_projects.concat(['all']);
-    console.log(`ALLOWED PROJECTS = ${allowed_projects}`);
     const projects = actions.getInputList('projects', {
         allowEmpty: false,
         allowedValues: allowed_projects,
@@ -18817,9 +18816,6 @@ function getInputList(key, options) {
     if (!options)
         options = {};
     const input = actions.getInput(key, { required: options.required }).trim().split('\n').map(x => x.trim()).filter(x => x !== '');
-    console.log('INPUT = ');
-    console.log(input);
-    console.log(`${process.env['INPUT_PROJECTS']}`);
     if (input.length == 0) {
         if ((!options.required || !options.allowEmpty) && options.default !== null)
             return options.default;
