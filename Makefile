@@ -1,24 +1,19 @@
 
 
-
-ACTIONS = build/dist/index.js test/dist/index.js dispatch/dist/index.js
-
 .PHONY : all
-all: $(ACTIONS)
-
-$(ACTIONS): %/dist/index.js: %/action.ts
-	ncc build $< --out $*/dist --external @libcxx/actions
-
-%/action.ts:
+all: clean
+	tsc
+	ncc build lib/index.js
 
 
 
 .PHONY : clean
 clean:
-	rm -rf build/dist/* test/dist/* dispatch/dist/*
-	rm -f lib/*
+	rm -rf lib/* dist/*
 	touch lib/.gitkeep
+	touch dist/.gitkeep
+
 
 .PHONY : distclean
 distclean: clean
-	rm -rf node_modules/* package-lock.
+	rm -rf node_modules/* package-lock.json

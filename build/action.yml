@@ -31,7 +31,9 @@ outputs:
       The path of the written configuration file, which may be consumed by
       other actions.
   sha:
-    description: 'The git SHA of the specified ref'
+    description: The git SHA of the specified ref
+  success:
+    description: true if the job was a success
 runs:
   using: 'node12'
   main: './action.js'

@@ -14312,7 +14312,6 @@ class LLVMAction {
                 const results = reader.readTestRunResults();
                 yield reader.annotateFailures(results);
                 core.setOutput('results', request.xunit_path);
-                core.setOutput('failing_tests', `${results.numFailures}`);
                 return results;
             }));
             return r;
@@ -14326,6 +14325,7 @@ class LLVMAction {
                 yield config.checkoutProjects();
                 yield config.configureProjects();
                 yield config.buildProjects();
+                core.setOutput('success', 'true');
                 return 0;
             }
             catch (error) {
@@ -14342,6 +14342,11 @@ class LLVMAction {
             try {
                 const act = new LLVMAction(LLVMProjectConfig.loadConfig());
                 const result = yield act.testProjects(getTestActionInputsWithDefaults(act.config));
+                core.setOutput('total_tests', `${result.tests.length}`);
+                core.setOutput('passing_tests', `${result.tests.length - result.numFailures - result.numSkipped}`);
+                core.setOutput('skpped_tests', `${result.numSkipped}`);
+                core.setOutput('failing_tests', `${result.numFailures}`);
+                core.setOutput('success', 'true');
                 if (result.numFailures != 0) {
                     core.setFailed(`Test run for ${result.request.id} has ${result.numFailures} failing tests!`);
                     return 1;

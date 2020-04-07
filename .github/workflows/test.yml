@@ -21,6 +21,7 @@ jobs:
           -DCMAKE_C_COMPILER=clang
           -DCMAKE_CXX_COMPILER=clang++
     - uses: libcxx/actions/test@v0
+      id: 't1'
       with:
         id: 'libcxxabi'
         projects: |
@@ -30,7 +31,7 @@ jobs:
         id: 'modules'
         args: |
           --param=enable_modules=true
-      if: always()
+      if: ${{ steps.t1.outputs.passing_tests }} > 0
     - uses: libcxx/actions/test@v0
       with:
         id: 'cxx03'
@@ -38,6 +39,6 @@ jobs:
           '--param=std=c++03'
         projects: |
           libcxx
-      if: always()
+      if:
 
 
