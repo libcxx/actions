@@ -14066,12 +14066,13 @@ function getLLVMProjectInfo(name) {
             throw new Error(`Unknown LLVM project: '${name}'`);
     }
 }
-const all_llvm_projects = ['clang', 'clang-tools-extra', 'compiler-rt', 'debuginfo-tests', 'libc', 'libclc',
-    'libcxx', 'libcxxabi', 'libunwind', 'lld', 'lldb', 'mlir', 'openmp',
-    'parallel-libs', 'polly', 'pstl'];
-const default_llvm_projects = ['libcxx', 'libcxxabi'];
-function getProjectsList(default_projects = default_llvm_projects) {
-    let allowed_projects = all_llvm_projects.concat(['all']);
+function getProjectsList(default_projects = ['libcxx', 'libcxxabi']) {
+    const all_llvm_projects = ['clang', 'clang-tools-extra', 'compiler-rt', 'debuginfo-tests', 'libc', 'libclc',
+        'libcxx', 'libcxxabi', 'libunwind', 'lld', 'lldb', 'mlir', 'openmp',
+        'parallel-libs', 'polly', 'pstl'];
+    const default_llvm_projects = ['libcxx', 'libcxxabi'];
+    const allowed_projects = all_llvm_projects.concat(['all']);
+    console.log(`ALLOWED PROJECTS = ${allowed_projects}`);
     const projects = actions.getInputList('projects', {
         allowEmpty: false,
         allowedValues: allowed_projects,

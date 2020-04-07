@@ -74,6 +74,7 @@ function getProjectsList(default_projects: string[] = ['libcxx', 'libcxxabi']) :
   const default_llvm_projects : string[] = ['libcxx', 'libcxxabi']
 
   const allowed_projects : string[] = all_llvm_projects.concat(['all'])
+  console.log(`ALLOWED PROJECTS = ${allowed_projects}`)
 
   const projects : string[] = actions.getInputList('projects', {
       allowEmpty: false,
