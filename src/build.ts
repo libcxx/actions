@@ -66,7 +66,7 @@ function getLLVMProjectInfo(name : string) : LLVMProjectInfo {
 }
 
 const all_llvm_projects = ['clang', 'clang-tools-extra', 'compiler-rt', 'debuginfo-tests', 'libc', 'libclc', 'libcxx', 'libcxxabi', 'libunwind', 'lld', 'lldb', 'mlir', 'openmp', 'parallel-libs', 'polly', 'pstl']
-const default_llvm_projects = ['libcxx', 'libcxxabi', 'libunwind']
+const default_llvm_projects = ['libcxx', 'libcxxabi']
 
 function getProjectsList() : string[] {
   let allowed_projects = all_llvm_projects
@@ -414,40 +414,3 @@ export class LLVMAction {
     }
   }
 }
-
-/*
-async function test(config : LLVMProjectConfig, runtime : string, name, options) {
-  try {
-    let result = await core.group(`test-runtime-${runtime}`,async () => {
-      if (!name)
-        name = 'default';
-      const config_name = `test-${runtime}-${name}`;
-      const xunit_output = path.join(config.artifactsPath(), `${config_name}.xml`)
-
-
-      core.setOutput('results', xunit_output)
-
-
-      assert(llvm_lit !== undefined);
-      const test_path = path.join(config.getSo, runtime, 'test');
-      const options = [
-        '--no-progress-bar', '--show-xfail', '--show-unsupported', '-v', '--xunit-xml-output', xunit_output, test_path]
-      const user_options = core.getInput('options');
-      if (user_options) {
-        options.push(user_options);
-      }
-      try {
-        let result = await util.run(llvm_lit, options, {});
-      } catch (error) {
-        console.log(error);
-      }
-      return xunit_output;
-    });
-    return result;
-  } catch (error) {
-    core.setFailed(error);
-    throw error;
-  }
-}
-
-*/

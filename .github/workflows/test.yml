@@ -13,26 +13,29 @@ jobs:
       env:
         GITHUB_CONTEXT: ${{ toJson(github) }}
       run: echo "$GITHUB_CONTEXT"
-    - uses: libcxx/actions/build@v0
+    - uses: libcxx/actions/build@master
       with:
         repository: ${{ github.event.client_payload.repository }}
         ref: ${{ github.event.client_payload.ref }}
+        projects: |
+          libcxx
+          libcxxabi
         args: |
           -DCMAKE_C_COMPILER=clang
           -DCMAKE_CXX_COMPILER=clang++
-    - uses: libcxx/actions/test@v0
+    - uses: libcxx/actions/test@master
       id: 't1'
       with:
         id: 'libcxxabi'
         projects: |
           libcxxabi
-    - uses: libcxx/actions/test@v0
+    - uses: libcxx/actions/test@master
       with:
         id: 'modules'
         args: |
           --param=enable_modules=true
       if: ${{ steps.t1.outputs.passing_tests }} > 0
-    - uses: libcxx/actions/test@v0
+    - uses: libcxx/actions/test@master
       with:
         id: 'cxx03'
         args: |
