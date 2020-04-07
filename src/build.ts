@@ -72,7 +72,7 @@ const default_llvm_projects = ['libcxx', 'libcxxabi']
 
 function getProjectsList() : string[] {
   let allowed_projects : string[] = []
-  allowed_projects.concat(all_llvm_projects)
+  allowed_projects = allowed_projects.concat(all_llvm_projects)
   allowed_projects.push('all')
 
   const projects : string[] = actions.getInputList('projects', {

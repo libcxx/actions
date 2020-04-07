@@ -14072,7 +14072,7 @@ const all_llvm_projects = ['clang', 'clang-tools-extra', 'compiler-rt', 'debugin
 const default_llvm_projects = ['libcxx', 'libcxxabi'];
 function getProjectsList() {
     let allowed_projects = [];
-    allowed_projects.concat(all_llvm_projects);
+    allowed_projects = allowed_projects.concat(all_llvm_projects);
     allowed_projects.push('all');
     const projects = actions.getInputList('projects', {
         allowEmpty: false,
