@@ -54,6 +54,7 @@ export function getInputList(
   options?: ValidationOptions
 ): string[] {
   if (!options) options = {}
+
   const input : string[] = actions.getInput(key, {required: options.required}).trim().split('\n').map(x => x.trim()).filter(x => x !== '')
   console.log('INPUT = ')
   console.log(input)
@@ -66,7 +67,8 @@ export function getInputList(
   }
   const values: string[] = input
   if (options.allowedValues) {
-    for (const v of values) {
+    let v : string
+    for (v of values) {
       if (!options.allowedValues.includes(v)) {
         throw new Error(
           `Value '${v}' is not allowed. [${options.allowedValues.join(', ')}]`

@@ -3,7 +3,7 @@
 .PHONY : all
 all: clean
 	tsc
-	ncc build lib/index.js
+	ncc build -s lib/index.js
 
 
 
