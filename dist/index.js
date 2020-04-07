@@ -14192,8 +14192,10 @@ class LLVMProjectConfig {
         return args;
     }
     cleanupPaths() {
-        util.rmRF(this.outputPath());
-        util.rmRF(this.sourcePath());
+        return __awaiter(this, void 0, void 0, function* () {
+            yield util.rmRF(this.outputPath());
+            yield util.rmRF(this.sourcePath());
+        });
     }
     createPaths() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -14352,6 +14354,21 @@ class LLVMAction {
                     return 1;
                 }
                 return 0;
+            }
+            catch (error) {
+                console.error(error.message);
+                console.error(error.stack);
+                console.error(error);
+                core.setFailed(error.message);
+                throw error;
+            }
+        });
+    }
+    static runCleanup() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const config = LLVMProjectConfig.loadConfig();
+                yield config.cleanupPaths();
             }
             catch (error) {
                 console.error(error.message);
