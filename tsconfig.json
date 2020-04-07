@@ -8,10 +8,18 @@
         "declaration": true,
         "sourceMap": true,
         "lib": ["es6", "dom"],
-        "strict": true
-    },
+        "strict": true,
+        "baseUrl": ".",
+        "outDir": "lib/",
+        "rootDir": "."
+      },
+    "include": [
+        "src/*.ts"
+    ],
     "exclude": [
         "node_modules",
-        "**/*.test.ts"
+        "__test__/",
+        "BACK_actions",
+        "BAK_publish"
     ]
 }

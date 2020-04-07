@@ -1,9 +1,9 @@
-import * as actions from '@actions/core'
+import * as core from '@actions/core'
 import * as path from 'path'
 import * as fs from 'fs'
 import * as process from 'process'
-import * as core from '@libcxx/core'
 import {strict as assert} from 'assert'
+import * as util from './util'
 
 export interface LLVMProjectInfo {
   readonly name: string
@@ -69,7 +69,7 @@ function getProjectsList() : string[] {
   let allowed_projects = all_llvm_projects
   allowed_projects.push('all')
 
-  const projects : string[] = core.getInputList('projects', {
+  const projects : string[] = util.getInputList('projects', {
       allowEmpty: false,
       allowedValues: allowed_projects,
       default: default_llvm_projects,
@@ -94,15 +94,15 @@ export interface BuildActionInputs {
 
 export function getBuildActionInputsWithDefaults(): BuildActionInputs {
   const result: BuildActionInputs = {
-    destination: core.getInput('destination', {
+    destination: util.getInput('destination', {
       allowEmpty: false,
       default: process.cwd()
     }),
-    name: core.getInput('name', {default: 'debug'}),
-    repository: core.getInput('repository', {default: 'llvm/llvm-project'}),
-    ref: core.getInput('ref', {default: 'master'}),
+    name: util.getInput('name', {default: 'debug'}),
+    repository: util.getInput('repository', {default: 'llvm/llvm-project'}),
+    ref: util.getInput('ref', {default: 'master'}),
     projects: getProjectsList(),
-    args: core.getInputList('args', {
+    args: util.getInputList('args', {
       default: ['-DCMAKE_BUILD_TYPE=DEBUG']
     }),
   }
@@ -199,15 +199,15 @@ export class LLVMProjectConfig implements BuildActionInputs {
   }
 
   cleanupPaths(): void {
-    core.rmRF(this.outputPath())
-    core.rmRF(this.sourcePath())
+    util.rmRF(this.outputPath())
+    util.rmRF(this.sourcePath())
   }
 
   async createPaths(): Promise<void> {
     const paths = this.getWorkspacePaths()
     for (const p of paths) {
       if (!fs.existsSync(p)) {
-        core.mkdirP(p)
+        util.mkdirP(p)
       }
     }
   }
@@ -248,46 +248,46 @@ export class LLVMAction {
 
   async checkoutProjects(): Promise<string> {
     const config = this.config
-    return await actions.group(
+    return await core.group(
       'checkout',
       async (): Promise<string> => {
         const options = {cwd: config.sourcePath()}
-        await core.run('git', ['init'], options)
-        await core.run(
+        await util.run('git', ['init'], options)
+        await util.run(
           'git',
           ['remote', 'add', 'origin', config.getRepositoryURL()],
           options
         )
-        await core.run(
+        await util.run(
           'git',
           ['fetch', '--depth=1', 'origin', config.ref],
           options
         )
-        await core.run('git', ['reset', '--hard', 'FETCH_HEAD'], options)
-        const sha = await core.capture('git', ['rev-parse', 'HEAD'], options)
-        actions.saveState('sha', sha)
+        await util.run('git', ['reset', '--hard', 'FETCH_HEAD'], options)
+        const sha = await util.capture('git', ['rev-parse', 'HEAD'], options)
+        core.saveState('sha', sha)
         return sha
       }
     )
   }
 
   async setupWorkspace(): Promise<void> {
-    return await actions.group(
+    return await core.group(
       'configuration',
       async (): Promise<void> => {
         const config = this.config
         await config.createPaths()
         const config_file = config.saveConfig()
-        actions.setOutput('config_file', config_file)
-        actions.saveState('config_file', config_file)
+        core.setOutput('config_file', config_file)
+        core.saveState('config_file', config_file)
       }
     )
   }
 
   async configureProjects(): Promise<number> {
     const config = this.config
-    const exitCode = await actions.group('configure', async () => {
-      return await core.run('cmake', config.getCMakeArguments(), {
+    const exitCode = await core.group('configure', async () => {
+      return await util.run('cmake', config.getCMakeArguments(), {
         cwd: config.buildPath()
       })
     })
@@ -296,8 +296,8 @@ export class LLVMAction {
 
   async buildProjects(): Promise<number> {
     const config = this.config
-    const exitCode = await actions.group('building runtimes', async () => {
-      return await core.run('ninja -v', config.getBuildTargets(), {
+    const exitCode = await core.group('building runtimes', async () => {
+      return await util.run('ninja -v', config.getBuildTargets(), {
         cwd: config.buildPath()
       })
     })
@@ -306,8 +306,8 @@ export class LLVMAction {
 
   async installProjects(): Promise<number> {
     const config = this.config
-    const exitCode = await actions.group('installing runtimes', async () => {
-      return await core.run('ninja -v', config.getBuildTargets(), {
+    const exitCode = await core.group('installing runtimes', async () => {
+      return await util.run('ninja -v', config.getBuildTargets(), {
         cwd: config.buildPath()
       })
     })
@@ -326,7 +326,7 @@ export class LLVMAction {
       console.error(error.message)
       console.error(error.stack)
       console.error(error)
-      actions.setFailed(error.message)
+      core.setFailed(error.message)
       throw error
     }
   }
@@ -335,31 +335,31 @@ export class LLVMAction {
 /*
 async function test(config : LLVMProjectConfig, runtime : string, name, options) {
   try {
-    let result = await actions.group(`test-runtime-${runtime}`,async () => {
+    let result = await core.group(`test-runtime-${runtime}`,async () => {
       if (!name)
         name = 'default';
       const config_name = `test-${runtime}-${name}`;
       const xunit_output = path.join(config.artifactsPath(), `${config_name}.xml`)
 
       if (fs.existsSync(xunit_output)) {
-        actions.setFailed(`Duplicate test suite entry for ${config_name}`);
+        core.setFailed(`Duplicate test suite entry for ${config_name}`);
         return xunit_output;
       }
-      actions.setOutput('results', xunit_output)
+      core.setOutput('results', xunit_output)
       const llvm_lit = path.join(config.buildPath(), 'bin', 'llvm-lit');
-      let result = await core.run(llvm_lit, ['--version'], {}); // Breathing test
+      let result = await util.run(llvm_lit, ['--version'], {}); // Breathing test
       assert(result === 0);
 
       assert(llvm_lit !== undefined);
       const test_path = path.join(config.getSo, runtime, 'test');
       const options = [
         '--no-progress-bar', '--show-xfail', '--show-unsupported', '-v', '--xunit-xml-output', xunit_output, test_path]
-      const user_options = actions.getInput('options');
+      const user_options = core.getInput('options');
       if (user_options) {
         options.push(user_options);
       }
       try {
-        let result = await core.run(llvm_lit, options, {});
+        let result = await util.run(llvm_lit, options, {});
       } catch (error) {
         console.log(error);
       }
@@ -367,7 +367,7 @@ async function test(config : LLVMProjectConfig, runtime : string, name, options)
     });
     return result;
   } catch (error) {
-    actions.setFailed(error);
+    core.setFailed(error);
     throw error;
   }
 }

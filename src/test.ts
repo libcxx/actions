@@ -1,9 +1,10 @@
-import * as core from '@libcxx/core'
+
 import {strict as assert} from 'assert'
 import * as path from 'path'
 import * as fs from 'fs'
 import * as xmldom from 'xmldom'
-import * as util from 'util'
+import * as jsutil from 'util'
+import * as util from './util'
 
 export enum TestOutcome {
   Passed,
@@ -27,7 +28,7 @@ export interface TestResult {
 
 export interface TestRunResult {
   request: TestRunRequest
-  outcome: core.Outcome
+  outcome: util.Outcome
   tests: TestResult[]
   numSkipped: number
   numFailures: number
@@ -59,7 +60,7 @@ export class TestSuiteRunner {
   private actOnDocument(doc: XMLDocument): TestRunResult {
     const result: TestRunResult = {
       request: this.request,
-      outcome: core.Outcome.Success,
+      outcome: util.Outcome.Success,
       tests: <TestResult[]>[],
       numFailures: 0,
       numSkipped: 0
@@ -73,7 +74,7 @@ export class TestSuiteRunner {
       const numFailed = parseInt(<string>suite.getAttribute('failures'))
       const numSkipped = parseInt(<string>suite.getAttribute('skipped'))
       if (numFailed !== 0) {
-        result.outcome = core.Outcome.Failure
+        result.outcome = util.Outcome.Failure
       }
       result.numFailures += numFailed
       result.numSkipped += numSkipped
@@ -114,7 +115,7 @@ export class TestSuiteRunner {
       result.output = <string>skipped[0].getAttribute('message')
     } else {
 
-      console.log(util.inspect(testcase, false, 3))
+      console.log(jsutil.inspect(testcase, false, 3))
        throw new Error(`Unexpected  lack of children node`)
     }
     return result;

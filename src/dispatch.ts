@@ -1,6 +1,6 @@
-import * as actions from '@actions/core'
+import * as core from '@actions/core'
 import {Octokit} from '@octokit/rest'
-import * as my_actions from '@libcxx/actions'
+import * as actions from './actions'
 import {strict as assert} from 'assert'
 
 
@@ -28,13 +28,13 @@ export class ActionInputs implements ActionInputsI {
   }
 
   static async fromEnviroment(): Promise<ActionInputsI> {
-    const repository: string = actions.getInput('repository')
+    const repository: string = core.getInput('repository')
     const i = repository.indexOf('/')
     assert(i !== -1)
 
     let parsed: any
     try {
-      parsed = await JSON.parse(actions.getInput('client_payload'))
+      parsed = await JSON.parse(core.getInput('client_payload'))
     } catch (error) {
       error.message = `Bad JSON input: ${error.message}`
       throw error
@@ -42,9 +42,9 @@ export class ActionInputs implements ActionInputsI {
     return new ActionInputs({
       owner: repository.substr(0, i),
       repo: repository.substr(i + 1),
-      event_type: actions.getInput('event_type'),
+      event_type: core.getInput('event_type'),
       client_payload: parsed,
-      token: actions.getInput('token')
+      token: core.getInput('token')
     })
   }
 }
@@ -54,7 +54,7 @@ export async function runAction(
 ): Promise<any> {
   try {
     const inputs: ActionInputsI = await rawInputs
-    const octokit = my_actions.createGithubAPI(inputs.token)
+    const octokit = actions.createGithubAPI(inputs.token)
     const r = await octokit.repos.createDispatchEvent({
       repo: inputs.repo,
       owner: inputs.owner,
@@ -66,7 +66,7 @@ export async function runAction(
     throw new Error(`Failed to create dispatch event: Got status ${r.status}`)
   } catch (error) {
     console.log(error.stack)
-    actions.setFailed(error.message)
+    core.setFailed(error.message)
     throw error
   }
 }

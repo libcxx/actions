@@ -1,8 +1,5 @@
-import * as mtest from '../'
+import * as mtest from '../src/test'
 import * as path from 'path'
-import * as core from '@libcxx/core'
-import * as xml2js from 'xml2js'
-import * as convert from 'xml-js'
 import * as fs from 'fs'
 import * as util from 'util'
 

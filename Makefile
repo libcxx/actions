@@ -34,8 +34,21 @@ endef
 
 .PHONY : build
 build:
-	npm run build && npm run pack
-	$(foreach tool,$(dirs),$(call CMD_build,$(tool)))
+	npm run bootstrap
+	npm run build
+
+.PHONY : test
+test: build
+	npm run test
+
+.PHONY : retest
+retest:
+	npm run test
+
+.PHONY : package-actions
+package-actions: build
+	cd packages/build/ && ncc build lib/run-action.js
+
 
 
 .phony : clean
@@ -54,25 +67,6 @@ reinstall: distclean
 .phony : distclean
 distclean:
 	$(foreach tool,$(dirs),$(call CMD_distclean,$(tool)))
-
-
-
-
-.PHONY : commit
-push: build
-	git add -A :/
-	git commit -am 'dummy commit'
-	git push
-
-.PHONY : add-package
-add-package:
-	@echo "Which package?: "; \
-	read package; \
-	npm install $$package --save; \
-	npm install --prefix build/ $$package --save; \
-	npm install --prefix test/ $$package --save; \
-	npm install --prefix publish/ $$package --save; \
-	npm install --prefix dispatch/ $$package --save
 
 
 
