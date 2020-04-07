@@ -30,6 +30,7 @@ jobs:
         id: 'modules'
         args: |
           --param=enable_modules=true
+      if: always()
     - uses: libcxx/actions/test@v0
       with:
         id: 'cxx03'
@@ -37,5 +38,6 @@ jobs:
           '--param=std=c++03'
         projects: |
           libcxx
+      if: always()
 
 
