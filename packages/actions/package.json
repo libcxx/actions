@@ -1,7 +1,7 @@
 {
-  "name": "@libcxx/dispatch",
+  "name": "@libcxx/actions",
   "version": "1.0.0",
-  "description": "Create and Send a Repository Dispatch Event",
+  "description": "Github Actions for checkout out, configuring, and building LLVM Runtimes",
   "keywords": [
     "Github",
     "Actions",
@@ -10,8 +10,7 @@
   "author": "Eric Fiselier <eric@efcs.ca>",
   "homepage": "http://libcxx.llvm.org",
   "license": "Apache-2.0",
-  "main": "lib/dispatch.js",
-  "types": "lib/dispatch.d.ts",
+  "main": "lib/actions.js",
   "directories": {
     "lib": "lib",
     "test": "test"
@@ -25,24 +24,25 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/libcxx/actions.git",
-    "directory": "packages/dispatch"
+    "directory": "packages/actions"
   },
   "scripts": {
     "audit-moderate": "npm install && npm audit --audit-level=moderate",
-    "test": "echo \"Error: run tests from root\" && exit 1",
+    "test": "jest",
+    "build": "tsc",
+    "format": "prettier --write **/*.ts",
+    "format-check": "prettier --check **/*.ts",
     "tsc": "tsc"
   },
   "bugs": {
     "url": "https://github.com/libcxx/actions/issues"
   },
-  "devDependencies": {
-    "jest": "^25.1.0"
-  },
   "dependencies": {
     "@actions/core": "^1.2.3",
     "@octokit/rest": "^17.1.4",
-    "@libcxx/core": "^1.0.0",
-    "@libcxx/actions": "^1.0.0",
-    "assert": "^2.0.0"
+    "js-yaml": "^3.13.1"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^3.12.3"
   }
 }

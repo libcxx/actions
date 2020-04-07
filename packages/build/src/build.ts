@@ -3,77 +3,127 @@ import * as path from 'path'
 import * as fs from 'fs'
 import * as process from 'process'
 import * as core from '@libcxx/core'
+import {strict as assert} from 'assert'
 
-const all_runtimes = ['libcxx', 'libcxxabi', 'libunwind']
-
-export interface ActionInputsI {
-  name: string
-  repository: string
-  ref: string
-  path: string
-  runtimes: string[]
-  cc: string
-  cxx: string
-  cxxabi: string
-  sanitizer: string
-  cmake_args: string[]
-  getToken?: () => string
+export interface LLVMProjectInfo {
+  readonly name: string
+  readonly output_path: string
+  readonly build_targets: string[]
+  readonly install_targets: string[]
 }
 
-export function getActionInputsWithDefaults(): ActionInputsI {
-  const result: ActionInputsI = {
-    path: core.getInput('path', {
+
+function getLLVMProjectInfo(name : string) : LLVMProjectInfo {
+  switch (name) {
+    case 'llvm':
+      return {
+        name: 'llvm',
+        output_path: '.',
+        build_targets: ['include/llvm/all', 'lib/all'],
+        install_targets: ['install-llvm-headers', 'install-llvm-libraries']
+      }
+    case 'libc':
+    case 'libclc':
+    case 'libcxx':
+    case 'libcxxabi':
+    case 'libunwind':
+    case 'pstl':
+    case 'openmp':
+    case 'parallel-libs':
+    case 'compiler-rt':
+    case 'debuginfo-tests':
+      return {
+        name: name,
+        output_path: `projects/${name}/`,
+        build_targets: [`projects/${name}/all`],
+        install_targets: [`projects/${name}/install`]
+      }
+    case 'clang':
+    case 'lld':
+    case 'lldb':
+    case 'polly':
+    case 'mlir':
+      return {
+        name: name,
+        output_path:  `tools/${name}/`,
+        build_targets: [`tools/${name}/all`],
+        install_targets: [`tools/${name}/install`]
+
+      }
+    case 'clang-tools-extra':
+      return {
+        name: name,
+        output_path: 'tools/clang/tools/extra',
+        build_targets: ['tools/clang/tools/extra/all'],
+        install_targets: ['tools/clang/tools/extra/install']
+      }
+    default:
+      throw new Error(`Unknown LLVM project: '${name}'`)
+  }
+}
+
+const all_llvm_projects = ['clang', 'clang-tools-extra', 'compiler-rt', 'debuginfo-tests', 'libc', 'libclc', 'libcxx', 'libcxxabi', 'libunwind', 'lld', 'lldb', 'mlir', 'openmp', 'parallel-libs', 'polly', 'pstl']
+const default_llvm_projects = ['libcxx', 'libcxxabi', 'libunwind']
+
+function getProjectsList() : string[] {
+  let allowed_projects = all_llvm_projects
+  allowed_projects.push('all')
+
+  const projects : string[] = core.getInputList('projects', {
+      allowEmpty: false,
+      allowedValues: allowed_projects,
+      default: default_llvm_projects,
+    })
+  if (projects.includes('all')) {
+    if (projects.length != 1)
+      throw new Error('"all" must appear as the only project')
+    return all_llvm_projects
+  }
+
+  return projects
+}
+
+export interface BuildActionInputs {
+  name: string
+  projects: string[]
+  repository: string
+  ref: string
+  destination: string
+  args: string[]
+}
+
+export function getBuildActionInputsWithDefaults(): BuildActionInputs {
+  const result: BuildActionInputs = {
+    destination: core.getInput('destination', {
       allowEmpty: false,
       default: process.cwd()
     }),
     name: core.getInput('name', {default: 'debug'}),
     repository: core.getInput('repository', {default: 'llvm/llvm-project'}),
     ref: core.getInput('ref', {default: 'master'}),
-    runtimes: core.getInputList('runtimes', {
-      allowEmpty: false,
-      allowedValues: all_runtimes,
-      default: all_runtimes
-    }),
-    cc: core.getInput('cc', {default: 'clang'}),
-    cxx: core.getInput('cxx', {default: 'clang++'}),
-    sanitizer: core.getInput('sanitizer', {default: ''}),
-    cxxabi: core.getInput('cxxabi', {default: 'default'}),
-    cmake_args: core.getInputList('cmake_args', {
+    projects: getProjectsList(),
+    args: core.getInputList('args', {
       default: ['-DCMAKE_BUILD_TYPE=DEBUG']
     }),
-    getToken: () => {
-      return core.getInput('token', {required: true})
-    }
   }
   return result
 }
 
-export class RuntimeConfig implements ActionInputsI {
+export class LLVMProjectConfig implements BuildActionInputs {
   name: string
   repository: string
   ref: string
-  path: string
-  runtimes: string[]
-  cc: string
-  cxx: string
-  cxxabi: string
-  sanitizer: string
-  cmake_args: string[]
-  getToken: () => string
+  destination: string
+  projects: string[]
+  args: string[]
 
-  constructor(i: ActionInputsI) {
+  constructor(i: BuildActionInputs) {
     this.name = i.name
     this.repository = i.repository
     this.ref = i.ref
-    this.path = path.resolve(i.path)
-    this.runtimes = i.runtimes
-    this.cc = i.cc
-    this.cxx = i.cxx
-    this.cxxabi = i.cxxabi
-    this.sanitizer = i.sanitizer
-    this.cmake_args = i.cmake_args
-    this.getToken =
-      i.getToken || (getActionInputsWithDefaults().getToken as () => string)
+    this.destination = path.resolve(i.destination)
+    this.projects = i.projects
+    this.args = i.args
   }
 
   getRepositoryOwner(): string {
@@ -87,23 +137,27 @@ export class RuntimeConfig implements ActionInputsI {
   }
 
   getBuildTargets(): string[] {
-    return this.runtimes.map(rt => {
-      return `projects/${rt}/all`
-    })
+    let targets : string[] = []
+    for (const p of this.projects) {
+      targets = targets.concat(getLLVMProjectInfo(p).build_targets)
+    }
+    return targets
   }
   getInstallTargets(): string[] {
-    return this.runtimes.map(rt => {
-      return `projects/${rt}/install`
-    })
+    let targets : string[] = []
+    for (const p of this.projects) {
+      targets = targets.concat(getLLVMProjectInfo(p).install_targets)
+    }
+    return targets
   }
   getTestTargets(): string[] {
-    return this.runtimes.map(rt => {
-      return path.join(this.sourcePath(), rt, 'test')
+    return this.projects.map(proj => {
+      return path.join(this.sourcePath(), proj, 'test')
     })
   }
 
   workspacePath(): string {
-    return this.path
+    return this.destination
   }
   outputPath(): string {
     return path.join(this.workspacePath(), 'output')
@@ -135,16 +189,11 @@ export class RuntimeConfig implements ActionInputsI {
     const args = [
       '-GNinja',
       `-DCMAKE_INSTALL_PREFIX=${this.installPath()}`,
-      `-DCMAKE_C_COMPILER=${this.cc}`,
-      `-DCMAKE_CXX_COMPILER=${this.cxx}`,
-      `-DLLVM_ENABLE_PROJECTS=${this.runtimes.join(';')}`,
-      `-DLIBCXX_CXX_ABI=${this.cxxabi}`
+      `-DLLVM_ENABLE_PROJECTS=${this.projects.join(';')}`,
     ]
-    if (this.cmake_args) {
-      for (const arg of this.cmake_args) args.push(arg)
+    if (this.args) {
+      for (const arg of this.args) args.push(arg)
     }
-    if (this.sanitizer) args.push(`"-DLLVM_ENABLE_SANITIZER=${this.sanitizer}"`)
-
     args.push(path.join(this.sourcePath(), 'llvm'))
     return args
   }
@@ -164,14 +213,13 @@ export class RuntimeConfig implements ActionInputsI {
   }
 
   saveConfig(): string {
-    const this_base = this as ActionInputsI
+    const this_base = this as BuildActionInputs
     const config = {
       ...this_base
     }
-    delete config.getToken
     const output: string = path.join(
       this.workspacePath(),
-      RuntimeConfig.configFileName()
+      LLVMProjectConfig.configFileName()
     )
     fs.writeFileSync(output, JSON.stringify(config))
     return output
@@ -181,24 +229,24 @@ export class RuntimeConfig implements ActionInputsI {
     return 'runtime-config.json'
   }
 
-  static loadConfig(file?: string): RuntimeConfig {
+  static loadConfig(file?: string): LLVMProjectConfig {
     if (!file) {
       file = path.join(process.cwd(), this.configFileName())
     }
     const config_str: Buffer = fs.readFileSync(file)
-    const result = JSON.parse(config_str.toString()) as ActionInputsI
-    return new RuntimeConfig(result)
+    const result = JSON.parse(config_str.toString()) as BuildActionInputs
+    return new LLVMProjectConfig(result)
   }
 }
 
-export class GenericRuntimeAction {
-  config: RuntimeConfig
+export class LLVMAction {
+  config: LLVMProjectConfig
 
-  constructor(inputs: ActionInputsI) {
-    this.config = new RuntimeConfig(inputs)
+  constructor(inputs: BuildActionInputs) {
+    this.config = new LLVMProjectConfig(inputs)
   }
 
-  async checkoutRuntimes(): Promise<string> {
+  async checkoutProjects(): Promise<string> {
     const config = this.config
     return await actions.group(
       'checkout',
@@ -223,7 +271,7 @@ export class GenericRuntimeAction {
     )
   }
 
-  async setupRuntimeWorkspace(): Promise<void> {
+  async setupWorkspace(): Promise<void> {
     return await actions.group(
       'configuration',
       async (): Promise<void> => {
@@ -236,7 +284,7 @@ export class GenericRuntimeAction {
     )
   }
 
-  async configureRuntimes(): Promise<number> {
+  async configureProjects(): Promise<number> {
     const config = this.config
     const exitCode = await actions.group('configure', async () => {
       return await core.run('cmake', config.getCMakeArguments(), {
@@ -246,7 +294,7 @@ export class GenericRuntimeAction {
     return exitCode
   }
 
-  async buildRuntimes(): Promise<number> {
+  async buildProjects(): Promise<number> {
     const config = this.config
     const exitCode = await actions.group('building runtimes', async () => {
       return await core.run('ninja -v', config.getBuildTargets(), {
@@ -256,7 +304,7 @@ export class GenericRuntimeAction {
     return exitCode
   }
 
-  async installRuntimes(): Promise<number> {
+  async installProjects(): Promise<number> {
     const config = this.config
     const exitCode = await actions.group('installing runtimes', async () => {
       return await core.run('ninja -v', config.getBuildTargets(), {
@@ -268,11 +316,11 @@ export class GenericRuntimeAction {
 
   static async runAll(): Promise<number> {
     try {
-      const config = new GenericRuntimeAction(getActionInputsWithDefaults())
-      await config.setupRuntimeWorkspace()
-      await config.checkoutRuntimes()
-      await config.configureRuntimes()
-      await config.buildRuntimes()
+      const config = new LLVMAction(getBuildActionInputsWithDefaults())
+      await config.setupWorkspace()
+      await config.checkoutProjects()
+      await config.configureProjects()
+      await config.buildProjects()
       return 0
     } catch (error) {
       console.error(error.message)
@@ -285,25 +333,25 @@ export class GenericRuntimeAction {
 }
 
 /*
-async function testRuntime(config : RuntimeConfig, runtime : string, name, options) {
+async function test(config : LLVMProjectConfig, runtime : string, name, options) {
   try {
     let result = await actions.group(`test-runtime-${runtime}`,async () => {
       if (!name)
         name = 'default';
       const config_name = `test-${runtime}-${name}`;
-      const xunit_output = path.join(config.artifacts, `${config_name}.xml`)
+      const xunit_output = path.join(config.artifactsPath(), `${config_name}.xml`)
 
       if (fs.existsSync(xunit_output)) {
         actions.setFailed(`Duplicate test suite entry for ${config_name}`);
         return xunit_output;
       }
       actions.setOutput('results', xunit_output)
-      const llvm_lit = path.join(config.build, 'bin', 'llvm-lit');
+      const llvm_lit = path.join(config.buildPath(), 'bin', 'llvm-lit');
       let result = await core.run(llvm_lit, ['--version'], {}); // Breathing test
       assert(result === 0);
 
       assert(llvm_lit !== undefined);
-      const test_path = path.join(config.source, runtime, 'test');
+      const test_path = path.join(config.getSo, runtime, 'test');
       const options = [
         '--no-progress-bar', '--show-xfail', '--show-unsupported', '-v', '--xunit-xml-output', xunit_output, test_path]
       const user_options = actions.getInput('options');
@@ -323,4 +371,5 @@ async function testRuntime(config : RuntimeConfig, runtime : string, name, optio
     throw error;
   }
 }
+
 */

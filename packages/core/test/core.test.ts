@@ -1,4 +1,4 @@
-import * as core from '../'
+import * as core from '../src/core'
 import * as fs from 'fs'
 
 describe('@libcxx/core', () => {

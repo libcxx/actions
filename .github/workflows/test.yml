@@ -9,17 +9,10 @@ jobs:
     - uses: actions/checkout@master
       with:
         token: ${{ secrets.personal_token }}
+        path: all-actions/
     - name: "move actions"
       run: |
-        git config --list --show-origin 1>&2
-        mkdir actions/
-        ls | grep -v actions | grep -v gitconfig | xargs mv -t actions/
-    - uses: ./actions/build
-    - uses: ./actions/test
-      with:
-        runtimes: 'libcxxabi libunwind'
-    - uses: ./actions/publish
-      with:
-        publisher_key: ${{ secrets.publisher_key }}
+        mv all-actions/actions/ actions/
+    - with: ./actions/build
 
 

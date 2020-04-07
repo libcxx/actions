@@ -141,9 +141,9 @@ export function getInputList(
   options?: ValidationOptions
 ): string[] {
   if (!options) options = {}
-  const raw_input = actions.getInput(key, {required: options.required})
+  const raw_input = actions.getInput(key, {required: options.required}).trim()
   if (raw_input === null || raw_input === '') {
-    if (!options.required && options.default !== null)
+    if ((!options.required || !options.allowEmpty) && options.default !== null)
       return <string[]>options.default
     if (options.required && !options.allowEmpty)
       throw new Error(`Input '${key}' was required but not found`)
@@ -159,7 +159,7 @@ export function getInputList(
       }
     }
   }
-  if (!options.allowEmpty && values.length === 0) {
+  if (!options.allowEmpty && values.length == 0) {
     throw new Error(`Empty lists are not allowed for input ${key}`)
   }
   return values

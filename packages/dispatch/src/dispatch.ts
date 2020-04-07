@@ -1,27 +1,8 @@
 import * as actions from '@actions/core'
 import {Octokit} from '@octokit/rest'
+import * as my_actions from '@libcxx/actions'
 import {strict as assert} from 'assert'
 
-function createAPI(token: string): Octokit {
-  const octokit = new Octokit({
-    auth: token,
-    userAgent: 'ericwf',
-    previews: ['everest-preview'],
-    baseUrl: 'https://api.github.com',
-    log: {
-      debug: actions.info,
-      info: actions.info,
-      warn: actions.warning,
-      error: actions.error
-    },
-    request: {
-      agent: undefined,
-      fetch: undefined,
-      timeout: 0
-    }
-  })
-  return octokit
-}
 
 export interface ActionInputsI {
   repo: string
@@ -73,7 +54,7 @@ export async function runAction(
 ): Promise<any> {
   try {
     const inputs: ActionInputsI = await rawInputs
-    const octokit = createAPI(inputs.token)
+    const octokit = my_actions.createGithubAPI(inputs.token)
     const r = await octokit.repos.createDispatchEvent({
       repo: inputs.repo,
       owner: inputs.owner,
