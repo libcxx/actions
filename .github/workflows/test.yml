@@ -6,13 +6,18 @@ jobs:
   debug:
     runs-on: [libcxx-builder]
     steps:
+    - name: "Show Workspace"
+      run: |
+        ls -lart
+        pwd
+        ls
     - uses: actions/checkout@master
       with:
         token: ${{ secrets.personal_token }}
         path: all-actions/
     - name: "move actions"
       run: |
-        mv all-actions/actions/ actions/
-    - uses: ./actions/build
+        mv all-actions/actions/ mactions/
+    - uses: ./mactions/build
 
 
