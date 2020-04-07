@@ -13,6 +13,6 @@ jobs:
     - name: "move actions"
       run: |
         mv all-actions/actions/ actions/
-    - with: ./actions/build
+    - uses: ./actions/build
 
 
