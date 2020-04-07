@@ -1,6 +1,7 @@
 name: Build Runtimes
 
-on: push
+on: repository_dispatch
+  types: [build_request]
 
 jobs:
   debug:

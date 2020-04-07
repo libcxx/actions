@@ -1,0 +1,22 @@
+name: Build Runtimes
+
+on: push
+
+jobs:
+  debug:
+    runs-on: [libcxx-builder]
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ./dispatch/
+      with:
+        event_type: build_request
+        repository: libcxx/actions
+        token: ${{ secrets.personal_token }}
+        client_payload: |
+          {
+            "repository": "llvm/llvm-project",
+            "ref": "master"
+          }
+
+
+
