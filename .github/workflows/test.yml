@@ -10,9 +10,9 @@ jobs:
     runs-on: [libcxx-builder]
     steps:
     - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
+      env:
+        GITHUB_CONTEXT: ${{ toJson(github) }}
+      run: echo "$GITHUB_CONTEXT"
     - uses: libcxx/actions/build@v0
       with:
         repository: ${{ github.event.client_payload.repository }}
