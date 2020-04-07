@@ -11,13 +11,7 @@ jobs:
         ls -lart
         pwd
         ls
-    - uses: actions/checkout@master
-      with:
-        token: ${{ secrets.personal_token }}
-        path: all-actions/
-    - name: "move actions"
-      run: |
-        mv all-actions/actions/ mactions/
-    - uses: ./mactions/build
+    - uses: actions/checkout@v2
+    - uses: ./all-actions/build
 
 
