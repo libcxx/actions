@@ -16,5 +16,5 @@ inputs:
     required: True
 runs:
   using: 'node12'
-  main: 'dist/index.js'
+  main: './action.js'
 
