@@ -9,10 +9,11 @@
         "sourceMap": true,
         "lib": ["es6", "dom"],
         "strict": true,
-        "baseUrl": "./src/",
-        "outDir": "./lib/"
-      },
-    "include": ["build/action.ts", "dispatch/action.ts", "src/*.ts"],
+        "baseUrl": "./",
+        "outDir": "./lib/",
+        "rootDir": "./src"
+    },
+    "include": ["./src/*.ts"],
     "exclude": [
         "node_modules",
         "__test__/**",

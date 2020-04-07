@@ -34,5 +34,5 @@ outputs:
     description: 'The git SHA of the specified ref'
 runs:
   using: 'node12'
-  main: '../dist/build/index.js'
+  main: './action.js'
 
