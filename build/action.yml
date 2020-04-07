@@ -37,4 +37,5 @@ outputs:
 runs:
   using: 'node12'
   main: './action.js'
+  post: './cleanup.js'
 

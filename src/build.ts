@@ -216,9 +216,9 @@ export class LLVMProjectConfig implements BuildActionInputs {
     return args
   }
 
-  cleanupPaths(): void {
-    util.rmRF(this.outputPath())
-    util.rmRF(this.sourcePath())
+  async cleanupPaths(): Promise<void> {
+    await util.rmRF(this.outputPath())
+    await util.rmRF(this.sourcePath())
   }
 
   async createPaths(): Promise<void> {
@@ -392,6 +392,19 @@ export class LLVMAction {
         return 1
       }
       return 0
+    } catch (error) {
+      console.error(error.message)
+      console.error(error.stack)
+      console.error(error)
+      core.setFailed(error.message)
+      throw error
+    }
+  }
+
+  static async runCleanup(): Promise<void> {
+    try {
+      const config = LLVMProjectConfig.loadConfig()
+      await config.cleanupPaths()
     } catch (error) {
       console.error(error.message)
       console.error(error.stack)
