@@ -12,6 +12,8 @@ jobs:
         pwd
         ls
     - uses: actions/checkout@v2
+      with:
+        path: all-actions
     - uses: ./all-actions/build
 
 
