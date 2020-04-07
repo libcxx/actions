@@ -1,7 +1,8 @@
 name: Build Runtimes
 
 on: repository_dispatch
-  types: [build_request]
+    types: [build_request]
+
 
 jobs:
   debug:
