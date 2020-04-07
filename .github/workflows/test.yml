@@ -9,30 +9,28 @@ jobs:
   debug:
     runs-on: [libcxx-builder]
     steps:
-    - name: "Show Workspace"
-      run: |
-        ls -lart
-        pwd
-        ls
-    - uses: actions/checkout@v2
+    - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+    - uses: libcxx/actions/build@v0
       with:
-        path: all-actions
-    - uses: ./all-actions/build
-      with:
+        repository: ${{ github.event.client_payload.repository }}
+        ref: ${{ github.event.client_payload.ref }}
         args: |
           -DCMAKE_C_COMPILER=clang
           -DCMAKE_CXX_COMPILER=clang++
-    - uses: ./all-actions/test
+    - uses: libcxx/actions/test@v0
       with:
         id: 'libcxxabi'
         projects: |
           libcxxabi
-    - uses: ./all-actions/test
+    - uses: libcxx/actions/test@v0
       with:
         id: 'modules'
         args: |
           --param=enable_modules=true
-    - uses: ./all-actions/test
+    - uses: libcxx/actions/test@v0
       with:
         id: 'cxx03'
         args: |
