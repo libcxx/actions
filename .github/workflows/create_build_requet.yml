@@ -13,8 +13,8 @@ jobs:
         token: ${{ secrets.personal_token }}
         client_payload: |
           {
-            "repository": "llvm/llvm-project",
-            "ref": "master"
+            "repository": "efcs/llvm-project",
+            "ref": "broken-branch"
           }
 
 
