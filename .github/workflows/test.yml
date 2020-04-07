@@ -18,5 +18,26 @@ jobs:
       with:
         path: all-actions
     - uses: ./all-actions/build
+      with:
+        args: |
+          -DCMAKE_C_COMPILER=clang
+          -DCMAKE_CXX_COMPILER=clang++
+    - uses: ./all-actions/test
+      with:
+        id: 'libcxxabi'
+        projects: |
+          libcxxabi
+    - uses: ./all-actions/test
+      with:
+        id: 'modules'
+        args: |
+          --param=enable_modules=true
+    - uses: ./all-actions/test
+      with:
+        id: 'cxx03'
+        args: |
+          '--param=std=c++03'
+        projects: |
+          libcxx
 
 

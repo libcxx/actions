@@ -117,7 +117,7 @@ export function getTestActionInputsWithDefaults(config: LLVMProjectConfig) : Tes
   const result : TestRunRequest = {
     id: actions.getInput('id', {required: true}),
     projects: actions.getInputList('projects', {required: false, allowEmpty: false, default: config.projects}),
-    options: actions.getInputList('options', {required: false, allowEmpty: true, default: []}),
+    options: actions.getInputList('args', {required: false, allowEmpty: true, default: []}),
     xunit_path: ''
   }
   result.xunit_path = path.join(config.artifactsPath(), `testsuite-run-${result.id}.xml`)
