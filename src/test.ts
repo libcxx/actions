@@ -1,38 +1,12 @@
-
 import {strict as assert} from 'assert'
+import * as core from '@actions/core'
 import * as path from 'path'
 import * as fs from 'fs'
 import * as xmldom from 'xmldom'
 import * as jsutil from 'util'
-import * as util from './util'
 
-export enum TestOutcome {
-  Passed,
-  Failed,
-  Skipped
-}
+import {Outcome, TestOutcome, TestResult, TestRunRequest, TestRunResult} from './actions'
 
-export interface TestRunRequest {
-  id: string
-  runtimes: string[]
-  test_options: string[]
-  xunit_path: string
-}
-
-export interface TestResult {
-  name: string
-  suite: string
-  result: TestOutcome
-  output: string
-}
-
-export interface TestRunResult {
-  request: TestRunRequest
-  outcome: util.Outcome
-  tests: TestResult[]
-  numSkipped: number
-  numFailures: number
-}
 
 function correctTestNames(
   test_case: Element, testsuite: Element
@@ -50,7 +24,7 @@ function correctTestNames(
   return {testsuite_name, testcase_name}
 }
 
-export class TestSuiteRunner {
+export class TestResultReader {
   private request: TestRunRequest
 
   constructor(request: TestRunRequest) {
@@ -60,7 +34,7 @@ export class TestSuiteRunner {
   private actOnDocument(doc: XMLDocument): TestRunResult {
     const result: TestRunResult = {
       request: this.request,
-      outcome: util.Outcome.Success,
+      outcome: Outcome.Success,
       tests: <TestResult[]>[],
       numFailures: 0,
       numSkipped: 0
@@ -74,7 +48,7 @@ export class TestSuiteRunner {
       const numFailed = parseInt(<string>suite.getAttribute('failures'))
       const numSkipped = parseInt(<string>suite.getAttribute('skipped'))
       if (numFailed !== 0) {
-        result.outcome = util.Outcome.Failure
+        result.outcome = Outcome.Failure
       }
       result.numFailures += numFailed
       result.numSkipped += numSkipped
@@ -141,5 +115,13 @@ export class TestSuiteRunner {
     const parser = new xmldom.DOMParser()
     const doc : XMLDocument = parser.parseFromString(xml_string, 'application/xml')
     return this.actOnDocument(doc)
+  }
+
+  async annotateFailures(results: TestRunResult) : Promise<void> {
+    for (let res of results.tests) {
+      if (res.result != TestOutcome.Failed)
+        continue
+      await core.error(`TEST '${res.suite} :: ${res.name} Failed!\n${res.output}`)
+    }
   }
 }

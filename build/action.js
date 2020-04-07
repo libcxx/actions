@@ -1,2 +1,2 @@
 const libcxx = require('../dist/index')
-libcxx.build.LLVMAction.runAll()
+libcxx.build.LLVMAction.runBuild()

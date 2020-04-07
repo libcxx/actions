@@ -3,7 +3,10 @@ import * as path from 'path'
 import * as fs from 'fs'
 import * as process from 'process'
 import {strict as assert} from 'assert'
+import * as actions from './actions'
 import * as util from './util'
+import {TestResultReader} from './test'
+import {Outcome, TestOutcome, TestResult, TestRunRequest, TestRunResult } from './actions'
 
 export interface LLVMProjectInfo {
   readonly name: string
@@ -69,7 +72,7 @@ function getProjectsList() : string[] {
   let allowed_projects = all_llvm_projects
   allowed_projects.push('all')
 
-  const projects : string[] = util.getInputList('projects', {
+  const projects : string[] = actions.getInputList('projects', {
       allowEmpty: false,
       allowedValues: allowed_projects,
       default: default_llvm_projects,
@@ -92,20 +95,32 @@ export interface BuildActionInputs {
   args: string[]
 }
 
+
 export function getBuildActionInputsWithDefaults(): BuildActionInputs {
   const result: BuildActionInputs = {
-    destination: util.getInput('destination', {
+    destination: actions.getInput('destination', {
       allowEmpty: false,
       default: process.cwd()
     }),
-    name: util.getInput('name', {default: 'debug'}),
-    repository: util.getInput('repository', {default: 'llvm/llvm-project'}),
-    ref: util.getInput('ref', {default: 'master'}),
+    name: actions.getInput('name', {default: 'debug'}),
+    repository: actions.getInput('repository', {default: 'llvm/llvm-project'}),
+    ref: actions.getInput('ref', {default: 'master'}),
     projects: getProjectsList(),
-    args: util.getInputList('args', {
+    args: actions.getInputList('args', {
       default: ['-DCMAKE_BUILD_TYPE=DEBUG']
     }),
   }
+  return result
+}
+
+export function getTestActionInputsWithDefaults(config: LLVMProjectConfig) : TestRunRequest {
+  const result : TestRunRequest = {
+    id: actions.getInput('id', {required: true}),
+    projects: actions.getInputList('projects', {required: false, allowEmpty: false, default: config.projects}),
+    options: actions.getInputList('options', {required: false, allowEmpty: true, default: []}),
+    xunit_path: ''
+  }
+  result.xunit_path = path.join(config.artifactsPath(), `testsuite-run-${result.id}.xml`)
   return result
 }
 
@@ -150,8 +165,11 @@ export class LLVMProjectConfig implements BuildActionInputs {
     }
     return targets
   }
-  getTestTargets(): string[] {
-    return this.projects.map(proj => {
+  getTestsuitePaths(test_run?: TestRunRequest): string[] {
+    let projects = this.projects
+    if (test_run && test_run.projects.length != 0)
+      projects = test_run.projects
+    return projects.map(proj => {
       return path.join(this.sourcePath(), proj, 'test')
     })
   }
@@ -314,13 +332,60 @@ export class LLVMAction {
     return exitCode
   }
 
-  static async runAll(): Promise<number> {
+  async testProjects(request : TestRunRequest) : Promise<TestRunResult> {
+    const config = this.config
+    if (request.projects.length == 0)
+      request.projects = config.projects
+    let r = await core.group('testing projects', async () => {
+        if (fs.existsSync(request.xunit_path)) {
+          throw new Error(`Duplicate test suite entry for ${request.xunit_path}`)
+        }
+        const llvm_lit = path.join(config.buildPath(), 'bin', 'llvm-lit');
+        let exitCode = await util.run(llvm_lit, ['--version'], {}); // Breathing test
+        if (exitCode != 0) {
+          throw new Error("llvm_lit invocation failed")
+        }
+        let options = [
+        '--no-progress-bar', '--show-xfail', '--show-unsupported', '-v', '--xunit-xml-output', request.xunit_path]
+        options = options.concat(request.options)
+        options = options.concat(config.getTestsuitePaths(request))
+
+        exitCode = await util.run(llvm_lit, options, {ignoreReturnCode: true})
+        const reader  = new TestResultReader(request)
+        const results : TestRunResult = reader.readTestRunResults()
+        await reader.annotateFailures(results)
+        core.setOutput('results', request.xunit_path)
+        core.setOutput('failing_tests', `${results.numFailures}` )
+        return results
+    });
+    return r
+  }
+
+  static async runBuild(): Promise<number> {
     try {
       const config = new LLVMAction(getBuildActionInputsWithDefaults())
       await config.setupWorkspace()
       await config.checkoutProjects()
       await config.configureProjects()
       await config.buildProjects()
+      return 0
+    } catch (error) {
+      console.error(error.message)
+      console.error(error.stack)
+      console.error(error)
+      core.setFailed(error.message)
+      throw error
+    }
+  }
+
+  static async runTests(): Promise<number> {
+    try {
+      const act = new LLVMAction(LLVMProjectConfig.loadConfig())
+      const result : TestRunResult = await act.testProjects(getTestActionInputsWithDefaults(act.config))
+      if (result.numFailures != 0) {
+        core.setFailed(`Test run for ${result.request.id} has ${result.numFailures} failing tests!`)
+        return 1
+      }
       return 0
     } catch (error) {
       console.error(error.message)
@@ -341,14 +406,9 @@ async function test(config : LLVMProjectConfig, runtime : string, name, options)
       const config_name = `test-${runtime}-${name}`;
       const xunit_output = path.join(config.artifactsPath(), `${config_name}.xml`)
 
-      if (fs.existsSync(xunit_output)) {
-        core.setFailed(`Duplicate test suite entry for ${config_name}`);
-        return xunit_output;
-      }
+
       core.setOutput('results', xunit_output)
-      const llvm_lit = path.join(config.buildPath(), 'bin', 'llvm-lit');
-      let result = await util.run(llvm_lit, ['--version'], {}); // Breathing test
-      assert(result === 0);
+
 
       assert(llvm_lit !== undefined);
       const test_path = path.join(config.getSo, runtime, 'test');
