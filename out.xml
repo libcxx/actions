@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites time="0.45">
+<testsuite name="llvm-libc++-shared-cfg-in" tests="3" failures="2" skipped="0">
+<testcase classname="llvm-libc++-shared-cfg-in.std/strings/string_classes" name="typedefs.compile.pass.cpp" time="0.25">
+  <failure><![CDATA[Exit Code: 1
+
+Command Output (stdout):
+--
+# COMPILED WITH
+/usr/local/bin/clang++ /home/eric/llvm-project/libcxx/test/std/strings/string.classes/typedefs.compile.pass.cpp -pthread --target=x86_64-unknown-linux-gnu -nostdinc++ -I /home/eric/llvm-project/build/libcxx/include/c++/v1 -I /home/eric/llvm-project/build/libcxx/include/c++/v1 -I /home/eric/llvm-project/libcxx/test/support -std=c++26 -Werror -Wall -Wctad-maybe-unsupported -Wextra -Wshadow -Wundef -Wunused-template -Wno-unused-command-line-argument -Wno-attributes -Wno-pessimizing-move -Wno-noexcept-type -Wno-atomic-alignment -Wno-reserved-module-identifier -Wdeprecated-copy -Wdeprecated-copy-dtor -Wno-user-defined-literals -Wno-tautological-compare -Wsign-compare -Wunused-variable -Wunused-parameter -Wunreachable-code -Wno-unused-local-typedef -Wno-local-type-template-args -Wno-c++11-extensions -Wno-unknown-pragmas -Wno-pass-failed -Wno-mismatched-new-delete -Wno-redundant-move -Wno-self-move -D_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER -D_LIBCPP_ENABLE_EXPERIMENTAL -D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_NONE -Werror=thread-safety -Wuser-defined-warnings  -fsyntax-only
+# executed command: /usr/local/bin/clang++ /home/eric/llvm-project/libcxx/test/std/strings/string.classes/typedefs.compile.pass.cpp -pthread --target=x86_64-unknown-linux-gnu -nostdinc++ -I /home/eric/llvm-project/build/libcxx/include/c++/v1 -I /home/eric/llvm-project/build/libcxx/include/c++/v1 -I /home/eric/llvm-project/libcxx/test/support -std=c++26 -Werror -Wall -Wctad-maybe-unsupported -Wextra -Wshadow -Wundef -Wunused-template -Wno-unused-command-line-argument -Wno-attributes -Wno-pessimizing-move -Wno-noexcept-type -Wno-atomic-alignment -Wno-reserved-module-identifier -Wdeprecated-copy -Wdeprecated-copy-dtor -Wno-user-defined-literals -Wno-tautological-compare -Wsign-compare -Wunused-variable -Wunused-parameter -Wunreachable-code -Wno-unused-local-typedef -Wno-local-type-template-args -Wno-c++11-extensions -Wno-unknown-pragmas -Wno-pass-failed -Wno-mismatched-new-delete -Wno-redundant-move -Wno-self-move -D_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER -D_LIBCPP_ENABLE_EXPERIMENTAL -D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_NONE -Werror=thread-safety -Wuser-defined-warnings -fsyntax-only
+# .---command stderr------------
+# | /home/eric/llvm-project/libcxx/test/std/strings/string.classes/typedefs.compile.pass.cpp:25:16: error: static assertion failed due to requirement 'std::is_same<std::wstring, std::string>::value': 
+# |    25 | static_assert((std::is_same<std::wstring, std::basic_string<char> >::value), "");
+# |       |                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# | 1 error generated.
+# `-----------------------------
+# error: command failed with exit status: 1
+
+--
+]]></failure>
+</testcase>
+<testcase classname="llvm-libc++-shared-cfg-in.std/strings/strings_erasure" name="erase.pass.cpp" time="0.44">
+  <failure><![CDATA[Exit Code: 250
+
+Command Output (stdout):
+--
+# COMPILED WITH
+/usr/local/bin/clang++ /home/eric/llvm-project/libcxx/test/std/strings/strings.erasure/erase.pass.cpp -pthread --target=x86_64-unknown-linux-gnu -nostdinc++ -I /home/eric/llvm-project/build/libcxx/include/c++/v1 -I /home/eric/llvm-project/build/libcxx/include/c++/v1 -I /home/eric/llvm-project/libcxx/test/support -std=c++26 -Werror -Wall -Wctad-maybe-unsupported -Wextra -Wshadow -Wundef -Wunused-template -Wno-unused-command-line-argument -Wno-attributes -Wno-pessimizing-move -Wno-noexcept-type -Wno-atomic-alignment -Wno-reserved-module-identifier -Wdeprecated-copy -Wdeprecated-copy-dtor -Wno-user-defined-literals -Wno-tautological-compare -Wsign-compare -Wunused-variable -Wunused-parameter -Wunreachable-code -Wno-unused-local-typedef -Wno-local-type-template-args -Wno-c++11-extensions -Wno-unknown-pragmas -Wno-pass-failed -Wno-mismatched-new-delete -Wno-redundant-move -Wno-self-move -D_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER -D_LIBCPP_ENABLE_EXPERIMENTAL -D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_NONE -Werror=thread-safety -Wuser-defined-warnings  -lc++experimental -nostdlib++ -L /home/eric/llvm-project/build/libcxx/lib -Wl,-rpath,/home/eric/llvm-project/build/libcxx/lib -lc++ -o /home/eric/llvm-project/build/libcxx/test/std/strings/strings.erasure/Output/erase.pass.cpp.dir/t.tmp.exe
+# executed command: /usr/local/bin/clang++ /home/eric/llvm-project/libcxx/test/std/strings/strings.erasure/erase.pass.cpp -pthread --target=x86_64-unknown-linux-gnu -nostdinc++ -I /home/eric/llvm-project/build/libcxx/include/c++/v1 -I /home/eric/llvm-project/build/libcxx/include/c++/v1 -I /home/eric/llvm-project/libcxx/test/support -std=c++26 -Werror -Wall -Wctad-maybe-unsupported -Wextra -Wshadow -Wundef -Wunused-template -Wno-unused-command-line-argument -Wno-attributes -Wno-pessimizing-move -Wno-noexcept-type -Wno-atomic-alignment -Wno-reserved-module-identifier -Wdeprecated-copy -Wdeprecated-copy-dtor -Wno-user-defined-literals -Wno-tautological-compare -Wsign-compare -Wunused-variable -Wunused-parameter -Wunreachable-code -Wno-unused-local-typedef -Wno-local-type-template-args -Wno-c++11-extensions -Wno-unknown-pragmas -Wno-pass-failed -Wno-mismatched-new-delete -Wno-redundant-move -Wno-self-move -D_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER -D_LIBCPP_ENABLE_EXPERIMENTAL -D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_NONE -Werror=thread-safety -Wuser-defined-warnings -lc++experimental -nostdlib++ -L /home/eric/llvm-project/build/libcxx/lib -Wl,-rpath,/home/eric/llvm-project/build/libcxx/lib -lc++ -o /home/eric/llvm-project/build/libcxx/test/std/strings/strings.erasure/Output/erase.pass.cpp.dir/t.tmp.exe
+# EXECUTED AS
+/home/eric/.pyenvs/idea/bin/python3 /home/eric/llvm-project/libcxx/utils/run.py --execdir /home/eric/llvm-project/build/libcxx/test/std/strings/strings.erasure/Output/erase.pass.cpp.dir --  /home/eric/llvm-project/build/libcxx/test/std/strings/strings.erasure/Output/erase.pass.cpp.dir/t.tmp.exe
+# executed command: /home/eric/.pyenvs/idea/bin/python3 /home/eric/llvm-project/libcxx/utils/run.py --execdir /home/eric/llvm-project/build/libcxx/test/std/strings/strings.erasure/Output/erase.pass.cpp.dir -- /home/eric/llvm-project/build/libcxx/test/std/strings/strings.erasure/Output/erase.pass.cpp.dir/t.tmp.exe
+# .---command stderr------------
+# | t.tmp.exe: /home/eric/llvm-project/libcxx/test/std/strings/strings.erasure/erase.pass.cpp:29: void test0(S, U, S, std::size_t) [S = std::string, U = char]: Assertion `s == expected' failed.
+# `-----------------------------
+# error: command failed with exit status: 250
+
+--
+]]></failure>
+</testcase>
+<testcase classname="llvm-libc++-shared-cfg-in.std/strings/strings_erasure" name="erase_if.pass.cpp" time="0.44"/>
+</testsuite>
+</testsuites>
