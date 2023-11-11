@@ -10,8 +10,3 @@ jobs:
         uses: actions/checkout@v4
       - run: echo "::error file=target.cpp,line=4,col=1::This is the first error"
       - run: python python-echo.py
-      - name: "Upload"
-        uses: actions/upload-artifact@v2
-        with:
-          name: "artifact"
-          path: out.xml

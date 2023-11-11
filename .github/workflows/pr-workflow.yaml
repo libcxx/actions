@@ -1,0 +1,14 @@
+name: 'CI'
+on:
+  pull_request:
+jobs:
+  build-test:
+    runs-on: libcxx-runners-small
+    steps:
+      - uses: actions/checkout@v4         # checkout the repo
+      - run: echo "::error file=target.cpp,line=4,col=1::This is the first error"
+      - uses: actions/upload-artifact@v3  # upload test results
+        if: success() || failure()        # run this step even if previous step failed
+        with:
+          name: test-results
+          path: out.xml
